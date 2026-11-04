@@ -41,6 +41,7 @@ Fuente: `SaludVital_BaseDatos.xlsx` (7 tablas).
 
 ## Stack
 
+<<<<<<< HEAD
 Python (ETL) · Excel (fuente) · Power BI + DAX (reporte)
 
 ## Documentación
@@ -66,3 +67,7 @@ SaludVital/
     └── Salud_Vital.pbix
 
 ```
+=======
+Excel (fuente) · Power BI + DAX (reporte) + Obsidian (Documentacion) 
+>>>>>>> 71efe956823c4933049cd93b9c96b3f51b47fe77
+    
