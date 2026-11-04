@@ -56,6 +56,8 @@ SaludVital/
 ├── README.md
 ├── .gitignore
 ├── data/
+│   ├── Catalogo_Reglas_SaludVital_v1.0_2026-11-04.xlsx
+│   ├── Inventario_SaludVital_v1.0_2026-11-04.xlsx
 │   ├── SaludVital_BaseDatos.xlsx
 │   ├── SaludVital_DatosAdicionales.xlsx
 ├── docs/
@@ -63,6 +65,6 @@ SaludVital/
 │   └── instruciones.pdf
 │   └── Proyecto_SaludVital_Analisis.md
 ├── reports/
-    └── Salud_Vital.pbix
+    └── SaludVital.pbix
 
 ```
