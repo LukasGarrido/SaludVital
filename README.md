@@ -41,8 +41,4 @@ Fuente: `SaludVital_BaseDatos.xlsx` (7 tablas).
 
 ## Stack
 
-Python (ETL) · Excel (fuente) · Power BI + DAX (reporte)
-
-## Documentación
-
-El análisis completo está en [`Proyecto_SaludVital_Analisis.md`](./Proyecto_SaludVital_Analisis.md): análisis del negocio, reglas de negocio, requerimientos BI (24 preguntas), perfilamiento de datos, modelo dimensional y medidas.
+Excel (fuente) · Power BI + DAX (reporte) + Obsidian (Documentacion) 
