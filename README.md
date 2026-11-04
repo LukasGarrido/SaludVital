@@ -46,3 +46,23 @@ Python (ETL) · Excel (fuente) · Power BI + DAX (reporte)
 ## Documentación
 
 El análisis completo está en [`Proyecto_SaludVital_Analisis.md`](./Proyecto_SaludVital_Analisis.md): análisis del negocio, reglas de negocio, requerimientos BI (24 preguntas), perfilamiento de datos, modelo dimensional y medidas.
+
+
+## Estructura del repositorio
+
+```
+SaludVital/
+├── .obsidian
+├── README.md
+├── .gitignore
+├── data/
+│   ├── SaludVital_BaseDatos.xlsx
+│   ├── SaludVital_DatosAdicionales.xlsx
+├── docs/
+│   ├── documentacion_etl.md
+│   └── instruciones.pdf
+│   └── Proyecto_SaludVital_Analisis.md
+├── reports/
+    └── Salud_Vital.pbix
+
+```

@@ -467,4 +467,6 @@ Acción por defecto ante incumplimiento: **Rechazar** (cuarentena con motivo y o
 
 ---
 
+# Actividad 6 / Resolver etiquetas 
+
 
