@@ -170,3 +170,9 @@ Los períodos indicados (base: 05-ene a 03-feb de 2026, adicional: 04-feb a 31-m
 
 Se registra mediante consultas avanzadas la bitacora de calidad e integridad, la cual se visualiza con una tabla con los campos de bitacora_calidad, en este orden: Fuente, Clave, Campo, Regla, ValorRaw, Motivo.
 
+---
+
+## Aprobar contratos - Catalogo de reglas 
+
+Excel-CatalogoReglas [docs/Catalogo_Reglas_SaludVital_v1.0_2026-11-04]
+
