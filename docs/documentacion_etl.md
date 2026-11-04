@@ -133,3 +133,34 @@ flowchart TB
 Los períodos indicados (base: 05-ene a 03-feb de 2026, adicional: 04-feb a 31-mar de 2026) provienen del archivo LEEME del ejercicio. Son una hipótesis de simulación y no un hecho operativo sobre la periodicidad real de SaludVital.
 
 **Excel Inventario [docs/Inventario_SaludVital_v1.0_2026-11-04.xlsx]**
+
+---
+
+## Perfil Raw 
+
+**Reglas**:
+
+- **Nulo o blanco**: celda null o texto que queda vacío tras Text.Trim.
+- **Fila vacía**: fila donde todos los campos son nulos o blancos.
+- **Duplicado exacto**: fila idéntica a otra en todos los campos (Table.Distinct).
+- **Clave repetida**: ID no nulo que aparece más de una vez, aunque el resto de la fila difiera.
+
+| Fuente | Filas_fisicas | Nulos_reales | Distintos | Longitud_max | Tipos_encontrados | Clave_repetida | Duplicados_exactos_tabla | Fecha_ejecucion | Campo | Filas_vacias |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 01_PACIENTES | 33 | 0 | 33 | 4 | text | 0 | 0 | 04-11-2026 18:07:56 | PacienteID | 0 |
+| 01_PACIENTES | 33 | 3 | 2 | 1 | text, null | | 0 | 04-11-2026 18:07:56 | Sexo | 0 |
+| 01_PACIENTES | 33 | 3 | 2 | 6 | text, null | | 0 | 04-11-2026 18:07:56 | Prevision | 0 |
+| 01_PACIENTES | 33 | 3 | 30 | 10 | date, null | | 0 | 04-11-2026 18:07:56 | FechaNacimiento | 0 |
+| 01_PACIENTES | 33 | 3 | 30 | 19 | text, null | | 0 | 04-11-2026 18:07:56 | Nombre | 0 |
+| 01_PACIENTES | 33 | 3 | 5 | 11 | text, null | | 0 | 04-11-2026 18:07:56 | Comuna | 0 |
+| 01_PACIENTES | 33 | 33 | 0 | | null | | 0 | 04-11-2026 18:07:56 | Column2 | 0 |
+| 02_MEDICOS | 11 | 0 | 11 | 14 | text | | 0 | 04-11-2026 18:07:56 | Column3 | 0 |
+| 02_MEDICOS | 11 | 0 | 11 | 20 | text | | 0 | 04-11-2026 18:07:56 | Column2 | 0 |
+| 02_MEDICOS | 11 | 0 | 11 | 8 | text | | 0 | 04-11-2026 18:07:56 | Column1 | 0 |
+| 03_ESPECIALIDADES | 11 | 0 | 11 | 14 | text | | 0 | 04-11-2026 18:07:56 | Column3 | 0 |
+| 03_ESPECIALIDADES | 11 | 0 | 11 | 20 | text | | 0 | 04-11-2026 18:07:56 | Column2 | 0 |
+| 03_ESPECIALIDADES | 11 | 0 | 11 | 8 | text | | 0 | 04-11-2026 18:07:56 | Column1 | 0 |
+| 04_PRESTACIONES | 15 | 0 | 10 | 3 | text | | 0 | 04-11-2026 18:07:56 | EspecialidadID | 0 |
+| 04_PRESTACIONES | 15 | 0 | 14 | 5 | number | | 0 | 04-11-2026 18:07:56 | Valor | 0 |
+| 04_PRESTACIONES | 15 | 0 | 15 | 27 | text | | 0 | 04-11-2026 18:07:56 | Prestacion | 0 |
+
