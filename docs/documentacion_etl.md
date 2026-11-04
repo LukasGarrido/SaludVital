@@ -164,3 +164,9 @@ Los períodos indicados (base: 05-ene a 03-feb de 2026, adicional: 04-feb a 31-m
 | 04_PRESTACIONES | 15 | 0 | 14 | 5 | number | | 0 | 04-11-2026 18:07:56 | Valor | 0 |
 | 04_PRESTACIONES | 15 | 0 | 15 | 27 | text | | 0 | 04-11-2026 18:07:56 | Prestacion | 0 |
 
+---
+
+## Calidad e integridad
+
+Se registra mediante consultas avanzadas la bitacora de calidad e integridad, la cual se visualiza con una tabla con los campos de bitacora_calidad, en este orden: Fuente, Clave, Campo, Regla, ValorRaw, Motivo.
+
