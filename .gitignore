@@ -1,0 +1,8 @@
+# data en la raíz del repo
+data/*.xlsx
+
+# data en cualquier nivel (raíz o subcarpetas)
+**/data/*.xlsx
+
+# o ignorar todos los Excel del repo
+*.xlsx
