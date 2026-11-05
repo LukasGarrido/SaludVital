@@ -176,3 +176,6 @@ Se registra mediante consultas avanzadas la bitacora de calidad e integridad, la
 
 Excel-CatalogoReglas [docs/Catalogo_Reglas_SaludVital_v1.0_2026-11-04]
 
+
+
+
