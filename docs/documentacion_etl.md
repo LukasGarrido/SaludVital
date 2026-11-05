@@ -368,4 +368,104 @@ Estados en HechoReservas: Atendida 48, No asistió 12, Cancelada 10, Pendiente 5
 
 **Evidencia:** diagrama estrella de la vista Modelo, tabla de granos, justificación y diccionario.
 
+---
+
+## Medidas DAX
+
+### Calculos BI
+
+```dax
+Total Reservas = COUNTROWS ( HechoReservas )
+
+Reservas Atendidas =
+CALCULATE ( COUNTROWS ( HechoReservas ), HechoReservas[EstadoReserva] = "Atendida" )
+
+Reservas No Asistió =
+CALCULATE ( COUNTROWS ( HechoReservas ), HechoReservas[EstadoReserva] = "No asistió" )
+
+Reservas Canceladas =
+CALCULATE ( COUNTROWS ( HechoReservas ), HechoReservas[EstadoReserva] = "Cancelada" )
+
+Reservas Pendientes =
+CALCULATE ( COUNTROWS ( HechoReservas ), HechoReservas[EstadoReserva] = "Pendiente" )
+
+Reservas Resueltas =
+[Reservas Atendidas] + [Reservas No Asistió] + [Reservas Canceladas]
+
+Atenciones Realizadas = DISTINCTCOUNTNOBLANK ( HechoReservas[AtencionID] )
+
+Tasa de Atención = DIVIDE ( [Reservas Atendidas], [Reservas Resueltas] )
+
+Tasa de Inasistencia =
+DIVIDE ( [Reservas No Asistió], [Reservas Atendidas] + [Reservas No Asistió] )
+
+Tasa de Cancelación = DIVIDE ( [Reservas Canceladas], [Reservas Resueltas] )
+
+Tasa de Atención sobre Total = DIVIDE ( [Reservas Atendidas], [Total Reservas] )
+
+Ingresos = SUM ( HechoDetalle[Importe] )
+
+Ingreso Promedio por Atención =
+DIVIDE ( [Ingresos], DISTINCTCOUNT ( HechoDetalle[AtencionID] ) )
+
+Minutos Programados (con bloque) = SUM ( HechoReservas[BloqueMinutos] )
+
+Minutos Atendidos (con bloque) =
+CALCULATE ( SUM ( HechoReservas[BloqueMinutos] ), HechoReservas[EstadoReserva] = "Atendida" )
+
+Horas Perdidas por Inasistencia (con bloque) =
+DIVIDE (
+    CALCULATE ( SUM ( HechoReservas[BloqueMinutos] ), HechoReservas[EstadoReserva] = "No asistió" ),
+    60
+)
+
+Utilización (solo reservas con bloque) =
+DIVIDE ( [Minutos Atendidos (con bloque)], [Minutos Programados (con bloque)] )
+
+Reservas con Bloque =
+CALCULATE (
+    COUNTROWS ( HechoReservas ),
+    FILTER ( HechoReservas, NOT ISBLANK ( HechoReservas[BloqueMinutos] ) )
+)
+
+Cobertura de Bloque = DIVIDE ( [Reservas con Bloque], [Total Reservas] )
+
+Ingresos Recalculados =
+SUMX ( HechoDetalle, HechoDetalle[Cantidad] * HechoDetalle[ValorUnitario] )
+
+Diferencia Ingresos = [Ingresos] - [Ingresos Recalculados]
+```
+
+### Diseñar dashboard y reflexión
+
+Medidas:
+
+```dax
+Pacientes Distintos = DISTINCTCOUNT ( HechoReservas[PacienteID] )
+
+Reservas por Paciente = DIVIDE ( [Total Reservas], [Pacientes Distintos] )
+
+Médicos Activos = DISTINCTCOUNT ( HechoReservas[MedicoID] )
+
+Reservas Mes Anterior =
+CALCULATE ( [Total Reservas], DATEADD ( DimFecha[Date], -1, MONTH ) )
+
+Variación Mensual Reservas =
+DIVIDE ( [Total Reservas] - [Reservas Mes Anterior], [Reservas Mes Anterior] )
+```
+
+Columnas calculadas en `DimPaciente`:
+
+```dax
+Reservas del Paciente = CALCULATE ( COUNTROWS ( HechoReservas ) )
+
+Tramo Frecuencia =
+SWITCH (
+    TRUE (),
+    DimPaciente[Reservas del Paciente] = 0, "Sin reservas",
+    DimPaciente[Reservas del Paciente] = 1, "1 reserva",
+    DimPaciente[Reservas del Paciente] <= 3, "2 a 3 reservas",
+    "4 o más"
+)
+```
 
