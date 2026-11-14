@@ -43,6 +43,8 @@ SaludVital/
 │   └── SaludVital.pbix         # Dashboard de BI (Modelo dimensional + DAX)
 ├── scripts/                    # Scripts de procesamiento
 │   └── modelo_dimensional.py   # Script ETL en Python (Pandas)
+├── theme/                      # Recursos visuales
+│   └── SaludVital.json         # Tema de diseño corporativo para Power BI
 ├── .gitignore                  # Archivos ignorados (CSV, XLSX, checkpoints y entornos)
 ├── README.md                   # Resumen ejecutivo del proyecto
 └── requirements.txt            # Dependencias de Python
