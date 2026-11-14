@@ -1,6 +1,6 @@
 # Guía de Usuario y del Repositorio — SaludVital BI
 
-Esta guía describe la arquitectura, la estructura del proyecto, el funcionamiento del pipeline ETL y las instrucciones para ejecutar y mantener la solución de Business Intelligence (BI) de **SaludVital**.
+Esta guía describe la arquitectura, la estructura del proyecto, el funcionamiento del pipeline ETL, el análisis exploratorio en Jupyter y las instrucciones para ejecutar y mantener la solución de Business Intelligence (BI) de **SaludVital**.
 
 ---
 
@@ -12,14 +12,14 @@ El proyecto se organiza de la siguiente manera:
 SaludVital/
 ├── .venv/                      # Entorno virtual de Python
 ├── data/                       # Datos de origen y modelo dimensional generado
-│   ├── modelo/                 # Esquema en estrella (CSV y Excel consolidado)
-│   │   ├── DimFecha.csv
-│   │   ├── DimMedico.csv
-│   │   ├── DimPaciente.csv
-│   │   ├── DimPrestacion.csv
-│   │   ├── HechoReservas.csv
-│   │   ├── HechoDetalle.csv
-│   │   ├── SaludVital_ModeloDimensional.xlsx
+│   ├── modelo/                 # Esquema en estrella (CSV y control)
+│   │   ├── DimFecha.csv        # Dimensión Fecha (86 filas)
+│   │   ├── DimMedico.csv       # Dimensión Médico (14 filas)
+│   │   ├── DimPaciente.csv     # Dimensión Paciente (44 filas)
+│   │   ├── DimPrestacion.csv   # Dimensión Prestación (19 filas)
+│   │   ├── HechoReservas.csv   # Tabla de Hechos: Reservas (75 filas)
+│   │   ├── HechoDetalle.csv    # Tabla de Hechos: Detalle de Prestaciones (41 filas)
+│   │   ├── SaludVital_ModeloDimensional.xlsx # Libro Excel consolidado del modelo
 │   │   └── control/            # Bitácoras de calidad, rechazos e idempotencia
 │   │       ├── control_cardinalidad.csv
 │   │       ├── control_carga.csv
@@ -34,20 +34,22 @@ SaludVital/
 │   │       ├── rechazos.csv
 │   │       ├── reservas_atendidas_sin_atencion.csv
 │   │       └── verificacion_documentada.csv
-│   ├── SaludVital_BaseDatos.xlsx
-│   └── SaludVital_DatosAdicionales.xlsx
+│   ├── SaludVital_BaseDatos.xlsx        # Libro Excel fuente período base
+│   └── SaludVital_DatosAdicionales.xlsx # Libro Excel fuente período adicional
 ├── docs/                       # Documentación técnica y funcional
 │   ├── documentacion_etl.md    # Reglas de negocio, mapeos y especificación ETL
 │   ├── guia_usuario.md         # Esta guía de uso
 │   ├── Instrucciones.pdf       # Pauta original del caso / proyecto
 │   └── Proyecto_SaludVital_Analisis.md # Análisis analítico y estratégico
+├── notebooks/                  # Análisis exploratorio interactivo
+│   └── analisis_saludvital.ipynb # Notebook Jupyter que valida y grafica las 24 preguntas de negocio
 ├── reports/                    # Visualización Power BI
 │   └── SaludVital.pbix         # Dashboard de BI (Modelo dimensional + DAX)
 ├── scripts/                    # Scripts de procesamiento
 │   └── modelo_dimensional.py   # Script ETL principal (Python + Pandas)
-├── .gitignore                  # Archivos excluidos del control de versiones (incl. CSV y entornos)
+├── .gitignore                  # Archivos excluidos (CSV, XLSX locales, checkpoints, .venv)
 ├── README.md                   # Resumen ejecutivo del proyecto
-└── requirements.txt            # Dependencias de Python (pandas, openpyxl)
+└── requirements.txt            # Dependencias de Python (pandas, openpyxl, etc.)
 ```
 
 ---
@@ -72,7 +74,7 @@ SaludVital/
 
 ## 3. Ejecución del Pipeline ETL
 
-El script `scripts/modelo_dimensional.py` procesa los libros Excel de origen en `data/`, aplica rigurosas reglas de validación, limpieza, desduplicación e idempotencia, y genera el modelo dimensional listo para Power BI.
+El script `scripts/modelo_dimensional.py` procesa los libros Excel de origen en `data/`, aplica rigurosas reglas de validación, limpieza, desduplicación e idempotencia, y genera el modelo dimensional listo para Power BI y análisis.
 
 ### Comando de ejecución estándar:
 ```bash
@@ -90,7 +92,21 @@ python scripts/modelo_dimensional.py
 
 ---
 
-## 4. Visualización en Power BI (`reports/SaludVital.pbix`)
+## 4. Análisis Exploratorio en Jupyter (`notebooks/analisis_saludvital.ipynb`)
+
+El notebook interactivo `notebooks/analisis_saludvital.ipynb` permite realizar un análisis exploratorio y validar con gráficos las 24 preguntas de negocio del proyecto (D1–D5, R1–R5, M1–M5, P1–P5 y RQ01–RQ24).
+
+### Instrucciones de uso:
+1. Asegurarse de haber ejecutado previamente el ETL (`python scripts/modelo_dimensional.py`) para generar las tablas en `data/modelo/`.
+2. Abrir Jupyter Lab o Jupyter Notebook:
+   ```bash
+   jupyter notebook
+   ```
+3. Abrir `notebooks/analisis_saludvital.ipynb` y ejecutar todas las celdas (*Run All*).
+
+---
+
+## 5. Visualización en Power BI (`reports/SaludVital.pbix`)
 
 1. Abrir Power BI Desktop.
 2. Cargar el archivo `reports/SaludVital.pbix`.
@@ -99,8 +115,8 @@ python scripts/modelo_dimensional.py
 
 ---
 
-## 5. Documentación Adicional
+## 6. Documentación Adicional
 
-- **`docs/documentacion_etl.md`**: Detalla el mapa de procesos, entidades, preguntas analíticas de negocio (Dirección, Recepción, Profesionales) y las reglas de validación ETL.
+- **`docs/documentacion_etl.md`**: Detalla el mapa de procesos, entidades, preguntas analíticas de negocio y las reglas de validación ETL.
 - **`docs/Proyecto_SaludVital_Analisis.md`**: Análisis de negocio en profundidad.
 - **`docs/Instrucciones.pdf`**: Pauta y requerimientos originales del caso práctico.

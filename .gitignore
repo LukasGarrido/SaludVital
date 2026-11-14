@@ -7,6 +7,10 @@ data/*.csv
 **/data/*.csv
 **/data/**/*.csv
 
+# Jupyter checkpoints
+.ipynb_checkpoints
+**/ .ipynb_checkpoints
+
 # o ignorar todos los Excel y CSV del repo
 *.xlsx
 *.csv
