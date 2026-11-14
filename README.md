@@ -17,29 +17,44 @@ Diseñar e implementar una solución de BI que permita analizar demanda, atenci�
 
 ## Estructura del repositorio
 
-```
+```text
 SaludVital/
-├── .obsidian
-├── README.md
-├── .gitignore
-├── data/
-│   ├── Catalogo_Reglas_SaludVital_v1.0_2026-11-04.xlsx
-│   ├── Inventario_SaludVital_v1.0_2026-11-04.xlsx
+├── .venv/                      # Entorno virtual de Python
+├── data/                       # Datos de origen y modelo dimensional generado
+│   ├── modelo/                 # Esquema en estrella (CSV y control)
+│   │   ├── DimFecha.csv
+│   │   ├── DimMedico.csv
+│   │   ├── DimPaciente.csv
+│   │   ├── DimPrestacion.csv
+│   │   ├── HechoReservas.csv
+│   │   ├── HechoDetalle.csv
+│   │   ├── SaludVital_ModeloDimensional.xlsx
+│   │   └── control/            # Bitácoras de calidad y rechazos
 │   ├── SaludVital_BaseDatos.xlsx
-│   ├── SaludVital_DatosAdicionales.xlsx
-├── docs/
-│   ├── documentacion_etl.md
-│   └── instruciones.pdf
-│   └── Proyecto_SaludVital_Analisis.md
-├── reports/
-    └── SaludVital.pbix
+│   └── SaludVital_DatosAdicionales.xlsx
+├── docs/                       # Documentación técnica y funcional
+│   ├── documentacion_etl.md    # Especificación ETL y reglas de negocio
+│   ├── guia_usuario.md         # Guía de uso y funcionamiento del repo
+│   ├── Instrucciones.pdf       # Pauta original del proyecto
+│   └── Proyecto_SaludVital_Analisis.md # Análisis analítico y estratégico
+├── notebooks/                  # Análisis exploratorio interactivo
+│   └── analisis_saludvital.ipynb # Notebook Jupyter para análisis y respuestas a preguntas de negocio
+├── reports/                    # Visualización Power BI
+│   └── SaludVital.pbix         # Dashboard de BI (Modelo dimensional + DAX)
+├── scripts/                    # Scripts de procesamiento
+│   └── modelo_dimensional.py   # Script ETL en Python (Pandas)
+├── .gitignore                  # Archivos ignorados (CSV, XLSX, checkpoints y entornos)
+├── README.md                   # Resumen ejecutivo del proyecto
+└── requirements.txt            # Dependencias de Python
 ```
+
 ---
 
 ## Stack
 
-Excel (fuente) · Power BI + DAX (reporte) + Obsidian (Documentacion)
+Python (Pandas) + Jupyter Notebooks · Power BI + DAX (reporte) + Excel (fuente)
 
-## Documentación
+## Documentación y Guía de Uso
 
-El análisis completo está en [`Docs`](docs/): análisis del negocio, reglas de negocio, requerimientos BI (24 preguntas), perfilamiento de datos, modelo dimensional y medidas.
+- **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del notebook y estructura.
+- **Documentación ETL y de Negocio (`docs/documentacion_etl.md`)**: Reglas de negocio, mapeos, especificación ETL y 24 preguntas analíticas.
