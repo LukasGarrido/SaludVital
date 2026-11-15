@@ -16,3 +16,12 @@ data/*.csv
 *.csv
 *.pbix
 **/*.pbix
+
+# Python y Streamlit cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.streamlit/
+.cache/
+.pytest_cache/
