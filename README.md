@@ -35,6 +35,9 @@ SaludVital/
 ├── docs/                       # Documentación técnica y funcional
 │   ├── documentacion_etl.md    # Especificación ETL y reglas de negocio
 │   ├── guia_usuario.md         # Guía de uso y funcionamiento del repo
+│   ├── informe/                # Informe formal del proyecto
+│   │   ├── Informe_SaludVital.md # Informe de proyecto v2.0 (integrado)
+│   │   └── img/                # Figuras y visualizaciones del informe
 │   ├── Instrucciones.pdf       # Pauta original del proyecto
 │   └── Proyecto_SaludVital_Analisis.md # Análisis analítico y estratégico
 ├── notebooks/                  # Análisis exploratorio interactivo
@@ -59,4 +62,5 @@ Python (Pandas) + Jupyter Notebooks · Power BI + DAX (reporte) + Excel (fuente)
 ## Documentación y Guía de Uso
 
 - **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del notebook y estructura.
+- **[Informe Formal de Proyecto (`docs/informe/Informe_SaludVital.md`)](docs/informe/Informe_SaludVital.md)**: Documento formal completo (v2.0) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.
 - **Documentación ETL y de Negocio (`docs/documentacion_etl.md`)**: Reglas de negocio, mapeos, especificación ETL y 24 preguntas analíticas.
