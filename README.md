@@ -1,6 +1,6 @@
-# SaludVital BI
+# SaludVital BI & Streamlit
 
-Proyecto de **Inteligencia de Negocio**: solución de BI (ETL + modelo dimensional + dashboard) para analizar las atenciones médicas de SaludVital, centro médico ambulatorio privado de la Región del Biobío.
+Proyecto de **Inteligencia de Negocio**: solución de BI (ETL + modelo dimensional + dashboard interactivo en Streamlit y Power BI) para analizar las atenciones médicas de SaludVital, centro médico ambulatorio privado de la Región del Biobío.
 
 ## Contexto
 
@@ -19,7 +19,10 @@ Diseñar e implementar una solución de BI que permita analizar demanda, atenci�
 
 ```text
 SaludVital/
-├── .venv/                      # Entorno virtual de Python
+├── app/                        # Aplicación modular en Streamlit
+│   ├── app.py                  # Punto de entrada principal y navegación de páginas
+│   ├── data.py                 # Carga de datos, modelado en estrella y fusiones 1:N
+│   └── medidas.py              # Cálculo de medidas, formateadores y pruebas de aceptación
 ├── data/                       # Datos de origen y modelo dimensional generado
 │   ├── modelo/                 # Esquema en estrella (CSV y control)
 │   │   ├── DimFecha.csv        # Dimensión Fecha (86 filas)
@@ -61,7 +64,8 @@ SaludVital/
 │   └── modelo_dimensional.py   # Script ETL en Python (Pandas)
 ├── theme/                      # Recursos visuales corporativos
 │   └── SaludVital.json         # Tema de diseño corporativo para Power BI
-├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, checkpoints y entornos)
+├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, caché, .venv)
+├── app.py                      # Entrypoint de conveniencia para Streamlit
 ├── README.md                   # Resumen ejecutivo del proyecto
 └── requirements.txt            # Dependencias de Python
 ```
@@ -70,10 +74,16 @@ SaludVital/
 
 ## Stack
 
-Python (Pandas) + Jupyter Notebooks · Power BI + DAX (reporte) + Excel (fuente)
+Python (Streamlit + Pandas + Plotly) · Power BI + DAX (reporte) · Jupyter Notebooks · Excel (fuente)
+
+## Ejecución del Dashboard en Streamlit
+
+```bash
+streamlit run app/app.py
+```
 
 ## Documentación y Guía de Uso
 
-- **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del notebook y estructura.
+- **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del dashboard de Streamlit y estructura.
 - **[Informe Formal de Proyecto (`docs/informe/Informe_SaludVital.md`)](docs/informe/Informe_SaludVital.md)**: Documento formal completo (v2.0) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.
 - **Documentación ETL y de Negocio (`docs/documentacion_etl.md`)**: Reglas de negocio, mapeos, especificación ETL y 24 preguntas analíticas.
