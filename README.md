@@ -65,6 +65,7 @@ SaludVital/
 ├── theme/                      # Recursos visuales corporativos
 │   └── SaludVital.json         # Tema de diseño corporativo para Power BI
 ├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, caché, .venv)
+├── AGENTS.md                    # Guía de referencia para agentes de IA y desarrollo
 ├── app.py                      # Entrypoint de conveniencia para Streamlit
 ├── README.md                   # Resumen ejecutivo del proyecto
 └── requirements.txt            # Dependencias de Python
