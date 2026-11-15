@@ -55,10 +55,7 @@ Los resultados fueron validados con un notebook de Jupyter y con un recálculo i
 11. [Análisis de resultados](#11-análisis-de-resultados)
 12. [Limitaciones del estudio](#12-limitaciones-del-estudio)
 13. [Conclusiones](#13-conclusiones)
-14. [Recomendaciones](#14-recomendaciones)
-15. [Referencias](#15-referencias)
-16. [Anexo A. Trazabilidad de requerimientos](#anexo-a-trazabilidad-de-requerimientos)
-17. [Anexo B. Evidencias de respaldo](#anexo-b-evidencias-de-respaldo)
+14. [Referencias](#14-referencias)
 
 ---
 
