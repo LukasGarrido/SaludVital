@@ -3,8 +3,8 @@
 Welcome to the **SaludVital** Business Intelligence and Analytics workspace. This document serves as the core reference guide for AI agents and developers working on this codebase.
 
 ## Project Overview
-- **Name:** SaludVital (Centro Médico Ambulatorio Privado)
-- **Location:** Región del Biobío, Chile (8 años de operación, ~2,000 consultas mensuales, 10 especialidades médicas, >20 profesionales).
+- **Name:** SaludVital (Centro Medico Ambulatorio Privado)
+- **Location:** Region del Biobio, Chile (8 anos de operacion, ~2,000 consultas mensuales, 10 especialidades medicas, >20 profesionales).
 - **Purpose:** Provide a multidimensional Business Intelligence (BI) solution (ETL pipeline + Star Schema dimensional model + interactive Streamlit dashboard + Power BI reports) to replace manual monthly reports and support strategic decision-making in demand, productivity, patient profiling, and financial valuation.
 
 ---
@@ -44,13 +44,13 @@ SaludVital/
 ---
 
 ## Key Business Rules & ETL Logic
-1. **Patient Deduplication (RN03):** Resolves duplicate patient records resulting from variations in casing, spacing, or abbreviations (e.g., "Juan Pérez" vs "JUAN PEREZ").
-2. **Inconsistent Specialties:** Standardizes specialty names across source files (e.g., "Traumatología", "Traumatologia", "TRAUMATOLOGIA", "Trauma").
+1. **Patient Deduplication (RN03):** Resolves duplicate patient records resulting from variations in casing, spacing, or abbreviations (e.g., "Juan Perez" vs "JUAN PEREZ").
+2. **Inconsistent Specialties:** Standardizes specialty names across source files (e.g., "Traumatologia", "TRAUMATOLOGIA", "Trauma").
 3. **Appointment Lifecycle & Status:** Every reservation starts as `Pendiente` and resolves to one of three final states:
    - `Atendida`: Patient attended; generates a medical consultation and performance/service details.
-   - `No asistió`: Patient did not show up; results in wasted hours (`BloqueMinutos`).
-   - `Cancelled`: Reservation cancelled; no consultation generated.
-4. **Valued Income (Ingreso Valorizado):** Calculated as `Cantidad × ValorUnitario` from consultation service details (`HechoDetalle`). There are no direct payment gateway sources.
+   - `No asistio`: Patient did not show up; results in wasted hours (`BloqueMinutos`).
+   - `Cancelada`: Reservation cancelled; no consultation generated.
+4. **Valued Income (Ingreso Valorizado):** Calculated as `Cantidad x ValorUnitario` from consultation service details (`HechoDetalle`). There are no direct payment gateway sources.
 
 ---
 

@@ -20,6 +20,64 @@ st.set_page_config(
 COLOR_PRIMARY = "#1f77b4"
 PALETTE = px.colors.qualitative.Bold
 
+# Estilos CSS avanzados para filtros y panel dinámico en Modo Oscuro Total
+st.markdown("""
+<style>
+    /* Panel lateral y filtros tipo selector / tarjeta en modo oscuro */
+    [data-testid="stSidebar"] {
+        background-color: #0f172a;
+        border-right: 1px solid #1e293b;
+    }
+    .filter-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+    .filter-header {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 2px solid #334155;
+        padding-bottom: 8px;
+    }
+    /* Estilización de multiselect y selectores oscuros */
+    .stMultiSelect div[data-baseweb="select"] {
+        background-color: #0f172a;
+        border-radius: 8px;
+        border-color: #334155;
+    }
+    .stDateInput input {
+        border-radius: 8px;
+        border-color: #334155;
+        background-color: #0f172a;
+        color: #f8fafc;
+    }
+    /* Botones tipo selector oscuros */
+    .stButton button {
+        width: 100%;
+        border-radius: 8px;
+        font-weight: 600;
+        border: 1px solid #334155;
+        background-color: #1e293b;
+        color: #f8fafc;
+        transition: all 0.2s ease-in-out;
+    }
+    .stButton button:hover {
+        border-color: #38bdf8;
+        color: #38bdf8;
+        background-color: #0f172a;
+        box-shadow: 0 2px 4px rgba(56, 189, 248, 0.15);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 def main():
     data_dict = prepare_data()
     if data_dict is None:
@@ -42,7 +100,10 @@ def main():
     )
     
     st.sidebar.markdown("---")
-    st.sidebar.subheader("Filtros Globales")
+    
+    # Contenedor HTML dinámico para los filtros estilo tarjeta / selector
+    st.sidebar.markdown('<div class="filter-card">', unsafe_allow_html=True)
+    st.sidebar.markdown('<div class="filter-header">Filtros Globales</div>', unsafe_allow_html=True)
 
     min_res_date = hecho_reservas["FechaReserva"].min() if not hecho_reservas.empty else pd.to_datetime("2026-01-05").date()
     max_res_date = hecho_reservas["FechaReserva"].max() if not hecho_reservas.empty else pd.to_datetime("2026-03-31").date()
@@ -83,6 +144,8 @@ def main():
         options=sexos_disp,
         default=st.session_state.filtro_sexo
     )
+    st.session_state.filtro_sexo = sel_sexo
+    st.sidebar.markdown('</div>', unsafe_allow_html=True)
     st.session_state.filtro_sexo = sel_sexo
 
     st.sidebar.markdown("---")
