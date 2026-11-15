@@ -42,13 +42,13 @@ SaludVital/
 │   └── Proyecto_SaludVital_Analisis.md # Análisis analítico y estratégico
 ├── notebooks/                  # Análisis exploratorio interactivo
 │   └── analisis_saludvital.ipynb # Notebook Jupyter para análisis y respuestas a preguntas de negocio
-├── reports/                    # Visualización Power BI
+├── reports/                    # Visualización Power BI (archivo .pbix local no rastreado)
 │   └── SaludVital.pbix         # Dashboard de BI (Modelo dimensional + DAX)
 ├── scripts/                    # Scripts de procesamiento
 │   └── modelo_dimensional.py   # Script ETL en Python (Pandas)
 ├── theme/                      # Recursos visuales
 │   └── SaludVital.json         # Tema de diseño corporativo para Power BI
-├── .gitignore                  # Archivos ignorados (CSV, XLSX, checkpoints y entornos)
+├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, checkpoints y entornos)
 ├── README.md                   # Resumen ejecutivo del proyecto
 └── requirements.txt            # Dependencias de Python
 ```
