@@ -22,31 +22,44 @@ SaludVital/
 ├── .venv/                      # Entorno virtual de Python
 ├── data/                       # Datos de origen y modelo dimensional generado
 │   ├── modelo/                 # Esquema en estrella (CSV y control)
-│   │   ├── DimFecha.csv
-│   │   ├── DimMedico.csv
-│   │   ├── DimPaciente.csv
-│   │   ├── DimPrestacion.csv
-│   │   ├── HechoReservas.csv
-│   │   ├── HechoDetalle.csv
-│   │   ├── SaludVital_ModeloDimensional.xlsx
-│   │   └── control/            # Bitácoras de calidad y rechazos
-│   ├── SaludVital_BaseDatos.xlsx
-│   └── SaludVital_DatosAdicionales.xlsx
+│   │   ├── DimFecha.csv        # Dimensión Fecha (86 filas)
+│   │   ├── DimMedico.csv       # Dimensión Médico (14 filas)
+│   │   ├── DimPaciente.csv     # Dimensión Paciente (44 filas)
+│   │   ├── DimPrestacion.csv   # Dimensión Prestación (19 filas)
+│   │   ├── HechoReservas.csv   # Tabla de Hechos: Reservas (75 filas)
+│   │   ├── HechoDetalle.csv    # Tabla de Hechos: Detalle de Prestaciones (41 filas)
+│   │   ├── SaludVital_ModeloDimensional.xlsx # Libro Excel consolidado del modelo
+│   │   └── control/            # Bitácoras de calidad, rechazos e idempotencia
+│   │       ├── control_cardinalidad.csv
+│   │       ├── control_carga.csv
+│   │       ├── control_dim.csv
+│   │       ├── control_fuentes.csv
+│   │       ├── control_integridad.csv
+│   │       ├── control_merge.csv
+│   │       ├── duplicados_descartados.csv
+│   │       ├── mapeo_etiquetas.csv
+│   │       ├── no_resueltos.csv
+│   │       ├── prueba_idempotencia.csv
+│   │       ├── rechazos.csv
+│   │       ├── reservas_atendidas_sin_atencion.csv
+│   │       └── verificacion_documentada.csv
+│   ├── SaludVital_BaseDatos.xlsx        # Libro Excel fuente período base
+│   └── SaludVital_DatosAdicionales.xlsx # Libro Excel fuente período adicional
 ├── docs/                       # Documentación técnica y funcional
 │   ├── documentacion_etl.md    # Especificación ETL y reglas de negocio
 │   ├── guia_usuario.md         # Guía de uso y funcionamiento del repo
-│   ├── informe/                # Informe formal del proyecto
-│   │   ├── Informe_SaludVital.md # Informe de proyecto v2.0 (integrado)
-│   │   └── img/                # Figuras y visualizaciones del informe
+│   ├── informe/                # Informe formal del proyecto (v2.0)
+│   │   ├── Informe_SaludVital.md # Informe integral de proyecto
+│   │   └── img/                # Figuras y visualizaciones del informe (fig01 a fig17)
 │   ├── Instrucciones.pdf       # Pauta original del proyecto
 │   └── Proyecto_SaludVital_Analisis.md # Análisis analítico y estratégico
 ├── notebooks/                  # Análisis exploratorio interactivo
 │   └── analisis_saludvital.ipynb # Notebook Jupyter para análisis y respuestas a preguntas de negocio
-├── reports/                    # Visualización Power BI (archivo .pbix local no rastreado)
+├── reports/                    # Visualización Power BI
 │   └── SaludVital.pbix         # Dashboard de BI (Modelo dimensional + DAX)
 ├── scripts/                    # Scripts de procesamiento
 │   └── modelo_dimensional.py   # Script ETL en Python (Pandas)
-├── theme/                      # Recursos visuales
+├── theme/                      # Recursos visuales corporativos
 │   └── SaludVital.json         # Tema de diseño corporativo para Power BI
 ├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, checkpoints y entornos)
 ├── README.md                   # Resumen ejecutivo del proyecto
