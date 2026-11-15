@@ -49,13 +49,10 @@ SaludVital/
 │   ├── SaludVital_BaseDatos.xlsx        # Libro Excel fuente período base
 │   └── SaludVital_DatosAdicionales.xlsx # Libro Excel fuente período adicional
 ├── docs/                       # Documentación técnica y funcional
-│   ├── documentacion_etl.md    # Especificación ETL y reglas de negocio
 │   ├── guia_usuario.md         # Guía de uso y funcionamiento del repo
-│   ├── informe/                # Informe formal del proyecto (v2.0)
-│   │   ├── Informe_SaludVital.md # Informe integral de proyecto
-│   │   └── img/                # Figuras y visualizaciones del informe (fig01 a fig17)
-│   ├── Instrucciones.pdf       # Pauta original del proyecto
-│   └── Proyecto_SaludVital_Analisis.md # Análisis analítico y estratégico
+│   └── informe/                # Informe formal del proyecto (v2.0)
+│       ├── Informe_SaludVital.md # Informe integral de proyecto
+│       └── img/                # Figuras y visualizaciones del informe (fig01 a fig17)
 ├── notebooks/                  # Análisis exploratorio interactivo
 │   └── analisis_saludvital.ipynb # Notebook Jupyter para análisis y respuestas a preguntas de negocio
 ├── reports/                    # Visualización Power BI
@@ -65,7 +62,7 @@ SaludVital/
 ├── theme/                      # Recursos visuales corporativos
 │   └── SaludVital.json         # Tema de diseño corporativo para Power BI
 ├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, caché, .venv)
-├── AGENTS.md                    # Guía de referencia para agentes de IA y desarrollo
+├── AGENTS.md                   # Guía de referencia para agentes de IA y desarrollo
 ├── app.py                      # Entrypoint de conveniencia para Streamlit
 ├── README.md                   # Resumen ejecutivo del proyecto
 └── requirements.txt            # Dependencias de Python
@@ -87,4 +84,3 @@ streamlit run app/app.py
 
 - **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del dashboard de Streamlit y estructura.
 - **[Informe Formal de Proyecto (`docs/informe/Informe_SaludVital.md`)](docs/informe/Informe_SaludVital.md)**: Documento formal completo (v2.0) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.
-- **Documentación ETL y de Negocio (`docs/documentacion_etl.md`)**: Reglas de negocio, mapeos, especificación ETL y 24 preguntas analíticas.
