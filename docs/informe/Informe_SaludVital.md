@@ -333,9 +333,9 @@ El proceso ETL se construyó en Power BI con Power Query (lenguaje M) y se organ
 flowchart LR
   A["Excel base (7 hojas)"] --> R["Capa raw y perfil"]
   B["Excel adicional (A01 a A09 y MAP)"] --> R
-  R --> S["Staging stg_*: anexar base y adicional, limpiar, normalizar"]
+  R --> S["Staging stg_*: anexar base y adicional, limpiar, normalizar y convertir fechas y horas"]
   S --> Q["Reglas de calidad RV-*"]
-  Q -->|aceptadas| M["Modelo: 2 hechos y 4 dimensiones"]
+  Q -->|aceptadas| M["Modelo: 2 hechos y 4 dimensiones, relaciones 1:N manuales"]
   Q -->|rechazos| X["Cuarentena: rechazos y duplicados_descartados"]
   Q --> C["Controles: control_carga, control_merge, control_cardinalidad"]
   M --> D["Medidas DAX y tablero"]
@@ -471,6 +471,77 @@ Cada dimensión une su hoja base con la adicional y agrega la columna `Origen`. 
 
 La verificación `Clave_unica_OK` resultó verdadera en las cuatro dimensiones.
 
+**Conversión de fechas y horas.** Las hojas adicionales entregan fechas y horas con tipos mezclados. Se observaron fechas como número de serie de Excel (por ejemplo `46057`, equivalente al 04-02-2026), como texto con barras (`2026/02/07`) y como fecha ya tipada. Las horas llegan como texto (`09:30`) o como fracción del día (`0,4167` equivale a las 10:00). Dos funciones centralizan la conversión en staging: `fn_fecha` devuelve un valor de tipo fecha y `fn_hora` uno de tipo hora. Ambas devuelven nulo cuando el valor no es interpretable, y el valor de origen se conserva en las columnas `_raw`.
+
+| Función | Entrada | Tratamiento |
+|---|---|---|
+| `fn_fecha` | Nulo | Nulo |
+| `fn_fecha` | Número | Fecha = 30-12-1899 más la parte entera (serie de Excel) |
+| `fn_fecha` | Fecha o fecha y hora | Se conserva la fecha |
+| `fn_fecha` | Texto que representa un número entre 30.000 y 80.000 | Igual que un número, leído con cultura `es-CL` |
+| `fn_fecha` | Texto `yyyy-MM-dd` o `yyyy/MM/dd` | Se reemplaza `/` por `-` y se convierte |
+| `fn_fecha` | Cualquier otro valor | Nulo |
+| `fn_hora` | Nulo | Nulo |
+| `fn_hora` | Número | Fracción del día multiplicada por 86.400 segundos |
+| `fn_hora` | Hora o fecha y hora | Se conserva la hora, redondeada al segundo |
+| `fn_hora` | Texto que representa un número entre 0 y 1 | Igual que un número, leído con cultura `es-CL` |
+| `fn_hora` | Texto de hora (`09:30`) | `Time.FromText` con cultura `en-US` |
+| `fn_hora` | Cualquier otro valor | Nulo |
+
+El rango de 30.000 a 80.000 en `fn_fecha` (aproximadamente los años 1982 a 2118) evita interpretar como fecha un número cualquiera.
+
+```powerquery
+// fn_fecha
+(v as any) as nullable date =>
+  if v = null then null
+  else if v is number then Date.From(#date(1899, 12, 30) + #duration(Number.RoundDown(v), 0, 0, 0))
+  else if v is date then v
+  else if v is datetime then DateTime.Date(v)
+  else if v is text then (
+    let
+      t = Text.Trim(v),
+      n = try Number.FromText(t, "es-CL") otherwise null
+    in
+      if n <> null and n > 30000 and n < 80000
+      then Date.From(#date(1899, 12, 30) + #duration(Number.RoundDown(n), 0, 0, 0))
+      else try Date.FromText(Text.Replace(t, "/", "-"), [Format = "yyyy-MM-dd", Culture = "en-US"]) otherwise null
+  )
+  else null
+```
+
+```powerquery
+// fn_hora
+(v as any) as nullable time =>
+  let
+    aTime = (s as number) as time => #time(0, 0, 0) + #duration(0, 0, 0, Number.Mod(Number.Round(s, 0), 86400)),
+    segs = (x as time) as number => Duration.TotalSeconds(x - #time(0, 0, 0))
+  in
+    if v = null then null
+    else if v is number then aTime(v * 86400)
+    else if v is time then aTime(segs(v))
+    else if v is datetime then aTime(segs(DateTime.Time(v)))
+    else if v is text then (
+      let
+        t = Text.Trim(v),
+        n = try Number.FromText(t, "es-CL") otherwise null
+      in
+        if n <> null and n >= 0 and n < 1 then aTime(n * 86400)
+        else try aTime(segs(Time.FromText(t, "en-US"))) otherwise null
+    )
+    else null
+```
+
+Las versiones iniciales de ambas funciones no tenían la rama numérica, por lo que toda fecha u hora entregada como número se convertía en nulo. El efecto se detectó en `control_carga`:
+
+| Tabla | Aceptadas con las funciones iniciales | Aceptadas con las funciones actuales |
+|---|---|---|
+| Reservas | 33 | 75 |
+| Atenciones | 24 | 46 |
+| Detalle | 23 | 41 |
+| Canales y bloques | 2 | 38 |
+
+Los conteos de pacientes (44), médicos (14) y prestaciones (19) no cambiaron. Para validar las funciones se usó una consulta temporal de diagnóstico (`diag_fecha`), en la que `R0101` debe resultar en 04-02-2026 a las 10:00:00, `R0102` en 04-02-2026 a las 11:00:00, `R0103` en 05-02-2026 a las 9:30:00 y `R0107` en 07-02-2026, sin nulos en la columna de fecha.
+
 ### 7.6. Combinación sin multiplicación de filas
 
 Los hechos se anexan y se enriquecen con las dimensiones mediante la función `fn_unir`, que falla con error si la clave del lado derecho se repite. De esta manera ninguna combinación duplica filas sin aviso. Cada fila lleva `Fila_id`, `Origen`, `Idx` y `Fuente_orden` para ordenar de forma estable.
@@ -522,7 +593,7 @@ La clave natural es el identificador de negocio y gana la primera ocurrencia de 
 | Detalle | 50 | 41 | 1 | 8 |
 | Canales y bloques | 52 | 38 | 1 | 13 |
 
-La columna `Cuadra` (entrada igual a aceptadas más duplicados más rechazadas) y `Claves_unicas_en_aceptadas` son verdaderas en las 7 filas. La tabla `rechazos` contiene 34 filas y `duplicados_descartados` contiene 4.
+La columna `Cuadra` (entrada igual a aceptadas más duplicados más rechazadas) y `Claves_unicas_en_aceptadas` son verdaderas en las 7 filas. La tabla `rechazos` contiene 34 filas y `duplicados_descartados` contiene 4. Estas cifras corresponden a la ejecución con las funciones de conversión definitivas (sección 7.5).
 
 **Prueba de idempotencia.** Al simular la carga de los mismos datos dos veces (`particion_x2`), las filas aceptadas no cambian: Reservas 75, Atenciones 46, Detalle 41 y Canales y bloques 38. Los indicadores `Mismo_conteo` y `Mismas_filas` resultaron verdaderos. Además, dos refrescos consecutivos en Power BI entregaron los mismos conteos en `control_carga`.
 
@@ -540,7 +611,7 @@ La conciliación contrasta los conteos del modelo con las reglas de negocio. Se 
 |---|---|
 | Reservas Atendida frente a atenciones registradas | 48 frente a 46. Faltan las atenciones de `R0146` y `R0148` |
 | Atenciones con detalle valorizado | 41 de 46. Las 5 restantes (`A0104`, `A0109`, `A0114`, `A0119` y `A0124`) tienen detalle sin valor unitario y fueron rechazadas por RV-VALOR |
-| Integridad referencial del modelo | 8 relaciones verificadas, 0 huérfanos |
+| Integridad referencial del modelo | 7 relaciones verificadas, 0 huérfanos |
 | Importe frente a `Cantidad × ValorUnitario` | Diferencia igual a 0 |
 | Detalles con tarifa distinta de la maestra | 12 de 41 |
 
@@ -552,10 +623,57 @@ Las atenciones sin detalle valorizado implican que el ingreso total está **subv
 |---|---|
 | Excel | Fuentes de datos (base y adicional) y archivos de evidencia (`Mapeo_etiquetas`, `No_resueltos`) |
 | Power BI (Power Query en lenguaje M) | Extracción, staging, reglas de calidad, cuarentena y modelo |
-| DAX | Medidas y columnas calculadas |
+| DAX | Medidas, columnas calculadas y la tabla `DimFecha` |
 | Python (pandas y matplotlib) en Jupyter | Validación independiente y análisis exploratorio |
 
-La ejecución consiste en actualizar el modelo en Power BI, revisar las tablas de control (`control_carga`, `control_merge`, `control_cardinalidad`, `rechazos` y `prueba_idempotencia`) y, para la validación, ejecutar el script de generación del modelo en Python y luego el notebook completo.
+La ejecución consiste en confirmar que la detección automática de relaciones esté desactivada (sección 7.10), actualizar el modelo en Power BI, revisar las tablas de control (`control_carga`, `control_merge`, `control_cardinalidad`, `rechazos` y `prueba_idempotencia`) y, para la validación, ejecutar el script de generación del modelo en Python y luego el notebook completo.
+
+### 7.10. Carga al modelo y relaciones
+
+Una vez aceptadas las filas, el modelo se carga con Cerrar y aplicar y las relaciones se definen de forma manual. La detección automática de relaciones de Power BI se desactiva (Archivo, Opciones, Carga de datos, tanto en el nivel global como en el archivo actual). Esa opción propone relaciones por coincidencia de nombres y valores, incluso entre tablas de control y de cuarentena (por ejemplo `mapeo_etiquetas` con `no_resueltos`, o `rechazos` con `duplicados_descartados`), y las propone de 1 a 1 cuando los datos cargados todavía no repiten claves.
+
+`DimFecha` se genera como tabla calculada en DAX (`CALENDAR`), con las columnas `Fecha`, `Año`, `MesNum`, `Mes`, `AñoMes` y `DiaSemana`, y se marca como tabla de fechas. No es una consulta de Power Query, por lo que no se traslada al copiar consultas entre archivos y debe recrearse.
+
+**Tabla 14b.** Relaciones del modelo. Todas son de uno a varios, con filtro en un solo sentido y estado activo.
+
+| Lado uno (dimensión) | Lado varios (hecho) |
+|---|---|
+| `DimFecha[Fecha]` | `HechoReservas[FechaReserva]` |
+| `DimFecha[Fecha]` | `HechoDetalle[FechaAtencion]` |
+| `DimPaciente[PacienteID]` | `HechoReservas[PacienteID]` |
+| `DimPaciente[PacienteID]` | `HechoDetalle[PacienteID]` |
+| `DimMedico[MedicoID]` | `HechoReservas[MedicoID]` |
+| `DimMedico[MedicoID]` | `HechoDetalle[MedicoID]` |
+| `DimPrestacion[PrestacionID]` | `HechoDetalle[PrestacionID]` |
+
+Criterios de creación:
+
+- El lado uno es siempre la dimensión, cuya clave única se verificó en `control_cardinalidad` (Tabla 13). Un hecho nunca es el lado uno, porque sus claves de negocio de pacientes, médicos y prestaciones se repiten.
+- Las dos columnas relacionadas deben tener el mismo tipo (fecha con fecha, texto con texto).
+- Si Power BI propone «Varios a varios» o «Uno a uno», la relación no se guarda, porque indica claves repetidas o tipos distintos.
+- Los dos hechos no se relacionan entre sí.
+
+Cada relación se comprobó con una tabla de prueba que cruza un atributo de la dimensión con una medida de conteo. El resultado correcto son valores distintos por fila que suman el total de reservas (75). Un mismo valor repetido en todas las filas indica que la relación no filtra.
+
+### 7.11. Incidencias de implementación y lecciones aprendidas
+
+**Tabla 14c.** Incidencias detectadas durante la carga y su resolución.
+
+| Síntoma | Causa | Resolución |
+|---|---|---|
+| `control_carga` mostraba 33 reservas, 24 atenciones, 23 detalles y 2 canales | `fn_fecha` y `fn_hora` sin rama numérica: las fechas y horas entregadas como número quedaban en nulo | Reemplazo de ambas funciones (sección 7.5) y validación con `diag_fecha` |
+| Casi todas las tablas fallaban con «La carga se canceló debido a un error al cargar una tabla anterior» | Era un efecto en cadena de un único error real: `PacienteID` duplicado (`P001`) en `HechoReservas` | Ver la fila siguiente |
+| `PacienteID` duplicado en `HechoReservas` al cargar | Con solo 33 reservas cargadas, cada paciente aparecía una vez y Power BI creó relaciones 1 a 1 automáticas. Al corregir las fechas se cargaron 75 reservas con pacientes repetidos y esas relaciones dejaron de ser válidas | Se eliminaron las relaciones, se desactivó la detección automática y las consultas de Power Query se trasladaron a un archivo nuevo, porque el modelo guardado conservaba las relaciones anteriores. Las relaciones se crearon después de forma manual (sección 7.10) |
+| Error OLE DB `0x80040E4E` en `rechazos` y `HechoDetalle` | Error genérico del proveedor que apareció junto con el error de relaciones | Dejó de aparecer al reconstruir el modelo sin relaciones automáticas. No se aisló una causa adicional en las consultas |
+| Sin `DimFecha` en el archivo nuevo | La tabla no se trasladó al copiar las consultas | Se recreó con DAX, se marcó como tabla de fechas y se relacionó con ambos hechos |
+
+Lecciones derivadas:
+
+1. Corregir primero los datos y verificar `control_carga` antes de definir relaciones, porque las relaciones que Power BI infiere con volúmenes parciales dejan de ser válidas al completarse la carga.
+2. Desactivar la detección automática de relaciones antes del primer refresco.
+3. Ante una cascada de errores «La carga se canceló…», buscar el primer error de la lista que no tenga ese texto, porque es el único real.
+4. Verificar cardinalidad y dirección de filtro antes de guardar cada relación, y confirmar que se seleccionó la misma columna de clave en ambos lados (un error frecuente es elegir `Origen`, que existe en casi todas las tablas).
+5. Tras cualquier cambio en `fn_fecha` o `fn_hora`, comprobar que `control_carga` entregue 75, 46, 41 y 38 aceptadas.
 
 ---
 
@@ -990,6 +1108,3 @@ Del total de filas procesadas, 34 fueron rechazadas por las reglas del ETL y 4 s
 - Valencia, O. y Garrido, L. (2026). *Documentación del proceso ETL de SaludVital* [Documento interno del proyecto].
 - Valencia, O. y Garrido, L. (2026). *analisis_saludvital.ipynb* [Notebook de análisis y validación].
 - Kimball, R. y Ross, M. (2013). *The Data Warehouse Toolkit: The Definitive Guide to Dimensional Modeling* (3.ª ed.). Wiley.
-
-
-
