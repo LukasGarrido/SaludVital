@@ -16,8 +16,6 @@
 Octavio Valencia
 Lukas Garrido
 
-**Entregas incluidas:** 1 a 6 (análisis del negocio, perfilamiento, modelo dimensional y ETL)
-
 **Versión:** 2.0 (integra la base original y la base de datos adicionales)
 
 **Fecha:** 14 de noviembre de 2026
@@ -30,7 +28,7 @@ Lukas Garrido
 
 El presente informe documenta el diseño e implementación de una solución de inteligencia de negocio para SaludVital, un centro médico privado de atención ambulatoria de la Región del Biobío. El centro no cuenta con una arquitectura de datos apta para el análisis multidimensional, lo que se traduce en información distribuida, registros inconsistentes y reportes mensuales elaborados de forma manual.
 
-El trabajo integra **dos fuentes de datos**: el libro base `SaludVital_BaseDatos.xlsx` (7 tablas, período del 05-01-2026 al 03-02-2026) y el libro de datos adicionales `SaludVital_DatosAdicionales_ETL.xlsx` (hojas `A01` a `A09` y `MAP_ESPECIALIDADES`, período del 04-02-2026 en adelante), el cual incorpora de forma deliberada errores de calidad para ejercitar el proceso ETL. Ambas fuentes se anexan, depuran y cargan en un modelo dimensional en estrella con dos tablas de hechos (`HechoReservas` y `HechoDetalle`) y cuatro dimensiones, construido íntegramente en Power BI mediante Power Query y DAX.
+El trabajo integra **dos fuentes de datos**: el libro base `SaludVital_BaseDatos.xlsx` (7 tablas, período del 05-01-2026 al 03-02-2026) y el libro de datos adicionales `SaludVital_DatosAdicionales_ETL.xlsx` (hojas `A01` a `A09` y `MAP_ESPECIALIDADES`, período del 04-02-2026 en adelante), el cual incorpora de forma deliberada errores de calidad para ejercitar el proceso ETL. Ambas fuentes se anexan, depuran y cargan en un modelo dimensional en estrella con dos tablas de hechos (`HechoReservas` y `HechoDetalle`) y cuatro dimensiones, construido en Power BI mediante Power Query y DAX.
 
 El proceso ETL procesó 80 reservas, 49 atenciones y 50 detalles de atención de entrada. Aceptó 75, 46 y 41 registros respectivamente, y envió 34 filas a cuarentena con origen y motivo documentados. La prueba de idempotencia confirmó que cargas repetidas producen los mismos conteos.
 
@@ -74,7 +72,7 @@ El proyecto abarca el ciclo completo de una solución de inteligencia de negocio
 | Base de datos original (`SaludVital_BaseDatos.xlsx`) | 7 hojas: `01_PACIENTES`, `02_MEDICOS`, `03_ESPECIALIDADES`, `04_PRESTACIONES`, `05_RESERVAS`, `06_ATENCIONES`, `07_DETALLE_ATENCION` | 05-01-2026 al 03-02-2026 |
 | Base de datos adicionales (`SaludVital_DatosAdicionales_ETL.xlsx`) | Hojas `A01` a `A09` (pacientes, médicos, especialidades, prestaciones, reservas, atenciones, detalle, canales y bloques, etiquetas), `MAP_ESPECIALIDADES`, `LEEME`, `ACTIVIDADES12` y `DICCIONARIO` | 04-02-2026 en adelante |
 
-Según el archivo `LEEME`, el período adicional se extiende hasta el 31-03-2026. Sin embargo, tras la depuración las reservas aceptadas llegan solo hasta el 28-02-2026, porque los registros con fecha 31-03-2026 corresponden a filas rechazadas por claves inválidas. Los períodos son una hipótesis de simulación y no un hecho operativo sobre la periodicidad real del centro.
+Según el archivo `LEEME`, el período adicional se extiende hasta el 31-03-2026. Sin embargo, tras la depuración las reservas aceptadas llegan solo hasta el 28-02-2026, porque los registros con fecha 31-03-2026 corresponden a filas rechazadas por claves inválidas. Los períodos son una hipótesis de simulación y no un hecho sobre la periodicidad real del centro.
 
 ### 1.3. Estructura del informe
 
@@ -172,7 +170,8 @@ Un catálogo de reglas de negocio es una lista ordenada y documentada de las con
 |---|---|---|
 | RN01 | **Reconstrucción de especialidades.** La hoja `03_ESPECIALIDADES` de la base original es una copia exacta de `02_MEDICOS` y no contiene nombres. El catálogo se reconstruye a partir de los códigos `EspecialidadID` únicos de `04_PRESTACIONES` (E01 a E10). Los nombres de E01 a E10 provienen de `MAP_ESPECIALIDADES` y los de E11 y E12 de `A03_ESPECIALIDADES`, marcados con `Es_nueva_alta = true`. | Atributo `Especialidad` en `DimMedico` y `DimPrestacion` |
 | RN02 | **Normalización de etiquetas.** Una etiqueta se resuelve automáticamente solo cuando difiere en espacios, tildes, mayúsculas o cuando un número viene escrito como texto. Se conserva siempre la etiqueta original junto a la canónica y los nulos no se modifican. Las etiquetas sin respaldo de un catálogo (por ejemplo, `WEB` y `Kiosco`) no se interpretan. | Limpieza de especialidades, estados y canales |
-| RN03 | **Unificación de pacientes.** Los pacientes se identifican por `PacienteID`. Se elimina el duplicado exacto entre ambas fuentes (`P101`) y la primera ocurrencia prevalece. La detección de duplicados por variantes de escritura de nombre no se observó en los datos y queda como control futuro. | `DimPaciente` |
+| RN03 | **Unificación de pacientes.** Los pacientes se identifican por `PacienteID`. Se elimina el duplicado exacto (`P101`) y la primera ocurrencia prevalece. La detección de duplicados por variantes de escritura de nombre no se observó en los datos y queda como control futuro. | `DimPaciente` |
+| RN13 | **Conversión de fechas y horas.** Las fechas y horas se convierten con `fn_fecha` y `fn_hora`, que interpretan números de serie de Excel, fracciones de día, texto `yyyy-MM-dd` o `yyyy/MM/dd` y valores ya tipados. Un valor no interpretable resulta nulo y el valor de origen se conserva en la columna `_raw`. | Campos de fecha y hora de las fuentes |
 
 ### 4.2. Reglas operativas y de atención
 
@@ -295,8 +294,9 @@ Las hojas `02_MEDICOS` y `03_ESPECIALIDADES` presentan 11 filas físicas porque 
 | Hoja de especialidades corrupta | `03_ESPECIALIDADES` | Idéntica a `02_MEDICOS` | RN01 | Se descarta y se reconstruye el catálogo |
 | Columna vacía sin uso | `01_PACIENTES` columna B | 33 de 33 nulos | RN11 | Se excluye en la extracción |
 | Pacientes incompletos | `P031`, `P032`, `P033` (base) y `P115` (adicional) | Todos los campos nulos salvo el ID | RN11 | Cuarentena, ninguna reserva los usa |
-| Duplicados exactos entre fuentes | `P101`, `M011`, `E11`, `PR016` | Fila idéntica en base y adicional | RN10 | Se conserva la primera ocurrencia |
-| Fecha y hora en formatos mezclados | `A05_RESERVAS`, `A01_PACIENTES` | Valores `2026/02/07` y `09:30` junto a formatos estándar | RN02 | Conversión explícita conservando el valor raw |
+| Duplicados exactos en dimensiones | `P101`, `M011`, `E11`, `PR016` | Fila repetida de forma idéntica | RN10 | Se conserva la primera ocurrencia |
+| Duplicados exactos en hechos | `R0113` (reservas y canales), `A0101` (atenciones) y `DA0101` (detalle) | Fila repetida de forma idéntica, 4 casos en total | RN10 | Se conserva la primera y se registra en `duplicados_descartados` |
+| Fecha y hora en formatos mezclados | `A05_RESERVAS`, `A01_PACIENTES` | Números de serie de Excel (por ejemplo `46057`), texto `2026/02/07`, y horas como texto (`09:30`) o fracción del día, junto a formatos estándar | RN13 | Conversión con `fn_fecha` y `fn_hora` conservando el valor raw (sección 7.5) |
 | Estados con variantes | `A05_RESERVAS.EstadoReserva` | `ATENDIDA` (5 filas) y `No Asistio` | RN02 | Normalización con catálogo |
 | Estado fuera de catálogo | `R0129` | `Confirmada` | RN11 | Cuarentena, no se interpreta |
 | ID con patrón inválido | Reservas y canales | `1234` en lugar de `R0139` | RN11 | Cuarentena |
@@ -473,6 +473,8 @@ La verificación `Clave_unica_OK` resultó verdadera en las cuatro dimensiones.
 
 **Conversión de fechas y horas.** Las hojas adicionales entregan fechas y horas con tipos mezclados. Se observaron fechas como número de serie de Excel (por ejemplo `46057`, equivalente al 04-02-2026), como texto con barras (`2026/02/07`) y como fecha ya tipada. Las horas llegan como texto (`09:30`) o como fracción del día (`0,4167` equivale a las 10:00). Dos funciones centralizan la conversión en staging: `fn_fecha` devuelve un valor de tipo fecha y `fn_hora` uno de tipo hora. Ambas devuelven nulo cuando el valor no es interpretable, y el valor de origen se conserva en las columnas `_raw`.
 
+**Tabla 12.** Reglas de conversión de `fn_fecha` y `fn_hora`.
+
 | Función | Entrada | Tratamiento |
 |---|---|---|
 | `fn_fecha` | Nulo | Nulo |
@@ -533,6 +535,8 @@ El rango de 30.000 a 80.000 en `fn_fecha` (aproximadamente los años 1982 a 2118
 
 Las versiones iniciales de ambas funciones no tenían la rama numérica, por lo que toda fecha u hora entregada como número se convertía en nulo. El efecto se detectó en `control_carga`:
 
+**Tabla 13.** Filas aceptadas antes y después de corregir las funciones de conversión.
+
 | Tabla | Aceptadas con las funciones iniciales | Aceptadas con las funciones actuales |
 |---|---|---|
 | Reservas | 33 | 75 |
@@ -553,9 +557,12 @@ flowchart LR
   RES -->|N:1| CAN["stg_CANALES (1 por reserva)"]
   ATE["stg_ATENCIONES (49)"] -->|N:1| RES
   DET["stg_DETALLE (50)"] -->|N:1| PRE["stg_PRESTACIONES"]
+  DET -->|N:1| ATE
 ```
 
-**Tabla 12.** Control de combinaciones (`control_merge`).
+`HechoDetalle` se construye a partir de los detalles aceptados. Con `fn_unir` incorpora desde las atenciones aceptadas la reserva (`ReservaID`) y la fecha de atención (`FechaAtencion`), y desde las reservas aceptadas el paciente (`PacienteID`) y el médico (`MedicoID`). El importe se calcula como `Cantidad × ValorUnitario`. Por esta razón las dimensiones de paciente y médico se relacionan con ambos hechos (sección 7.10).
+
+**Tabla 14.** Control de combinaciones (`control_merge`).
 
 | Combinación | Antes | Después | Sin multiplicación |
 |---|---|---|---|
@@ -563,7 +570,7 @@ flowchart LR
 | Atenciones con reservas (N:1) | 49 | 49 | Verdadero |
 | Detalle con prestaciones (N:1) | 50 | 50 | Verdadero |
 
-**Tabla 13.** Control de cardinalidad (`control_cardinalidad`).
+**Tabla 15.** Control de cardinalidad (`control_cardinalidad`).
 
 | Lado | Tabla | Filas y claves distintas | Clave única |
 |---|---|---|---|
@@ -581,7 +588,9 @@ Que los hechos arrojen «Falso» es el resultado esperado, porque contienen dupl
 
 La clave natural es el identificador de negocio y gana la primera ocurrencia de forma determinista, lo que sostiene la idempotencia del proceso.
 
-**Tabla 14.** Control de carga (`control_carga`).
+La separación entre filas válidas y rechazadas se hace en dos consultas: `dims_ok` para las dimensiones (con las salidas `Ok` y `Rechazo`) y `particion` para los hechos (con las salidas `Aceptados` y `Rechazos`). El modelo lee solo las salidas aceptadas. La tabla `rechazos` combina las 7 salidas de rechazo (pacientes, médicos, prestaciones, reservas, atenciones, detalle y canales y bloques) con las columnas `Fuente`, `Clave`, `Origen`, `Fila_id` y `Motivo`. `Clave` toma el valor «(sin clave)» cuando el identificador es nulo y `Fila_id` toma «(dimensión)» en las filas de dimensiones.
+
+**Tabla 16.** Control de carga (`control_carga`).
 
 | Tabla | Entrada | Aceptadas | Duplicados | Rechazadas |
 |---|---|---|---|---|
@@ -593,7 +602,7 @@ La clave natural es el identificador de negocio y gana la primera ocurrencia de 
 | Detalle | 50 | 41 | 1 | 8 |
 | Canales y bloques | 52 | 38 | 1 | 13 |
 
-La columna `Cuadra` (entrada igual a aceptadas más duplicados más rechazadas) y `Claves_unicas_en_aceptadas` son verdaderas en las 7 filas. La tabla `rechazos` contiene 34 filas y `duplicados_descartados` contiene 4. Estas cifras corresponden a la ejecución con las funciones de conversión definitivas (sección 7.5).
+La columna `Cuadra` (entrada igual a aceptadas más duplicados más rechazadas) y `Claves_unicas_en_aceptadas` son verdaderas en las 7 filas. Los duplicados exactos de las dimensiones se eliminan antes de esta validación (sección 7.5), por lo que figuran en 0. La tabla `rechazos` contiene 34 filas y `duplicados_descartados` contiene 4. Estas cifras corresponden a la ejecución con las funciones de conversión definitivas (sección 7.5).
 
 **Prueba de idempotencia.** Al simular la carga de los mismos datos dos veces (`particion_x2`), las filas aceptadas no cambian: Reservas 75, Atenciones 46, Detalle 41 y Canales y bloques 38. Los indicadores `Mismo_conteo` y `Mismas_filas` resultaron verdaderos. Además, dos refrescos consecutivos en Power BI entregaron los mismos conteos en `control_carga`.
 
@@ -632,9 +641,9 @@ La ejecución consiste en confirmar que la detección automática de relaciones 
 
 Una vez aceptadas las filas, el modelo se carga con Cerrar y aplicar y las relaciones se definen de forma manual. La detección automática de relaciones de Power BI se desactiva (Archivo, Opciones, Carga de datos, tanto en el nivel global como en el archivo actual). Esa opción propone relaciones por coincidencia de nombres y valores, incluso entre tablas de control y de cuarentena (por ejemplo `mapeo_etiquetas` con `no_resueltos`, o `rechazos` con `duplicados_descartados`), y las propone de 1 a 1 cuando los datos cargados todavía no repiten claves.
 
-`DimFecha` se genera como tabla calculada en DAX (`CALENDAR`), con las columnas `Fecha`, `Año`, `MesNum`, `Mes`, `AñoMes` y `DiaSemana`, y se marca como tabla de fechas. No es una consulta de Power Query, por lo que no se traslada al copiar consultas entre archivos y debe recrearse.
+`DimFecha` se genera como tabla calculada en DAX (`CALENDAR`) que cubre el año 2026 (del 01-01-2026 al 31-12-2026), con las columnas `Fecha`, `Año`, `MesNum`, `Mes`, `AñoMes` y `DiaSemana`, y se marca como tabla de fechas. No es una consulta de Power Query, por lo que no se traslada al copiar consultas entre archivos y debe recrearse.
 
-**Tabla 14b.** Relaciones del modelo. Todas son de uno a varios, con filtro en un solo sentido y estado activo.
+**Tabla 17.** Relaciones del modelo. Todas son de uno a varios, con filtro en un solo sentido y estado activo.
 
 | Lado uno (dimensión) | Lado varios (hecho) |
 |---|---|
@@ -648,7 +657,7 @@ Una vez aceptadas las filas, el modelo se carga con Cerrar y aplicar y las relac
 
 Criterios de creación:
 
-- El lado uno es siempre la dimensión, cuya clave única se verificó en `control_cardinalidad` (Tabla 13). Un hecho nunca es el lado uno, porque sus claves de negocio de pacientes, médicos y prestaciones se repiten.
+- El lado uno es siempre la dimensión, cuya clave única se verificó en `control_cardinalidad` (Tabla 15). Un hecho nunca es el lado uno, porque sus claves de negocio de pacientes, médicos y prestaciones se repiten.
 - Las dos columnas relacionadas deben tener el mismo tipo (fecha con fecha, texto con texto).
 - Si Power BI propone «Varios a varios» o «Uno a uno», la relación no se guarda, porque indica claves repetidas o tipos distintos.
 - Los dos hechos no se relacionan entre sí.
@@ -657,7 +666,7 @@ Cada relación se comprobó con una tabla de prueba que cruza un atributo de la 
 
 ### 7.11. Incidencias de implementación y lecciones aprendidas
 
-**Tabla 14c.** Incidencias detectadas durante la carga y su resolución.
+**Tabla 18.** Incidencias detectadas durante la carga y su resolución.
 
 | Síntoma | Causa | Resolución |
 |---|---|---|
@@ -683,13 +692,13 @@ Lecciones derivadas:
 
 Se adoptó un esquema en estrella con una constelación de dos tablas de hechos que comparten dimensiones.
 
-**Tabla 15.** Tablas del modelo y su grano.
+**Tabla 19.** Tablas del modelo y su grano.
 
 | Tabla | Tipo | Grano | Clave |
 |---|---|---|---|
 | `HechoReservas` | Hecho | Una fila por reserva aceptada, con su atención, canal y bloque cuando existen | `ReservaID` (degenerada) |
 | `HechoDetalle` | Hecho | Una fila por prestación dentro de una atención aceptada | `DetalleID` (degenerada) |
-| `DimFecha` | Dimensión | Un día, del 05-01-2026 al 31-03-2026 | `Date` (natural) |
+| `DimFecha` | Dimensión | Un día, del 01-01-2026 al 31-12-2026 | `Fecha` (natural) |
 | `DimPaciente` | Dimensión | Un paciente aceptado | `PacienteID` (natural) |
 | `DimMedico` | Dimensión | Un médico aceptado, con su especialidad | `MedicoID` (natural) |
 | `DimPrestacion` | Dimensión | Una prestación aceptada, con su especialidad | `PrestacionID` (natural) |
@@ -731,7 +740,7 @@ Estados en `HechoReservas`: Atendida 48, No asistió 12, Cancelada 10 y Pendient
 
 ### 8.4. Diccionario semántico
 
-**Tabla 16.** Diccionario de datos del modelo.
+**Tabla 20.** Diccionario de datos del modelo.
 
 | Tabla | Campo | Significado | Tipo |
 |---|---|---|---|
@@ -834,7 +843,7 @@ Reservas por Paciente = DIVIDE ( [Total Reservas], [Pacientes Distintos] )
 Médicos Activos = DISTINCTCOUNT ( HechoReservas[MedicoID] )
 
 Reservas Mes Anterior =
-CALCULATE ( [Total Reservas], DATEADD ( DimFecha[Date], -1, MONTH ) )
+CALCULATE ( [Total Reservas], DATEADD ( DimFecha[Fecha], -1, MONTH ) )
 
 Variación Mensual Reservas =
 DIVIDE ( [Total Reservas] - [Reservas Mes Anterior], [Reservas Mes Anterior] )
@@ -857,7 +866,7 @@ SWITCH (
 
 ### 9.3. Definiciones de los indicadores
 
-**Tabla 17.** Fórmulas de los indicadores principales.
+**Tabla 21.** Fórmulas de los indicadores principales.
 
 | Indicador | Definición | Hecho |
 |---|---|---|
@@ -883,7 +892,7 @@ La validación se realizó con tres procedimientos independientes:
 
 ### 10.2. Concordancia de cifras
 
-**Tabla 18.** Comparación entre Power BI, Jupyter y el recálculo independiente.
+**Tabla 22.** Comparación entre Power BI, Jupyter y el recálculo independiente.
 
 | Indicador | Power BI | Jupyter | Recálculo independiente | Concuerda |
 |---|---|---|---|---|
@@ -905,7 +914,7 @@ La validación se realizó con tres procedimientos independientes:
 | Reservas Atendida sin atención | `R0146`, `R0148` | `R0146`, `R0148` | `R0146`, `R0148` | Sí |
 | Ingreso por mes (ene y feb) | No documentado en el ETL | $745.000 y $926.000 | $745.000 y $926.000 | Sí (Jupyter y recálculo) |
 
-El notebook además valida la integridad referencial del modelo, con 8 relaciones y 0 huérfanos, y confirma que `Importe` coincide con `Cantidad × ValorUnitario` (diferencia igual a 0).
+El notebook además valida la integridad referencial del modelo, con 7 relaciones y 0 huérfanos, y confirma que `Importe` coincide con `Cantidad × ValorUnitario` (diferencia igual a 0).
 
 **Figura 1.** Reservas por estado final. Fuente: notebook `analisis_saludvital.ipynb`, sección 1.
 
@@ -926,7 +935,7 @@ La validación no encontró diferencias numéricas, pero sí puntos de interpret
 3. **Empates en rankings.** La especialidad más solicitada es un empate entre Cardiología y Dermatología (11 reservas cada una). El día con mayor demanda es un empate entre lunes, miércoles y viernes (13 reservas cada uno). El texto automático del notebook informa solo el primer elemento de cada empate.
 4. **Especialidad del médico frente a especialidad de la prestación.** Las reservas se clasifican por la especialidad del médico, mientras que los ingresos se clasifican por la especialidad de la prestación. En el período adicional, los detalles utilizan solo los códigos `PR016` a `PR019`, por lo que no siempre coinciden con la especialidad del médico tratante. Por ejemplo, Kinesiología registra 3 reservas atendidas pero ningún ingreso. Las comparaciones entre demanda e ingreso por especialidad deben interpretarse con esta salvedad.
 5. **Tarifas.** 12 de 41 detalles usan un valor unitario distinto de la tarifa maestra. El modelo conserva el valor del hecho y no lo corrige, y la diferencia se informa como alerta.
-6. **Alcance temporal.** Las reservas aceptadas cubren del 05-01-2026 al 28-02-2026, aunque `DimFecha` se extiende hasta el 31-03-2026.
+6. **Alcance temporal.** Las reservas aceptadas cubren del 05-01-2026 al 28-02-2026, aunque `DimFecha` se extiende hasta el 31-12-2026.
 
 ---
 
@@ -936,7 +945,7 @@ Todas las cifras corresponden a la simulación y los ingresos son valorizados, n
 
 ### 11.1. Panorama general
 
-**Tabla 19.** Indicadores principales del período.
+**Tabla 23.** Indicadores principales del período.
 
 | Indicador | Valor |
 |---|---|
@@ -976,7 +985,7 @@ Se registraron 28 reservas en enero y 47 en febrero. Como los períodos duran di
 
 ![Estados y tasas por mes](img/fig06_estados_tasas_mes.png)
 
-**Tabla 20.** Estados y tasas por mes.
+**Tabla 24.** Estados y tasas por mes.
 
 | Mes | Atendida | No asistió | Cancelada | Pendiente | Total | Tasa de atención | Tasa de inasistencia | Tasa de cancelación |
 |---|---|---|---|---|---|---|---|---|
@@ -1025,7 +1034,7 @@ Cardiología y Dermatología concentran la mayor demanda, con 11 reservas cada u
 
 ![Prestaciones por médico](img/fig13_prestaciones_medico.png)
 
-**Tabla 21.** Desempeño por médico.
+**Tabla 25.** Desempeño por médico.
 
 | Médico | Total | Atendida | No asistió | Cancelada | Pendiente | Tasa de atención | Ingreso | Ingreso promedio por atención |
 |---|---|---|---|---|---|---|---|---|
@@ -1085,6 +1094,7 @@ Del total de filas procesadas, 34 fueron rechazadas por las reglas del ETL y 4 s
 - Cinco atenciones y dos reservas Atendida carecen de detalle valorizado o de atención registrada, lo que subvalúa el ingreso.
 - La relación entre especialidad del médico y especialidad de la prestación no es consistente en el período adicional.
 - La deduplicación de pacientes se limita a duplicados exactos. No se implementó detección difusa por variantes de nombre.
+- Las funciones `fn_fecha` y `fn_hora` interpretan solo los formatos observados en las fuentes (número de serie de Excel, `yyyy-MM-dd`, `yyyy/MM/dd`, y horas como texto o fracción del día). Un formato distinto resultaría nulo.
 - El análisis de la capacidad requerida por especialidad (RQ24) no es posible sin información de agenda disponible de cada profesional.
 
 ---
@@ -1092,7 +1102,7 @@ Del total de filas procesadas, 34 fueron rechazadas por las reglas del ETL y 4 s
 ## 13. Conclusiones
 
 1. Se construyó una solución de inteligencia de negocio completa para SaludVital que integra **dos fuentes de datos** en un modelo dimensional en estrella con dos hechos y cuatro dimensiones, implementado en Power BI.
-2. El ETL es reproducible y auditable. Cada una de las 80 reservas, 49 atenciones y 50 detalles de entrada tiene un destino documentado, los controles de carga cuadran en las 7 tablas y la prueba de idempotencia confirma que cargas repetidas no alteran los conteos.
+2. El ETL es reproducible y auditable. Cada una de las 80 reservas, 49 atenciones y 50 detalles de entrada tiene un destino documentado, los controles de carga cuadran en las 7 tablas y la prueba de idempotencia confirma que cargas repetidas no alteran los conteos. La corrección de las funciones de conversión de fechas y horas fue determinante: con la versión inicial solo 33 de las 80 reservas llegaban a aceptadas.
 3. Los resultados fueron validados con tres procedimientos independientes (Power BI, Jupyter y recálculo desde las fuentes originales) y coinciden en todas las cifras principales. La validación además permitió detectar seis puntos de interpretación que se documentaron en la sección 10.3.
 4. El centro resuelve en atención el 68,6 % de las reservas resueltas, con una inasistencia de 20,0 % y una cancelación de 14,3 %. Se perdieron 5,0 horas por inasistencia en las reservas con bloque registrado.
 5. La demanda diaria del período adicional (1,8 reservas por día) supera en alrededor de 80 % a la del período base (1,0), aunque la comparación se ve afectada por la duración distinta de los períodos.
