@@ -20,6 +20,8 @@ Lukas Garrido
 
 **Fecha:** 14 de noviembre de 2026
 
+**Repositorio:** https://github.com/LukasGarrido/SaludVital
+
 </div>
 
 ---
