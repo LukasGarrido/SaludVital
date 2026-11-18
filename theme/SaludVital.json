@@ -1,19 +1,18 @@
-
 {
-  "name": "SaludVital Cream & Burgundy",
+  "name": "SaludVital High Contrast",
   "dataColors": [
-    "#A83F46",
-    "#315D59",
-    "#C96B62",
-    "#D5A04B",
-    "#527F78",
-    "#D68B7E",
-    "#8D6254",
-    "#7D8492"
+    "#8E2430",
+    "#1B4D48",
+    "#C86D1F",
+    "#285B8E",
+    "#5B3765",
+    "#3B7A57",
+    "#B33B5B",
+    "#4A5568"
   ],
-  "background": "#F4EBDD",
-  "foreground": "#493D3B",
-  "tableAccent": "#A83F46",
+  "background": "#FAF6F0",
+  "foreground": "#241C1B",
+  "tableAccent": "#8E2430",
   "visualStyles": {
     "page": {
       "*": {
@@ -21,7 +20,7 @@
           {
             "color": {
               "solid": {
-                "color": "#F4EBDD"
+                "color": "#FAF6F0"
               }
             },
             "transparency": 0
@@ -31,7 +30,7 @@
           {
             "color": {
               "solid": {
-                "color": "#EDE2D2"
+                "color": "#E6DCD0"
               }
             },
             "transparency": 0
@@ -45,10 +44,10 @@
           {
             "color": {
               "solid": {
-                "color": "#FFFCF7"
+                "color": "#FFFFFF"
               }
             },
-            "transparency": 100
+            "transparency": 0
           }
         ],
         "border": [
@@ -56,7 +55,7 @@
             "show": true,
             "color": {
               "solid": {
-                "color": "#E3D5C3"
+                "color": "#D4C4B0"
               }
             },
             "radius": 12
@@ -67,11 +66,78 @@
             "show": true,
             "fontColor": {
               "solid": {
-                "color": "#493D3B"
+                "color": "#241C1B"
               }
             },
             "fontSize": 14,
             "fontFamily": "Segoe UI Semibold"
+          }
+        ]
+      }
+    },
+    "actionButton": {
+      "*": {
+        "fill": [
+          {
+            "$id": "default",
+            "show": true,
+            "fillColor": {
+              "solid": {
+                "color": "#8E2430"
+              }
+            },
+            "transparency": 0
+          },
+          {
+            "$id": "hover",
+            "show": true,
+            "fillColor": {
+              "solid": {
+                "color": "#6E1A24"
+              }
+            },
+            "transparency": 0
+          },
+          {
+            "$id": "selected",
+            "show": true,
+            "fillColor": {
+              "solid": {
+                "color": "#1B4D48"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "text": [
+          {
+            "$id": "default",
+            "show": true,
+            "fontColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "fontSize": 11,
+            "fontFamily": "Segoe UI Semibold"
+          }
+        ],
+        "outline": [
+          {
+            "$id": "default",
+            "show": false
+          }
+        ],
+        "icon": [
+          {
+            "$id": "default",
+            "show": true,
+            "lineColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "weight": 2
           }
         ]
       }
