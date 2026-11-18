@@ -1,17 +1,80 @@
 
 {
   "name": "SaludVital Cream & Burgundy",
-  "dataColors": ["#A83F46", "#315D59", "#C96B62", "#D5A04B", "#527F78", "#D68B7E", "#8D6254", "#7D8492"],
+  "dataColors": [
+    "#A83F46",
+    "#315D59",
+    "#C96B62",
+    "#D5A04B",
+    "#527F78",
+    "#D68B7E",
+    "#8D6254",
+    "#7D8492"
+  ],
   "background": "#F4EBDD",
   "foreground": "#493D3B",
   "tableAccent": "#A83F46",
   "visualStyles": {
-    "page": { "*": { "background": [{ "color": { "solid": { "color": "#F4EBDD" } }, "transparency": 0 }],
-                     "outspace": [{ "color": { "solid": { "color": "#EDE2D2" } }, "transparency": 0 }] } },
-    "*": { "*": {
-      "background": [{ "color": { "solid": { "color": "#FFFCF7" } }, "transparency": 0 }],
-      "border": [{ "show": true, "color": { "solid": { "color": "#E3D5C3" } }, "radius": 12 }],
-      "title": [{ "show": true, "fontColor": { "solid": { "color": "#493D3B" } }, "fontSize": 14, "fontFamily": "Segoe UI Semibold" }]
-    } }
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F4EBDD"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#EDE2D2"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    },
+    "*": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FFFCF7"
+              }
+            },
+            "transparency": 100
+          }
+        ],
+        "border": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#E3D5C3"
+              }
+            },
+            "radius": 12
+          }
+        ],
+        "title": [
+          {
+            "show": true,
+            "fontColor": {
+              "solid": {
+                "color": "#493D3B"
+              }
+            },
+            "fontSize": 14,
+            "fontFamily": "Segoe UI Semibold"
+          }
+        ]
+      }
+    }
   }
 }
