@@ -1,6 +1,10 @@
+<div align="center">
+
 # Guía de Usuario y del Repositorio — SaludVital BI & Streamlit
 
 Esta guía describe la arquitectura, la estructura del proyecto, el funcionamiento del pipeline ETL, el dashboard interactivo en Streamlit y las instrucciones para ejecutar y mantener la solución de Business Intelligence (BI) de **SaludVital**.
+
+</div>
 
 ---
 
