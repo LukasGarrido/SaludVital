@@ -15,9 +15,11 @@ El proyecto se organiza de la siguiente manera:
 ```text
 SaludVital/
 ├── app/                        # Aplicación modular en Streamlit
+│   ├── __init__.py             # Inicializador del paquete Streamlit
 │   ├── app.py                  # Punto de entrada principal y navegación de páginas
 │   ├── data.py                 # Carga de datos, modelado en estrella y fusiones 1:N
-│   └── medidas.py              # Cálculo de medidas, formateadores y pruebas de aceptación
+│   ├── medidas.py              # Cálculo de medidas, formateadores y pruebas de aceptación
+│   └── styles.py               # Estilos visuales, temas y diseño corporativo
 ├── data/                       # Datos de origen y modelo dimensional generado
 │   ├── modelo/                 # Esquema en estrella (CSV y control)
 │   │   ├── DimFecha.csv        # Dimensión Fecha (86 filas)
