@@ -523,8 +523,11 @@ def main():
                 "Ingresos": format_clp,
                 "Ingreso Promedio por Atención": format_clp
             }
-            st_func = getattr(df_desempeno.style, 'map', df_desempeno.style.applymap)
-            st.dataframe(st_func(color_tasa, subset=["Tasa de Atención"]).format(format_dict), use_container_width=True)
+            try:
+                styled_df = df_desempeno.style.map(color_tasa, subset=["Tasa de Atención"])
+            except AttributeError:
+                styled_df = df_desempeno.style.applymap(color_tasa, subset=["Tasa de Atención"])
+            st.dataframe(styled_df.format(format_dict), use_container_width=True)
         else:
             st.info("Sin datos de médico.")
 
@@ -670,8 +673,11 @@ def main():
         def style_ok(val):
             return 'color: #10B981; font-weight: bold;' if val else 'color: #EF4444; font-weight: bold;'
 
-        st_func_p = getattr(df_pruebas.style, 'map', df_pruebas.style.applymap)
-        st.dataframe(st_func_p(style_ok, subset=["ok"]), use_container_width=True)
+        try:
+            styled_pruebas = df_pruebas.style.map(style_ok, subset=["ok"])
+        except AttributeError:
+            styled_pruebas = df_pruebas.style.applymap(style_ok, subset=["ok"])
+        st.dataframe(styled_pruebas, use_container_width=True)
         
         ok_count = sum(1 for p in pruebas if p["ok"])
         total_count = len(pruebas)
