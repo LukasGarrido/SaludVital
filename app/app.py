@@ -7,8 +7,12 @@ import pandas as pd
 import plotly.express as px
 from datetime import date
 
-from data import prepare_data
-from medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
+try:
+    from app.data import prepare_data
+    from app.medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
+except ImportError:
+    from data import prepare_data
+    from medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
 
 # Configuración de la página
 st.set_page_config(
