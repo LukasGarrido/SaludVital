@@ -54,7 +54,7 @@ SaludVital/
 │   └── SaludVital_DatosAdicionales.xlsx # Libro Excel fuente período adicional
 ├── docs/                       # Documentación técnica y funcional
 │   ├── guia_usuario.md         # Guía de uso y funcionamiento del repo
-│   └── informe/                # Informe formal del proyecto (v2.0)
+│   └── informe/                # Informe formal del proyecto (v2.1)
 │       ├── Informe_SaludVital.md # Informe integral de proyecto
 │       └── img/                # Figuras y visualizaciones del informe (fig01 a fig17)
 ├── notebooks/                  # Análisis exploratorio interactivo
@@ -87,4 +87,4 @@ streamlit run app/app.py
 ## Documentación y Guía de Uso
 
 - **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del dashboard de Streamlit y estructura.
-- **[Informe Formal de Proyecto (`docs/informe/Informe_SaludVital.md`)](docs/informe/Informe_SaludVital.md)**: Documento formal completo (v2.0) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.
+- **[Informe Formal de Proyecto (`docs/informe/Informe_SaludVital.md`)](docs/informe/Informe_SaludVital.md)**: Documento formal completo (v2.1) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.

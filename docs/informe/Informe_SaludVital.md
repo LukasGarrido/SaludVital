@@ -16,9 +16,9 @@
 Octavio Valencia
 Lukas Garrido
 
-**Versión:** 2.0 (integra la base original y la base de datos adicionales)
+**Versión:** 2.1 (integra la base original, la base de datos adicionales y el tablero de Power BI de cuatro páginas)
 
-**Fecha:** 14 de noviembre de 2026
+**Fecha:** 18 de noviembre de 2026
 
 **Repositorio:** https://github.com/LukasGarrido/SaludVital
 
@@ -36,7 +36,9 @@ El proceso ETL procesó 80 reservas, 49 atenciones y 50 detalles de atención de
 
 Los resultados fueron validados con un notebook de Jupyter y con un recálculo independiente en Python realizado directamente sobre los archivos Excel originales. Los tres procedimientos coinciden en todas las cifras principales: 75 reservas (48 atendidas, 12 inasistencias, 10 cancelaciones y 5 pendientes), tasa de atención de 68,6 %, tasa de inasistencia de 20,0 %, tasa de cancelación de 14,3 % e ingreso valorizado de $1.671.000 CLP. El informe también registra las discrepancias metodológicas detectadas durante la validación y las recomendaciones derivadas.
 
-**Palabras clave:** inteligencia de negocio, ETL, modelo dimensional, Power BI, DAX, calidad de datos, centro médico.
+El modelo se explota en un tablero de Power BI de cuatro páginas (Resumen, Visión ejecutiva, Gestión médica y Pacientes) con filtros por fecha, comuna y sexo y una nota visible de cobertura, simulación y limitaciones. El informe cierra con conclusiones y recomendaciones operacionales, sin recomendaciones clínicas.
+
+**Palabras clave:** inteligencia de negocio, ETL, modelo dimensional, Power BI, DAX, tablero, calidad de datos, centro médico.
 
 ---
 
@@ -50,11 +52,11 @@ Los resultados fueron validados con un notebook de Jupyter y con un recálculo i
 6. [Fuentes de datos y perfilamiento](#6-fuentes-de-datos-y-perfilamiento)
 7. [Proceso ETL en Power BI](#7-proceso-etl-en-power-bi)
 8. [Modelo dimensional](#8-modelo-dimensional)
-9. [Medidas DAX](#9-medidas-dax)
+9. [Medidas DAX y tablero](#9-medidas-dax-y-tablero)
 10. [Validación de resultados con Jupyter](#10-validación-de-resultados-con-jupyter)
 11. [Análisis de resultados](#11-análisis-de-resultados)
 12. [Limitaciones del estudio](#12-limitaciones-del-estudio)
-13. [Conclusiones](#13-conclusiones)
+13. [Conclusiones y recomendaciones](#13-conclusiones-y-recomendaciones)
 14. [Referencias](#14-referencias)
 
 ---
@@ -78,7 +80,7 @@ Según el archivo `LEEME`, el período adicional se extiende hasta el 31-03-2026
 
 ### 1.3. Estructura del informe
 
-Los capítulos 3 a 5 presentan el análisis del negocio, las reglas y los requerimientos. El capítulo 6 perfila ambas fuentes. Los capítulos 7 a 9 documentan el ETL, el modelo dimensional y las medidas DAX. El capítulo 10 valida los resultados con Jupyter, el capítulo 11 los analiza y los capítulos 12 a 14 cierran con limitaciones, conclusiones y recomendaciones.
+Los capítulos 3 a 5 presentan el análisis del negocio, las reglas y los requerimientos. El capítulo 6 perfila ambas fuentes. Los capítulos 7 a 9 documentan el ETL, el modelo dimensional, las medidas DAX y el tablero de Power BI. El capítulo 10 valida los resultados con Jupyter, el capítulo 11 los analiza y los capítulos 12 a 14 cierran con las limitaciones, las conclusiones con sus recomendaciones operacionales y las referencias.
 
 ---
 
@@ -633,7 +635,7 @@ Las atenciones sin detalle valorizado implican que el ingreso total está **subv
 | Componente | Uso |
 |---|---|
 | Excel | Fuentes de datos (base y adicional) y archivos de evidencia (`Mapeo_etiquetas`, `No_resueltos`) |
-| Power BI (Power Query en lenguaje M) | Extracción, staging, reglas de calidad, cuarentena y modelo |
+| Power BI (Power Query en lenguaje M) | Extracción, staging, reglas de calidad, cuarentena, modelo y tablero de cuatro páginas (capítulo 9) |
 | DAX | Medidas, columnas calculadas y la tabla `DimFecha` |
 | Python (pandas y matplotlib) en Jupyter | Validación independiente y análisis exploratorio |
 
@@ -767,7 +769,7 @@ Estados en `HechoReservas`: Atendida 48, No asistió 12, Cancelada 10 y Pendient
 
 ---
 
-## 9. Medidas DAX
+## 9. Medidas DAX y tablero
 
 ### 9.1. Medidas de negocio
 
@@ -880,6 +882,161 @@ SWITCH (
 | Utilización | Minutos atendidos dividido por minutos programados, solo reservas con bloque | `HechoReservas` |
 | Horas perdidas | Minutos de reservas «No asistió» con bloque, divididos por 60 | `HechoReservas` |
 
+### 9.4. Medidas y columnas implementadas en el archivo de Power BI
+
+Las medidas del tablero viven en la tabla `_Medidas`. El archivo contenía seis medidas creadas en una primera versión del tablero. Para completar las tres páginas solicitadas se añadieron las medidas de estados, tasas, horas perdidas y pacientes definidas en las secciones 9.1 y 9.2.
+
+**Tabla 21a.** Medidas de la primera versión del tablero y su equivalencia con las definiciones del informe.
+
+| Medida en el archivo | Valor observado | Equivalencia y uso |
+|---|---|---|
+| `Total Reservas` | 75 | Igual a la medida del mismo nombre de la sección 9.1 |
+| `Ingresos` | $1.671.000 | Igual a la medida del mismo nombre de la sección 9.1 |
+| `Ticket Promedio` | $40.756 | Corresponde al ingreso promedio por atención valorizada. Se usa en el tablero en lugar de `Ingreso Promedio por Atención` |
+| `Total Atenciones` | 41 | Cuenta atenciones con detalle valorizado. No equivale a `Atenciones Realizadas` (46 atenciones registradas), por lo que no se usa como indicador principal de atenciones |
+| `Prestaciones Realizadas` | 43 | Unidades de prestación, no detalles (41 detalles aceptados). Se usa en el gráfico de prestaciones |
+| `Pacientes Atendidos` | 44 | Cuenta pacientes distintos con reservas. Para evitar una lectura errónea se reemplaza por `Pacientes Distintos` y se rotula «Pacientes con reservas» |
+
+**Tabla 21b.** Medidas añadidas para las tres páginas del tablero. Sus fórmulas son las de las secciones 9.1 y 9.2.
+
+| Medida | Valor de control |
+|---|---|
+| `Reservas Atendidas` | 48 |
+| `Reservas No Asistió` | 12 |
+| `Reservas Canceladas` | 10 |
+| `Reservas Pendientes` | 5 |
+| `Reservas Resueltas` | 70 |
+| `Atenciones Realizadas` | 46 |
+| `Tasa de Atención` | 68,6 % |
+| `Tasa de Inasistencia` | 20,0 % |
+| `Tasa de Cancelación` | 14,3 % |
+| `Horas Perdidas por Inasistencia (con bloque)` | 5,0 horas |
+| `Minutos Programados (con bloque)`, `Minutos Atendidos (con bloque)` y `Utilización (solo reservas con bloque)` | Utilización entre 38 % y 100 % por médico |
+| `Reservas con Bloque` y `Cobertura de Bloque` | 51 % |
+| `Pacientes Distintos` | 44 |
+| `Reservas por Paciente` | 1,7 |
+| `Pacientes (cartera)` | 44 |
+
+`Pacientes (cartera)` cuenta pacientes de `DimPaciente` y se usa en el gráfico de frecuencia. La medida de la sección 9.2 sobre `HechoReservas[PacienteID]` (`Pacientes Distintos`) se usa en las tarjetas y en la evolución mensual.
+
+**Columnas calculadas en `DimPaciente`.** Las tres se crean en este orden, porque cada una depende de la anterior. Las dos primeras están en la sección 9.2. La tercera sirve para ordenar el tramo de frecuencia.
+
+```dax
+Orden Tramo =
+SWITCH (
+    TRUE (),
+    DimPaciente[Reservas del Paciente] = 0, 0,
+    DimPaciente[Reservas del Paciente] = 1, 1,
+    DimPaciente[Reservas del Paciente] <= 3, 2,
+    3
+)
+```
+
+`Tramo Frecuencia` se ordena por `Orden Tramo` (Herramientas de columna, Ordenar por columna). Si `Reservas del Paciente` se intenta usar antes de crearla, Power BI informa que la columna no puede encontrarse.
+
+**Ajustes en `DimFecha`.** En el archivo de Power BI la columna de fecha se llama `Date` y no `Fecha` como en el capítulo 8. La columna `Mes` se ordena por `MesNum` para que enero preceda a febrero en los gráficos.
+
+### 9.5. Estructura del tablero
+
+El tablero tiene cuatro páginas. Las tres solicitadas en la pauta son Visión ejecutiva, Gestión médica y Pacientes. La página Resumen funciona como portada, con las cifras principales, las conclusiones y las recomendaciones operacionales. Las páginas de análisis comparten tres segmentaciones sincronizadas (fecha, comuna y sexo), la nota de la sección 9.6 y un navegador de páginas.
+
+**Tabla 21c.** Cobertura de los contenidos solicitados por la pauta.
+
+| Contenido solicitado | Dónde se muestra |
+|---|---|
+| Evolución mensual | Visión ejecutiva (reservas e ingreso por mes) y Pacientes (pacientes distintos por mes) |
+| Estados | Visión ejecutiva (anillo) y Gestión médica (estados por médico) |
+| Especialidad | Visión ejecutiva (reservas) y Gestión médica (inasistencia) |
+| Médico | Gestión médica |
+| Horas perdidas | Gestión médica (por mes y por canal) |
+| Comuna | Pacientes |
+| Previsión | Pacientes (reservas e ingresos) |
+| Frecuencia | Pacientes |
+| Nota de cobertura, simulación y limitaciones | Las cuatro páginas |
+| Conclusiones y recomendaciones operacionales | Página Resumen y sección 13.1 |
+
+**Tabla 21d.** Página Resumen.
+
+| Elemento | Tipo | Campos |
+|---|---|---|
+| Total de reservas | Tarjeta | `Total Reservas` |
+| Tasa de atención | Tarjeta | `Tasa de Atención` |
+| Tasa de inasistencia | Tarjeta | `Tasa de Inasistencia` |
+| Ingreso valorizado | Tarjeta | `Ingresos` |
+| Conclusiones | Cuadro de texto | Conclusiones del capítulo 13 |
+| Recomendaciones operacionales | Cuadro de texto | Sección 13.1 |
+| Nota de cobertura, simulación y limitaciones | Cuadro de texto | Sección 9.6 |
+| Navegación | Navegador de páginas | Las cuatro páginas |
+
+**Tabla 21e.** Página Visión ejecutiva.
+
+| Visual | Tipo | Campos |
+|---|---|---|
+| Total de reservas, Atenciones registradas, Tasa de atención, Tasa de inasistencia, Ingreso valorizado e Ingreso promedio por atención | Seis tarjetas | `Total Reservas`, `Atenciones Realizadas`, `Tasa de Atención`, `Tasa de Inasistencia`, `Ingresos` y `Ticket Promedio` |
+| Reservas por estado | Anillo | Leyenda `HechoReservas[EstadoReserva]`, valor `Total Reservas` |
+| Reservas por mes | Columnas | Eje `DimFecha[Mes]`, valor `Total Reservas` |
+| Reservas por especialidad (del médico) | Barras ordenadas | Eje `DimMedico[Especialidad]`, valor `Total Reservas` |
+| Ingreso valorizado por mes | Columnas | Eje `DimFecha[Mes]`, valor `Ingresos` |
+| Tasas por mes | Tabla | `DimFecha[Mes]`, `Tasa de Atención`, `Tasa de Inasistencia` y `Tasa de Cancelación` |
+
+**Tabla 21f.** Página Gestión médica.
+
+| Visual | Tipo | Campos |
+|---|---|---|
+| Reservas atendidas por médico | Barras ordenadas | Eje nombre del médico (`DimMedico`), valor `Reservas Atendidas` |
+| Reservas por estado y médico | Barras apiladas | Eje nombre del médico, valor `Total Reservas`, leyenda `EstadoReserva` |
+| Tasa de inasistencia por especialidad | Barras ordenadas | Eje `DimMedico[Especialidad]`, valor `Tasa de Inasistencia` |
+| Horas perdidas por inasistencia (por mes) | Columnas | Eje `DimFecha[Mes]`, valor `Horas Perdidas por Inasistencia (con bloque)` |
+| Horas perdidas por canal (solo reservas con bloque) | Barras ordenadas | Eje `HechoReservas[Canal]`, misma medida |
+| Desempeño por médico | Tabla | Médico, `Total Reservas`, `Reservas Atendidas`, `Reservas No Asistió`, `Reservas Canceladas`, `Reservas Pendientes`, `Tasa de Atención`, `Ingresos` e `Ingreso Promedio por Atención` |
+
+La tabla de desempeño usa formato condicional sobre `Tasa de Atención`: rojo bajo 50 % y verde desde 50 %. Su contenido replica la Tabla 25.
+
+**Tabla 21g.** Página Pacientes.
+
+| Visual | Tipo | Campos |
+|---|---|---|
+| Pacientes con reservas y Reservas por paciente | Dos tarjetas | `Pacientes Distintos` y `Reservas por Paciente` |
+| Reservas atendidas por comuna | Barras ordenadas | Eje `DimPaciente[Comuna]`, valor `Reservas Atendidas` |
+| Reservas por previsión | Anillo | Leyenda `DimPaciente[Prevision]`, valor `Total Reservas` |
+| Ingresos por previsión (valorizado) | Anillo | Leyenda `DimPaciente[Prevision]`, valor `Ingresos` |
+| Frecuencia de uso (reservas por paciente) | Columnas | Eje `DimPaciente[Tramo Frecuencia]`, valor `Pacientes (cartera)` |
+| Pacientes distintos por mes | Columnas | Eje `DimFecha[Mes]`, valor `Pacientes Distintos` |
+| Pacientes con 2 o más inasistencias (solo IDs) | Tabla | `PacienteID` y `Reservas No Asistió`, con filtro de objeto visual mayor o igual a 2 |
+
+La tabla de inasistencias repetidas muestra únicamente identificadores, de acuerdo con la restricción de privacidad de la sección 7.2.
+
+**Figura 18.** Tablero de Power BI, página Resumen.
+
+![Página Resumen del tablero](img/fig18_pbi_resumen.png)
+
+**Figura 19.** Tablero de Power BI, página Visión ejecutiva.
+
+![Página Visión ejecutiva del tablero](img/fig19_pbi_vision_ejecutiva.png)
+
+**Figura 20.** Tablero de Power BI, página Gestión médica.
+
+![Página Gestión médica del tablero](img/fig20_pbi_gestion_medica.png)
+
+**Figura 21.** Tablero de Power BI, página Pacientes.
+
+![Página Pacientes del tablero](img/fig21_pbi_pacientes.png)
+
+### 9.6. Nota visible de cobertura, simulación y limitaciones
+
+Cada página incluye un cuadro de texto con el siguiente contenido:
+
+> Datos simulados (no corresponden a la operación real de SaludVital). Cobertura: reservas del 05-01-2026 al 28-02-2026 (alrededor de 2 meses), lo que no permite evaluar estacionalidad. Los ingresos son valorizados, no cobrados. Canal y bloque horario existen solo desde el 04-02-2026 (51 % de las reservas), por lo que horas perdidas y utilización cubren ese subconjunto. Con menos de 10 reservas por canal o especialidad, las diferencias son indicativas. 34 filas fueron rechazadas por calidad de datos.
+
+### 9.7. Configuración, filtros y navegación
+
+- **Filtros globales.** Las segmentaciones de fecha (`DimFecha[Date]`, estilo «Entre»), comuna (`DimPaciente[Comuna]`) y sexo (`DimPaciente[Sexo]`) se sincronizan entre las páginas de análisis.
+- **Rango de fechas.** `DimFecha` llega al 31-12-2026, pero los datos terminan el 28-02-2026. Un filtro de fecha aplicado a todas las páginas limita el rango al período del 05-01-2026 al 28-02-2026, para que los gráficos mensuales no muestren meses sin datos.
+- **Navegación.** Un navegador de páginas (Insertar, Botones, Navegador) permite pasar entre las cuatro páginas. En Power BI Desktop los botones se activan con Ctrl y clic.
+- **Lienzo.** Las páginas usan un lienzo personalizado de 1280 por 780 píxeles, que deja una franja inferior para la nota y el navegador.
+- **Ordenamiento.** `DimFecha[Mes]` se ordena por `MesNum` y `DimPaciente[Tramo Frecuencia]` por `Orden Tramo`.
+- **Criterio de especialidad.** Las reservas se agrupan por la especialidad del médico (`DimMedico`) y los ingresos por la de la prestación (`DimPrestacion`). Los dos criterios no se mezclan en un mismo gráfico (sección 10.3, punto 4).
+
 ---
 
 ## 10. Validación de resultados con Jupyter
@@ -938,6 +1095,39 @@ La validación no encontró diferencias numéricas, pero sí puntos de interpret
 4. **Especialidad del médico frente a especialidad de la prestación.** Las reservas se clasifican por la especialidad del médico, mientras que los ingresos se clasifican por la especialidad de la prestación. En el período adicional, los detalles utilizan solo los códigos `PR016` a `PR019`, por lo que no siempre coinciden con la especialidad del médico tratante. Por ejemplo, Kinesiología registra 3 reservas atendidas pero ningún ingreso. Las comparaciones entre demanda e ingreso por especialidad deben interpretarse con esta salvedad.
 5. **Tarifas.** 12 de 41 detalles usan un valor unitario distinto de la tarifa maestra. El modelo conserva el valor del hecho y no lo corrige, y la diferencia se informa como alerta.
 6. **Alcance temporal.** Las reservas aceptadas cubren del 05-01-2026 al 28-02-2026, aunque `DimFecha` se extiende hasta el 31-12-2026.
+
+### 10.4. Valores de control del tablero
+
+Con las segmentaciones sin selección, cada visual del tablero debe mostrar el valor indicado en la Tabla 26, que coincide con la Tabla 22 y con las tablas del capítulo 11. Estos valores se usaron para revisar el tablero página por página.
+
+**Tabla 26.** Valores de control por página.
+
+| Página | Visual | Valor esperado |
+|---|---|---|
+| Resumen y Visión ejecutiva | Total de reservas | 75 |
+| Visión ejecutiva | Atenciones registradas | 46 |
+| Resumen y Visión ejecutiva | Tasa de atención, inasistencia y cancelación | 68,6 %, 20,0 % y 14,3 % |
+| Resumen y Visión ejecutiva | Ingreso valorizado | $1.671.000 |
+| Visión ejecutiva | Ingreso promedio por atención | $40.756 |
+| Visión ejecutiva | Reservas por estado | Atendida 48, No asistió 12, Cancelada 10 y Pendiente 5 |
+| Visión ejecutiva | Reservas por mes | Enero 28 y febrero 47 |
+| Visión ejecutiva | Reservas por especialidad | Cardiología y Dermatología con 11 cada una |
+| Visión ejecutiva | Ingreso por mes | Enero $745.000 y febrero $926.000 |
+| Visión ejecutiva | Tasas por mes | Enero 71,4 %, 16,7 % y 14,3 %. Febrero 66,7 %, 22,2 % y 14,3 % |
+| Gestión médica | Reservas atendidas del primer médico | Dra. Carolina Pérez con 6 |
+| Gestión médica | Reservas del Dr. Rodrigo Soto | 6 reservas, 4 de ellas «No asistió» |
+| Gestión médica | Tasa de inasistencia por especialidad | Traumatología y Nutrición con 67 % |
+| Gestión médica | Horas perdidas por mes | Febrero con 5,0 horas |
+| Gestión médica | Horas perdidas por canal | Teléfono 1,5, Sin resolver 1,5, Sitio web 1,0, Recepción 0,5 y Aplicación móvil 0,5 |
+| Gestión médica | Tabla de desempeño | Igual a la Tabla 25 |
+| Pacientes | Pacientes con reservas | 44 |
+| Pacientes | Reservas por paciente | 1,7 |
+| Pacientes | Reservas atendidas por comuna | Concepción 19, Talcahuano 10, Hualpén 9, Chiguayante 6 y San Pedro 4 |
+| Pacientes | Reservas por previsión | FONASA 43 e Isapre 32 |
+| Pacientes | Ingresos por previsión | FONASA $799.000 e Isapre $872.000 |
+| Pacientes | Frecuencia de uso | 1 reserva: 27, 2 a 3: 16 y 4 o más: 1 |
+
+Si un valor no coincide, la revisión sigue este orden: el filtro de fechas, las segmentaciones con valores marcados y las siete relaciones del modelo (sección 7.10).
 
 ---
 
@@ -1098,10 +1288,13 @@ Del total de filas procesadas, 34 fueron rechazadas por las reglas del ETL y 4 s
 - La deduplicación de pacientes se limita a duplicados exactos. No se implementó detección difusa por variantes de nombre.
 - Las funciones `fn_fecha` y `fn_hora` interpretan solo los formatos observados en las fuentes (número de serie de Excel, `yyyy-MM-dd`, `yyyy/MM/dd`, y horas como texto o fracción del día). Un formato distinto resultaría nulo.
 - El análisis de la capacidad requerida por especialidad (RQ24) no es posible sin información de agenda disponible de cada profesional.
+- El tablero cubre solo dos meses, por lo que los gráficos mensuales tienen dos puntos y no permiten identificar tendencias.
+- En el tablero, las reservas por especialidad usan la especialidad del médico y los ingresos la de la prestación. Los dos gráficos no son directamente comparables (sección 10.3, punto 4).
+- La tabla de pacientes con inasistencias repetidas muestra solo identificadores, por restricción de privacidad, y no permite contactar a los pacientes sin consultar el sistema fuente.
 
 ---
 
-## 13. Conclusiones
+## 13. Conclusiones y recomendaciones
 
 1. Se construyó una solución de inteligencia de negocio completa para SaludVital que integra **dos fuentes de datos** en un modelo dimensional en estrella con dos hechos y cuatro dimensiones, implementado en Power BI.
 2. El ETL es reproducible y auditable. Cada una de las 80 reservas, 49 atenciones y 50 detalles de entrada tiene un destino documentado, los controles de carga cuadran en las 7 tablas y la prueba de idempotencia confirma que cargas repetidas no alteran los conteos. La corrección de las funciones de conversión de fechas y horas fue determinante: con la versión inicial solo 33 de las 80 reservas llegaban a aceptadas.
@@ -1109,7 +1302,24 @@ Del total de filas procesadas, 34 fueron rechazadas por las reglas del ETL y 4 s
 4. El centro resuelve en atención el 68,6 % de las reservas resueltas, con una inasistencia de 20,0 % y una cancelación de 14,3 %. Se perdieron 5,0 horas por inasistencia en las reservas con bloque registrado.
 5. La demanda diaria del período adicional (1,8 reservas por día) supera en alrededor de 80 % a la del período base (1,0), aunque la comparación se ve afectada por la duración distinta de los períodos.
 6. La calidad de los datos fuente es el principal factor de riesgo. Los problemas de claves, estados y tarifas generaron 34 rechazos y condicionan la cobertura de canal, la utilización y el ingreso.
-7. Se cumplieron los objetivos específicos de análisis, modelado, ETL, medidas y validación. El diseño del tablero se apoya en las medidas y columnas calculadas documentadas en el capítulo 9.
+7. Se cumplieron los objetivos específicos de análisis, modelado, ETL, medidas y validación. El tablero de Power BI se construyó con las medidas y columnas calculadas del capítulo 9 en cuatro páginas (Resumen, Visión ejecutiva, Gestión médica y Pacientes) e incluye una nota visible de cobertura, simulación y limitaciones.
+8. El tablero permite ubicar los focos operacionales con rapidez: el Dr. Rodrigo Soto concentra 4 inasistencias en 6 reservas, Teléfono y Aplicación móvil tienen las mayores tasas de inasistencia entre los canales resueltos, Concepción concentra la mayor cantidad de reservas atendidas (19) y 27 de los 44 pacientes tienen una sola reserva. Todas estas cifras provienen de pocas observaciones y son indicativas.
+
+### 13.1. Recomendaciones operacionales
+
+Las recomendaciones se limitan a la gestión de agendas, registro de datos y seguimiento de pacientes. No incluyen recomendaciones clínicas.
+
+**Tabla 27.** Recomendaciones operacionales y evidencia que las respalda.
+
+| N.° | Recomendación | Evidencia | Sección |
+|---|---|---|---|
+| 1 | Enviar recordatorios de cita (llamada o mensaje) entre 24 y 48 horas antes, priorizando los canales con mayor inasistencia y las agendas más afectadas | Inasistencia de 20,0 %. Teléfono 28,6 % y Aplicación móvil 25,0 %. Dr. Soto con 4 de 6 reservas en «No asistió» | 11.3, 11.4 y 11.6 |
+| 2 | Hacer obligatorio el registro de canal y bloque horario en todas las reservas | Solo el 51 % de las reservas tiene bloque, y 37 reservas no tienen canal registrado | 11.4 |
+| 3 | Cerrar las reservas pendientes de febrero con un seguimiento diario de recepción | 5 reservas pendientes, todas en febrero | 11.1 |
+| 4 | Registrar las atenciones faltantes de `R0146` y `R0148` y completar el valor unitario de las 5 atenciones sin tarifa | 48 reservas Atendida frente a 46 atenciones. 5 atenciones sin valor unitario, lo que subvalúa el ingreso | 7.8 |
+| 5 | Revisar la consistencia de tarifas entre detalle y tarifa maestra | 12 de 41 detalles con tarifa distinta de la maestra | 10.3 |
+| 6 | Contactar a los pacientes con una sola reserva para favorecer su retorno | 27 de 44 pacientes con una reserva y promedio de 1,7 reservas por paciente | 11.7 |
+| 7 | Ampliar el período de datos antes de decidir cambios de dotación o de agenda | Dos meses de datos, con menos de 10 reservas por canal y entre 3 y 11 por especialidad | 12 |
 
 ---
 
