@@ -1,13 +1,14 @@
 """
-Aplicación principal en Streamlit para el dashboard de SaludVital.
+Aplicación principal en Streamlit para el dashboard de SaludVital (Réplica Exacta Power BI).
 """
 from __future__ import annotations
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from datetime import date
 
 from data import prepare_data
-from medidas import calcular_medidas, format_clp, format_pct, format_num, ejecutar_pruebas_aceptacion
+from medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
 
 # Configuración de la página
 st.set_page_config(
@@ -16,14 +17,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilo y paleta consistente
-COLOR_PRIMARY = "#1f77b4"
-PALETTE = px.colors.qualitative.Bold
+# Paleta de colores corporativa
+COLOR_ISAPRE_PRIMARY = "#A93C47"
+COLOR_FONASA = "#2E5C58"
+COLOR_BARS = "#A93C47"
+PALETTE = ["#A93C47", "#2E5C58", "#3B82F6", "#F59E0B", "#10B981", "#8B5CF6", "#EC4899"]
 
-# Estilos CSS avanzados para filtros y panel dinámico en Modo Oscuro Total
+# Estilos CSS avanzados
 st.markdown("""
 <style>
-    /* Panel lateral y filtros tipo selector / tarjeta en modo oscuro */
     [data-testid="stSidebar"] {
         background-color: #0f172a;
         border-right: 1px solid #1e293b;
@@ -47,7 +49,6 @@ st.markdown("""
         border-bottom: 2px solid #334155;
         padding-bottom: 8px;
     }
-    /* Estilización de multiselect y selectores oscuros */
     .stMultiSelect div[data-baseweb="select"] {
         background-color: #0f172a;
         border-radius: 8px;
@@ -59,7 +60,6 @@ st.markdown("""
         background-color: #0f172a;
         color: #f8fafc;
     }
-    /* Botones tipo selector oscuros */
     .stButton button {
         width: 100%;
         border-radius: 8px;
@@ -77,6 +77,14 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+NOTA_VISIBLE = (
+    "Datos simulados (no corresponden a la operación real de SaludVital). "
+    "Cobertura: reservas del 05-01-2026 al 28-02-2026 (alrededor de 2 meses), lo que no permite evaluar estacionalidad. "
+    "Los ingresos son valorizados, no cobrados. Canal y bloque horario existen solo desde el 04-02-2026 (51 % de las reservas), "
+    "por lo que horas perdidas y utilización cubren ese subconjunto. Con menos de 10 reservas por canal o especialidad, "
+    "las diferencias son indicativas. 34 filas fueron rechazadas por calidad de datos."
+)
 
 def main():
     data_dict = prepare_data()
@@ -96,17 +104,16 @@ def main():
     
     pagina = st.sidebar.radio(
         "Navegación",
-        ["Resumen de reservas", "Ingresos y prestaciones", "Pruebas de aceptación"]
+        ["Resumen", "Visión ejecutiva", "Gestión médica", "Pacientes", "Pruebas de aceptación"]
     )
     
     st.sidebar.markdown("---")
     
-    # Contenedor HTML dinámico para los filtros estilo tarjeta / selector
     st.sidebar.markdown('<div class="filter-card">', unsafe_allow_html=True)
     st.sidebar.markdown('<div class="filter-header">Filtros Globales</div>', unsafe_allow_html=True)
 
-    min_res_date = hecho_reservas["FechaReserva"].min() if not hecho_reservas.empty else pd.to_datetime("2026-01-05").date()
-    max_res_date = hecho_reservas["FechaReserva"].max() if not hecho_reservas.empty else pd.to_datetime("2026-03-31").date()
+    min_res_date = date(2026, 1, 5)
+    max_res_date = date(2026, 2, 28)
 
     comunas_disp = sorted(dim_paciente["Comuna"].dropna().unique().tolist()) if "Comuna" in dim_paciente.columns else []
     sexos_disp = sorted(dim_paciente["Sexo"].dropna().unique().tolist()) if "Sexo" in dim_paciente.columns else []
@@ -127,8 +134,8 @@ def main():
     rango_fechas = st.sidebar.date_input(
         "Rango de fechas",
         value=st.session_state.filtro_fechas,
-        min_value=min_res_date,
-        max_value=max_res_date
+        min_value=date(2026, 1, 1),
+        max_value=date(2026, 12, 31)
     )
     st.session_state.filtro_fechas = rango_fechas
 
@@ -146,11 +153,8 @@ def main():
     )
     st.session_state.filtro_sexo = sel_sexo
     st.sidebar.markdown('</div>', unsafe_allow_html=True)
-    st.session_state.filtro_sexo = sel_sexo
 
-    st.sidebar.markdown("---")
-    st.sidebar.caption("Pie de página: Datos simulados")
-
+    # Filtrado de hechos
     df_res_filtered = hecho_reservas.copy()
     df_det_filtered = hecho_detalle.copy()
 
@@ -162,9 +166,6 @@ def main():
         if end_date:
             df_res_filtered = df_res_filtered[df_res_filtered["FechaReserva"] <= end_date]
             df_det_filtered = df_det_filtered[df_det_filtered["FechaAtencion"] <= end_date]
-    elif isinstance(rango_fechas, date):
-        df_res_filtered = df_res_filtered[df_res_filtered["FechaReserva"] == rango_fechas]
-        df_det_filtered = df_det_filtered[df_det_filtered["FechaAtencion"] == rango_fechas]
 
     if sel_comuna and "Comuna" in df_res_filtered.columns:
         df_res_filtered = df_res_filtered[df_res_filtered["Comuna"].isin(sel_comuna)]
@@ -176,185 +177,502 @@ def main():
     if sel_sexo and "Sexo" in df_det_filtered.columns:
         df_det_filtered = df_det_filtered[df_det_filtered["Sexo"].isin(sel_sexo)]
 
-    medidas = calcular_medidas(df_res_filtered, df_det_filtered)
+    # Pacientes cartera (filtrado por comuna y sexo, sin fecha)
+    df_pac_cartera = dim_paciente.copy()
+    if sel_comuna and "Comuna" in df_pac_cartera.columns:
+        df_pac_cartera = df_pac_cartera[df_pac_cartera["Comuna"].isin(sel_comuna)]
+    if sel_sexo and "Sexo" in df_pac_cartera.columns:
+        df_pac_cartera = df_pac_cartera[df_pac_cartera["Sexo"].isin(sel_sexo)]
 
-    if pagina == "Resumen de reservas":
-        st.title("Resumen de Reservas")
-        st.markdown("Tablero de control de reservas y atenciones del centro médico ambulatorio.")
+    medidas = calcular_medidas(df_res_filtered, df_det_filtered, df_pac_cartera)
 
-        if df_res_filtered.empty:
-            st.info("Sin datos para los filtros seleccionados")
-        else:
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Total Reservas", format_num(medidas["TotalReservas"]))
-            with col2:
-                st.metric("Atenciones Realizadas", format_num(medidas["AtencionesRealizadas"]))
-            with col3:
-                st.metric("Pacientes Distintos", format_num(medidas["PacientesDistintos"]))
-            with col4:
-                st.metric("Ingresos", format_clp(medidas["Ingresos"]))
+    # ----------------------------------------------------
+    # PÁGINA 1: RESUMEN
+    # ----------------------------------------------------
+    if pagina == "Resumen":
+        st.title("Resumen")
+        st.markdown("Cuadro de mando ejecutivo y recomendaciones operacionales.")
 
-            st.markdown("---")
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            st.metric("Total de reservas", format_num(medidas["TotalReservas"]))
+        with c2:
+            st.metric("Tasa de atención", format_pct(medidas["TasaAtencion"]))
+        with c3:
+            st.metric("Tasa de inasistencia", format_pct(medidas["TasaInasistencia"]))
+        with c4:
+            st.metric("Ingreso valorizado", format_clp(medidas["Ingresos"]))
 
-            st.subheader("Reservas por Día")
-            df_res_dia = df_res_filtered.groupby("FechaReserva").size().reset_index(name="TotalReservas")
-            df_res_dia["FechaReserva"] = pd.to_datetime(df_res_dia["FechaReserva"])
-            df_res_dia = df_res_dia.sort_values("FechaReserva")
+        st.markdown("---")
+
+        col_l, col_r = st.columns(2)
+        with col_l:
+            st.subheader("CONCLUSIONES")
+            st.markdown("""
+            - De 70 reservas resueltas, 48 terminaron en atención (68,6 %). La inasistencia es 20,0 % y la cancelación 14,3 %.
+            - La inasistencia subió de 16,7 % en enero a 22,2 % en febrero. Con solo 2 meses de datos no se puede confirmar una tendencia.
+            - Se perdieron 5,0 horas por inasistencia, todas en febrero y solo en reservas con bloque horario (51 % del total).
+            - El Dr. Rodrigo Soto concentra 4 inasistencias en 6 reservas.
+            - Cardiología y Dermatología concentran la mayor demanda (11 reservas cada una). Dermatología lidera el ingreso valorizado ($363.000).
+            - Concepción concentra la mayor cantidad de atenciones (19). FONASA reúne 43 reservas e Isapre 32.
+            - 27 de los 44 pacientes tienen una sola reserva.
+            """)
+
+        with col_r:
+            st.subheader("RECOMENDACIONES OPERACIONALES")
+            st.markdown("""
+            - Enviar recordatorios de cita (llamada o mensaje) 24 a 48 horas antes, priorizando los canales con más inasistencia (Teléfono y App) y las agendas más afectadas.
+            - Registrar canal y bloque horario en todas las reservas: hoy solo el 51 % los tiene.
+            - Cerrar las reservas pendientes de febrero con un seguimiento diario de recepción.
+            - Registrar las atenciones faltantes de 2 reservas atendidas y completar el valor unitario de 5 atenciones sin tarifa.
+            - Revisar las tarifas: 12 de 41 detalles tienen un valor distinto de la tarifa maestra.
+            - Contactar a los pacientes con una sola reserva para favorecer su retorno.
+            - Ampliar el período de datos antes de decidir cambios de dotación o de agenda.
+            """)
+
+        st.markdown("---")
+        st.info(NOTA_VISIBLE)
+
+    # ----------------------------------------------------
+    # PÁGINA 2: VISIÓN EJECUTIVA
+    # ----------------------------------------------------
+    elif pagina == "Visión ejecutiva":
+        st.title("Visión ejecutiva")
+        st.markdown("Evolución mensual, distribución por estados, especialidades e ingresos.")
+
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        with c1:
+            st.metric("Total de reservas", format_num(medidas["TotalReservas"]))
+        with c2:
+            st.metric("Atenciones registradas", format_num(medidas["AtencionesRealizadas"]))
+        with c3:
+            st.metric("Tasa de atención", format_pct(medidas["TasaAtencion"]))
+        with c4:
+            st.metric("Tasa de inasistencia", format_pct(medidas["TasaInasistencia"]))
+        with c5:
+            st.metric("Ingreso valorizado", format_clp(medidas["Ingresos"]))
+        with c6:
+            st.metric("Ingreso promedio / at.", format_clp(medidas["IngresoPromedio"]))
+
+        st.markdown("---")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Reservas por estado")
+            if "EstadoReserva" in df_res_filtered.columns and not df_res_filtered.empty:
+                df_estado = df_res_filtered.groupby("EstadoReserva").size().reset_index(name="TotalReservas")
+                fig_est = px.pie(
+                    df_estado,
+                    names="EstadoReserva",
+                    values="TotalReservas",
+                    hole=0.4,
+                    color_discrete_sequence=PALETTE
+                )
+                fig_est.update_traces(textinfo="percent+label")
+                st.plotly_chart(fig_est, use_container_width=True)
+            else:
+                st.info("Sin datos de estado.")
+
+        with col2:
+            st.subheader("Reservas por mes")
+            if "FechaReserva" in df_res_filtered.columns and not df_res_filtered.empty:
+                df_res_m = df_res_filtered.copy()
+                df_res_m["MesNum"] = pd.to_datetime(df_res_m["FechaReserva"]).dt.month
+                df_res_m["Mes"] = pd.to_datetime(df_res_m["FechaReserva"]).dt.strftime("%B").map({
+                    "January": "Enero", "February": "Febrero", "March": "Marzo", "April": "Abril",
+                    "May": "Mayo", "June": "Junio", "July": "Julio", "August": "Agosto",
+                    "September": "Septiembre", "October": "Octubre", "November": "Noviembre", "December": "Diciembre"
+                }).fillna(df_res_m["MesNum"].astype(str))
+                df_mes = df_res_m.groupby(["MesNum", "Mes"]).size().reset_index(name="TotalReservas").sort_values("MesNum")
+                
+                fig_mes = px.bar(
+                    df_mes,
+                    x="Mes",
+                    y="TotalReservas",
+                    text="TotalReservas",
+                    color_discrete_sequence=[COLOR_BARS]
+                )
+                fig_mes.update_traces(textposition="outside")
+                st.plotly_chart(fig_mes, use_container_width=True)
+            else:
+                st.info("Sin datos de fecha de reserva.")
+
+        col3, col4 = st.columns(2)
+        with col3:
+            st.subheader("Reservas por especialidad (del médico)")
+            if "Especialidad" in df_res_filtered.columns and not df_res_filtered.empty:
+                df_esp = df_res_filtered.groupby("Especialidad").size().reset_index(name="TotalReservas")
+                df_esp = df_esp.sort_values("TotalReservas", ascending=True)
+                fig_esp = px.bar(
+                    df_esp,
+                    x="TotalReservas",
+                    y="Especialidad",
+                    orientation="h",
+                    text="TotalReservas",
+                    color_discrete_sequence=[COLOR_BARS]
+                )
+                fig_esp.update_traces(textposition="outside")
+                st.plotly_chart(fig_esp, use_container_width=True)
+            else:
+                st.info("Sin datos de especialidad.")
+
+        with col4:
+            st.subheader("Ingreso valorizado por mes")
+            if "FechaAtencion" in df_det_filtered.columns and not df_det_filtered.empty:
+                df_det_m = df_det_filtered.copy()
+                df_det_m["MesNum"] = pd.to_datetime(df_det_m["FechaAtencion"]).dt.month
+                df_det_m["Mes"] = pd.to_datetime(df_det_m["FechaAtencion"]).dt.strftime("%B").map({
+                    "January": "Enero", "February": "Febrero", "March": "Marzo", "April": "Abril",
+                    "May": "Mayo", "June": "Junio", "July": "Julio", "August": "Agosto",
+                    "September": "Septiembre", "October": "Octubre", "November": "Noviembre", "December": "Diciembre"
+                }).fillna(df_det_m["MesNum"].astype(str))
+                df_ing_mes = df_det_m.groupby(["MesNum", "Mes"])["Importe"].sum().reset_index().sort_values("MesNum")
+                df_ing_mes["ImporteStr"] = df_ing_mes["Importe"].apply(format_clp)
+
+                fig_ing = px.bar(
+                    df_ing_mes,
+                    x="Mes",
+                    y="Importe",
+                    text="ImporteStr",
+                    color_discrete_sequence=[COLOR_BARS]
+                )
+                fig_ing.update_traces(textposition="outside")
+                st.plotly_chart(fig_ing, use_container_width=True)
+            else:
+                st.info("Sin datos de ingresos mensuales.")
+
+        st.subheader("Tasas por mes")
+        if not df_res_filtered.empty and "FechaReserva" in df_res_filtered.columns:
+            df_res_t = df_res_filtered.copy()
+            df_res_t["MesNum"] = pd.to_datetime(df_res_t["FechaReserva"]).dt.month
+            df_res_t["Mes"] = pd.to_datetime(df_res_t["FechaReserva"]).dt.strftime("%B").map({
+                "January": "Enero", "February": "Febrero", "March": "Marzo", "April": "Abril",
+                "May": "Mayo", "June": "Junio", "July": "Julio", "August": "Agosto",
+                "September": "Septiembre", "October": "Octubre", "November": "Noviembre", "December": "Diciembre"
+            }).fillna(df_res_t["MesNum"].astype(str))
             
-            fig_dia = px.line(
-                df_res_dia,
-                x="FechaReserva",
-                y="TotalReservas",
-                labels={"FechaReserva": "Fecha de Reserva", "TotalReservas": "Total Reservas"},
-                markers=True,
-                color_discrete_sequence=[COLOR_PRIMARY]
-            )
-            fig_dia.update_layout(xaxis_title="Fecha de Reserva", yaxis_title="Total Reservas", hovermode="x unified")
-            st.plotly_chart(fig_dia, use_container_width=True)
-
-            col_l, col_r = st.columns(2)
-
-            with col_l:
-                st.subheader("Reservas por Médico")
-                if "Medico" in df_res_filtered.columns:
-                    df_med = df_res_filtered.groupby("Medico").size().reset_index(name="TotalReservas")
-                    df_med = df_med.sort_values("TotalReservas", ascending=True)
-                    fig_med = px.bar(
-                        df_med,
-                        x="TotalReservas",
-                        y="Medico",
-                        orientation="h",
-                        labels={"TotalReservas": "Total Reservas", "Medico": "Médico"},
-                        color_discrete_sequence=[COLOR_PRIMARY]
-                    )
-                    fig_med.update_layout(xaxis_title="Total Reservas", yaxis_title="Médico")
-                    st.plotly_chart(fig_med, use_container_width=True)
-                else:
-                    st.info("Columna de médico no disponible.")
-
-            with col_r:
-                st.subheader("Reservas por Previsión")
-                if "Prevision" in df_res_filtered.columns:
-                    df_prev = df_res_filtered.groupby("Prevision").size().reset_index(name="TotalReservas")
-                    fig_prev = px.pie(
-                        df_prev,
-                        names="Prevision",
-                        values="TotalReservas",
-                        hole=0.4,
-                        color_discrete_sequence=PALETTE
-                    )
-                    fig_prev.update_traces(textinfo="percent+label")
-                    st.plotly_chart(fig_prev, use_container_width=True)
-                else:
-                    st.info("Columna de previsión no disponible.")
-
-    elif pagina == "Ingresos y prestaciones":
-        st.title("Ingresos y Prestaciones")
-        st.markdown("Análisis financiero y de prestaciones médicas.")
-
-        if df_det_filtered.empty:
-            st.info("Sin datos para los filtros seleccionados")
+            tasas_mes_rows = []
+            for (mnum, mname), group in df_res_t.groupby(["MesNum", "Mes"]):
+                m_sub = calcular_medidas(group, df_det_filtered[pd.to_datetime(df_det_filtered["FechaAtencion"]).dt.month == mnum] if "FechaAtencion" in df_det_filtered.columns else df_det_filtered)
+                tasas_mes_rows.append({
+                    "Mes": mname,
+                    "Tasa de Atención": format_pct(m_sub["TasaAtencion"]),
+                    "Tasa de Inasistencia": format_pct(m_sub["TasaInasistencia"]),
+                    "Tasa de Cancelación": format_pct(m_sub["TasaCancelacion"])
+                })
+            df_tasas_mes = pd.DataFrame(tasas_mes_rows)
+            st.dataframe(df_tasas_mes, use_container_width=True)
         else:
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Ingresos", format_clp(medidas["Ingresos"]))
-            with col2:
-                st.metric("Ingreso Promedio por Atención", format_clp(medidas["IngresoPromedio"]))
-            with col3:
-                st.metric("Prestaciones Realizadas", format_num(medidas["PrestacionesRealizadas"]))
+            st.info("Sin datos para calcular tasas por mes.")
 
-            st.markdown("---")
+        st.markdown("---")
+        st.info(NOTA_VISIBLE)
 
-            st.info("Nota: Ingreso valorizado (cantidad × valor unitario), no corresponde a cobros efectivos.")
+    # ----------------------------------------------------
+    # PÁGINA 3: GESTIÓN MÉDICA
+    # ----------------------------------------------------
+    elif pagina == "Gestión médica":
+        st.title("Gestión médica")
+        st.markdown("Desempeño por profesional, estados de reserva y horas perdidas.")
 
-            col_l, col_r = st.columns(2)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Reservas atendidas por médico")
+            if "Medico" in df_res_filtered.columns and not df_res_filtered.empty:
+                df_med_at = df_res_filtered[df_res_filtered["EstadoReserva"] == "Atendida"].groupby("Medico").size().reset_index(name="ReservasAtendidas")
+                df_med_at = df_med_at.sort_values("ReservasAtendidas", ascending=True)
+                fig_med_at = px.bar(
+                    df_med_at,
+                    x="ReservasAtendidas",
+                    y="Medico",
+                    orientation="h",
+                    text="ReservasAtendidas",
+                    color_discrete_sequence=[COLOR_BARS]
+                )
+                fig_med_at.update_traces(textposition="outside")
+                st.plotly_chart(fig_med_at, use_container_width=True)
+            else:
+                st.info("Sin datos.")
 
-            with col_l:
-                st.subheader("Ingresos por Especialidad")
-                if "Especialidad" in df_det_filtered.columns:
-                    df_esp_ing = df_det_filtered.groupby("Especialidad")["Importe"].sum().reset_index()
-                    df_esp_ing = df_esp_ing.sort_values("Importe", ascending=True)
-                    fig_esp = px.bar(
-                        df_esp_ing,
-                        x="Importe",
-                        y="Especialidad",
-                        orientation="h",
-                        labels={"Importe": "Ingresos (CLP)", "Especialidad": "Especialidad"},
-                        color_discrete_sequence=[COLOR_PRIMARY]
-                    )
-                    st.plotly_chart(fig_esp, use_container_width=True)
-                else:
-                    st.info("Especialidad no disponible en detalle.")
+        with col2:
+            st.subheader("Reservas por estado y médico")
+            if "Medico" in df_res_filtered.columns and "EstadoReserva" in df_res_filtered.columns and not df_res_filtered.empty:
+                df_med_est = df_res_filtered.groupby(["Medico", "EstadoReserva"]).size().reset_index(name="Total")
+                fig_med_est = px.bar(
+                    df_med_est,
+                    x="Total",
+                    y="Medico",
+                    color="EstadoReserva",
+                    orientation="h",
+                    color_discrete_sequence=PALETTE
+                )
+                st.plotly_chart(fig_med_est, use_container_width=True)
+            else:
+                st.info("Sin datos.")
 
-            with col_r:
-                st.subheader("Top 10 Prestaciones")
-                if "Prestacion" in df_det_filtered.columns:
-                    df_prest = df_det_filtered.groupby("Prestacion")["Cantidad"].sum().reset_index()
-                    df_prest = df_prest.sort_values("Cantidad", ascending=False).head(10)
-                    df_prest = df_prest.sort_values("Cantidad", ascending=True)
-                    fig_top = px.bar(
-                        df_prest,
-                        x="Cantidad",
-                        y="Prestacion",
-                        orientation="h",
-                        labels={"Cantidad": "Prestaciones Realizadas", "Prestacion": "Prestación"},
-                        color_discrete_sequence=[COLOR_PRIMARY]
-                    )
-                    st.plotly_chart(fig_top, use_container_width=True)
-                else:
-                    st.info("Prestación no disponible.")
+        col3, col4 = st.columns(2)
+        with col3:
+            st.subheader("Tasa de inasistencia por especialidad")
+            if "Especialidad" in df_res_filtered.columns and "EstadoReserva" in df_res_filtered.columns and not df_res_filtered.empty:
+                esp_list = []
+                for esp, grp in df_res_filtered.groupby("Especialidad"):
+                    m_esp = calcular_medidas(grp, pd.DataFrame())
+                    esp_list.append({"Especialidad": esp, "TasaInasistencia": m_esp["TasaInasistencia"] * 100})
+                df_esp_inas = pd.DataFrame(esp_list).sort_values("TasaInasistencia", ascending=True)
+                df_esp_inas["TasaStr"] = df_esp_inas["TasaInasistencia"].apply(lambda x: f"{x:.1f} %".replace(".", ","))
+                
+                fig_esp_in = px.bar(
+                    df_esp_inas,
+                    x="TasaInasistencia",
+                    y="Especialidad",
+                    orientation="h",
+                    text="TasaStr",
+                    color_discrete_sequence=[COLOR_BARS]
+                )
+                fig_esp_in.update_traces(textposition="outside")
+                st.plotly_chart(fig_esp_in, use_container_width=True)
+            else:
+                st.info("Sin datos.")
 
-            col_l2, col_r2 = st.columns(2)
+        with col4:
+            st.subheader("Horas perdidas por inasistencia (por mes)")
+            if "FechaReserva" in df_res_filtered.columns and "BloqueMinutos" in df_res_filtered.columns and not df_res_filtered.empty:
+                df_hp = df_res_filtered.copy()
+                df_hp["MesNum"] = pd.to_datetime(df_hp["FechaReserva"]).dt.month
+                df_hp["Mes"] = pd.to_datetime(df_hp["FechaReserva"]).dt.strftime("%B").map({
+                    "January": "Enero", "February": "Febrero", "March": "Marzo", "April": "Abril",
+                    "May": "Mayo", "June": "Junio", "July": "Julio", "August": "Agosto",
+                    "September": "Septiembre", "October": "Octubre", "November": "Noviembre", "December": "Diciembre"
+                }).fillna(df_hp["MesNum"].astype(str))
+                
+                hp_rows = []
+                for (mnum, mname), grp in df_hp.groupby(["MesNum", "Mes"]):
+                    m_hp = calcular_medidas(grp, pd.DataFrame())
+                    hp_rows.append({"Mes": mname, "MesNum": mnum, "HorasPerdidas": round(m_hp["HorasPerdidas"], 1)})
+                df_hp_res = pd.DataFrame(hp_rows).sort_values("MesNum")
+                df_hp_res["HpStr"] = df_hp_res["HorasPerdidas"].apply(lambda x: f"{x:.1f}")
 
-            with col_l2:
-                st.subheader("Ingresos por Día")
-                if "FechaAtencion" in df_det_filtered.columns:
-                    df_det_dia = df_det_filtered.groupby("FechaAtencion")["Importe"].sum().reset_index()
-                    df_det_dia["FechaAtencion"] = pd.to_datetime(df_det_dia["FechaAtencion"])
-                    df_det_dia = df_det_dia.sort_values("FechaAtencion")
-                    fig_det_dia = px.line(
-                        df_det_dia,
-                        x="FechaAtencion",
-                        y="Importe",
-                        labels={"FechaAtencion": "Fecha de Atención", "Importe": "Ingresos (CLP)"},
-                        markers=True,
-                        color_discrete_sequence=[COLOR_PRIMARY]
-                    )
-                    st.plotly_chart(fig_det_dia, use_container_width=True)
-                else:
-                    st.info("Fecha de atención no disponible.")
+                fig_hp = px.bar(
+                    df_hp_res,
+                    x="Mes",
+                    y="HorasPerdidas",
+                    text="HpStr",
+                    color_discrete_sequence=[COLOR_BARS]
+                )
+                fig_hp.update_traces(textposition="outside")
+                st.plotly_chart(fig_hp, use_container_width=True)
+            else:
+                st.info("Sin datos.")
 
-            with col_r2:
-                st.subheader("Ingresos por Previsión")
-                if "Prevision" in df_det_filtered.columns:
-                    df_prev_ing = df_det_filtered.groupby("Prevision")["Importe"].sum().reset_index()
-                    fig_prev_ing = px.pie(
-                        df_prev_ing,
-                        names="Prevision",
-                        values="Importe",
-                        hole=0.4,
-                        color_discrete_sequence=PALETTE
-                    )
-                    fig_prev_ing.update_traces(textinfo="percent+label")
-                    st.plotly_chart(fig_prev_ing, use_container_width=True)
-                else:
-                    st.info("Previsión no disponible en detalle.")
+        st.subheader("Horas perdidas por canal (solo reservas con bloque)")
+        if "Canal" in df_res_filtered.columns and "BloqueMinutos" in df_res_filtered.columns and not df_res_filtered.empty:
+            df_can = df_res_filtered[df_res_filtered["EstadoReserva"] == "No asistió"]
+            df_can_hp = df_can.groupby("Canal")["BloqueMinutos"].sum().reset_index(name="Minutos")
+            df_can_hp["HorasPerdidas"] = df_can_hp["Minutos"] / 60.0
+            df_can_hp = df_can_hp.sort_values("HorasPerdidas", ascending=True)
+            df_can_hp["HpStr"] = df_can_hp["HorasPerdidas"].apply(lambda x: f"{x:.1f}")
 
+            fig_can = px.bar(
+                df_can_hp,
+                x="HorasPerdidas",
+                y="Canal",
+                orientation="h",
+                text="HpStr",
+                color_discrete_sequence=[COLOR_BARS]
+            )
+            fig_can.update_traces(textposition="outside")
+            st.plotly_chart(fig_can, use_container_width=True)
+        else:
+            st.info("Sin datos de canal.")
+
+        st.subheader("Desempeño por médico")
+        if "Medico" in df_res_filtered.columns and not df_res_filtered.empty:
+            med_rows = []
+            for medico, grp_m in df_res_filtered.groupby("Medico"):
+                m_sub = calcular_medidas(grp_m, df_det_filtered[df_det_filtered["MedicoID"].isin(grp_m["MedicoID"])] if "MedicoID" in df_det_filtered.columns else pd.DataFrame())
+                med_id = grp_m["MedicoID"].iloc[0] if "MedicoID" in grp_m.columns else None
+                ing_med = df_det_filtered[df_det_filtered["MedicoID"] == med_id]["Importe"].sum() if med_id and "MedicoID" in df_det_filtered.columns else 0.0
+                det_med = df_det_filtered[df_det_filtered["MedicoID"] == med_id] if med_id and "MedicoID" in df_det_filtered.columns else pd.DataFrame()
+                dist_at_med = det_med["AtencionID"].nunique() if "AtencionID" in det_med.columns and not det_med.empty else 0
+                prom_med = ing_med / dist_at_med if dist_at_med > 0 else 0.0
+
+                med_rows.append({
+                    "Médico": medico,
+                    "Total Reservas": m_sub["TotalReservas"],
+                    "Reservas Atendidas": m_sub["Atendidas"],
+                    "Reservas No Asistió": m_sub["NoAsistio"],
+                    "Reservas Canceladas": m_sub["Canceladas"],
+                    "Reservas Pendientes": m_sub["Pendientes"],
+                    "Tasa de Atención": m_sub["TasaAtencion"],
+                    "Ingresos": ing_med,
+                    "Ingreso Promedio por Atención": prom_med
+                })
+            df_desempeno = pd.DataFrame(med_rows).sort_values("Total Reservas", ascending=False)
+            
+            def color_tasa(val):
+                if pd.isna(val):
+                    return ""
+                return 'color: #EF4444; font-weight: bold;' if val < 0.5 else 'color: #10B981; font-weight: bold;'
+
+            format_dict = {
+                "Tasa de Atención": lambda x: format_pct(x) if pd.notna(x) else "—",
+                "Ingresos": format_clp,
+                "Ingreso Promedio por Atención": format_clp
+            }
+            st.dataframe(df_desempeno.style.applymap(color_tasa, subset=["Tasa de Atención"]).format(format_dict), use_container_width=True)
+        else:
+            st.info("Sin datos de médico.")
+
+        st.markdown("---")
+        st.info(NOTA_VISIBLE)
+
+    # ----------------------------------------------------
+    # PÁGINA 4: PACIENTES
+    # ----------------------------------------------------
+    elif pagina == "Pacientes":
+        st.title("Pacientes")
+        st.markdown("Análisis demográfico, comunas, previsión y frecuencia de uso.")
+
+        c1, c2 = st.columns(2)
+        with c1:
+            st.metric("Pacientes con reservas", format_num(medidas["PacientesDistintos"]))
+        with c2:
+            st.metric("Reservas por paciente", f"{medidas['ReservasPorPaciente']:.1f}".replace(".", ","))
+
+        st.markdown("---")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Reservas atendidas por comuna")
+            if "Comuna" in df_res_filtered.columns and not df_res_filtered.empty:
+                df_com = df_res_filtered[df_res_filtered["EstadoReserva"] == "Atendida"].groupby("Comuna").size().reset_index(name="ReservasAtendidas")
+                df_com = df_com.sort_values("ReservasAtendidas", ascending=True)
+                fig_com = px.bar(
+                    df_com,
+                    x="ReservasAtendidas",
+                    y="Comuna",
+                    orientation="h",
+                    text="ReservasAtendidas",
+                    color_discrete_sequence=[COLOR_BARS]
+                )
+                fig_com.update_traces(textposition="outside")
+                st.plotly_chart(fig_com, use_container_width=True)
+            else:
+                st.info("Sin datos de comuna.")
+
+        with col2:
+            st.subheader("Reservas por previsión")
+            if "Prevision" in df_res_filtered.columns and not df_res_filtered.empty:
+                df_prev_res = df_res_filtered.groupby("Prevision").size().reset_index(name="TotalReservas")
+                fig_pr = px.pie(
+                    df_prev_res,
+                    names="Prevision",
+                    values="TotalReservas",
+                    hole=0.4,
+                    color_discrete_map={"FONASA": COLOR_FONASA, "Isapre": COLOR_ISAPRE_PRIMARY}
+                )
+                fig_pr.update_traces(textinfo="percent+label")
+                st.plotly_chart(fig_pr, use_container_width=True)
+            else:
+                st.info("Sin datos de previsión.")
+
+        col3, col4 = st.columns(2)
+        with col3:
+            st.subheader("Ingresos por previsión (valorizado)")
+            if "Prevision" in df_det_filtered.columns and not df_det_filtered.empty:
+                df_prev_ing = df_det_filtered.groupby("Prevision")["Importe"].sum().reset_index()
+                fig_pi = px.pie(
+                    df_prev_ing,
+                    names="Prevision",
+                    values="Importe",
+                    hole=0.4,
+                    color_discrete_map={"FONASA": COLOR_FONASA, "Isapre": COLOR_ISAPRE_PRIMARY}
+                )
+                fig_pi.update_traces(textinfo="percent+label")
+                st.plotly_chart(fig_pi, use_container_width=True)
+            else:
+                st.info("Sin datos de ingresos por previsión.")
+
+        with col4:
+            st.subheader("Frecuencia de uso (reservas por paciente)")
+            # Responde a comuna y sexo, pero NO al filtro de fecha
+            df_cartera_freq = df_pac_cartera.copy()
+            if "Tramo Frecuencia" in df_cartera_freq.columns:
+                orden_tramo_map = {"Sin reservas": 0, "1 reserva": 1, "2 a 3 reservas": 2, "4 o más": 3}
+                df_freq = df_cartera_freq.groupby(["Tramo Frecuencia", "Orden Tramo"]).size().reset_index(name="Pacientes")
+                df_freq = df_freq.sort_values("Orden Tramo")
+                
+                fig_freq = px.bar(
+                    df_freq,
+                    x="Tramo Frecuencia",
+                    y="Pacientes",
+                    text="Pacientes",
+                    color_discrete_sequence=[COLOR_BARS]
+                )
+                fig_freq.update_traces(textposition="outside")
+                st.plotly_chart(fig_freq, use_container_width=True)
+            else:
+                st.info("Sin datos de frecuencia.")
+
+        st.subheader("Pacientes distintos por mes")
+        if "FechaReserva" in df_res_filtered.columns and not df_res_filtered.empty:
+            df_pac_m = df_res_filtered.copy()
+            df_pac_m["MesNum"] = pd.to_datetime(df_pac_m["FechaReserva"]).dt.month
+            df_pac_m["Mes"] = pd.to_datetime(df_pac_m["FechaReserva"]).dt.strftime("%B").map({
+                "January": "Enero", "February": "Febrero", "March": "Marzo", "April": "Abril",
+                "May": "Mayo", "June": "Junio", "July": "Julio", "August": "Agosto",
+                "September": "Septiembre", "October": "Octubre", "November": "Noviembre", "December": "Diciembre"
+            }).fillna(df_pac_m["MesNum"].astype(str))
+            
+            df_p_mes = df_pac_m.groupby(["MesNum", "Mes"])["PacienteID"].nunique().reset_index(name="PacientesDistintos").sort_values("MesNum")
+            
+            fig_p_mes = px.bar(
+                df_p_mes,
+                x="Mes",
+                y="PacientesDistintos",
+                text="PacientesDistintos",
+                color_discrete_sequence=[COLOR_BARS]
+            )
+            fig_p_mes.update_traces(textposition="outside")
+            st.plotly_chart(fig_p_mes, use_container_width=True)
+        else:
+            st.info("Sin datos.")
+
+        st.subheader("Pacientes con 2 o más inasistencias (solo IDs)")
+        if "PacienteID" in df_res_filtered.columns and "EstadoReserva" in df_res_filtered.columns and not df_res_filtered.empty:
+            df_inas = df_res_filtered[df_res_filtered["EstadoReserva"] == "No asistió"].groupby("PacienteID").size().reset_index(name="Reservas No Asistió")
+            df_inas = df_inas[df_inas["Reservas No Asistió"] >= 2]
+            if not df_inas.empty:
+                st.dataframe(df_inas, use_container_width=True)
+            else:
+                st.info("Sin pacientes con 2 o más inasistencias.")
+        else:
+            st.info("Sin datos.")
+
+        st.markdown("---")
+        st.info(NOTA_VISIBLE)
+
+    # ----------------------------------------------------
+    # PÁGINA 5: PRUEBAS DE ACEPTACIÓN
+    # ----------------------------------------------------
     elif pagina == "Pruebas de aceptación":
-        st.title("Pruebas de Aceptación (Sin Filtros)")
-        st.markdown("Verificación automática de los indicadores clave requeridos en la especificación.")
+        st.title("Pruebas de Aceptación")
+        st.markdown("Validación automática de los 16 indicadores clave del modelo dimensional y financiero.")
 
         pruebas = ejecutar_pruebas_aceptacion(hecho_reservas, hecho_detalle)
         df_pruebas = pd.DataFrame(pruebas)
 
-        st.dataframe(df_pruebas, use_container_width=True)
+        def style_ok(val):
+            return 'color: #10B981; font-weight: bold;' if val else 'color: #EF4444; font-weight: bold;'
 
-        all_passed = df_pruebas["ok"].all()
-        if all_passed:
-            st.success("Todas las pruebas de aceptación pasaron exitosamente y coinciden con la documentación oficial.")
+        st.dataframe(df_pruebas.style.applymap(style_ok, subset=["ok"]), use_container_width=True)
+        
+        ok_count = sum(1 for p in pruebas if p["ok"])
+        total_count = len(pruebas)
+        if ok_count == total_count:
+            st.success(f"¡Todas las pruebas de aceptación pasaron exitosamente ({ok_count}/{total_count})!")
         else:
-            st.error("Algunas pruebas de aceptación no coinciden con los valores esperados.")
+            st.warning(f"Se pasaron {ok_count} de {total_count} pruebas.")
 
 if __name__ == "__main__":
     main()
