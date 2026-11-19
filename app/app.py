@@ -10,9 +10,11 @@ from datetime import date
 try:
     from app.data import prepare_data
     from app.medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
+    from app.styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter
 except ImportError:
     from data import prepare_data
     from medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
+    from styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter
 
 # Configuración de la página
 st.set_page_config(
@@ -22,65 +24,13 @@ st.set_page_config(
 )
 
 # Paleta de colores corporativa
-COLOR_ISAPRE_PRIMARY = "#A93C47"
-COLOR_FONASA = "#2E5C58"
-COLOR_BARS = "#A93C47"
-PALETTE = ["#A93C47", "#2E5C58", "#3B82F6", "#F59E0B", "#10B981", "#8B5CF6", "#EC4899"]
+COLOR_ISAPRE_PRIMARY = "#E05A6D"
+COLOR_FONASA = "#4FB3A8"
+COLOR_BARS = "#E05A6D"
+PALETTE = ["#E05A6D", "#4FB3A8", "#3B82F6", "#F59E0B", "#10B981", "#8B5CF6", "#EC4899"]
 
-# Estilos CSS avanzados
-st.markdown("""
-<style>
-    [data-testid="stSidebar"] {
-        background-color: #0f172a;
-        border-right: 1px solid #1e293b;
-    }
-    .filter-card {
-        background: #1e293b;
-        border: 1px solid #334155;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 16px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-    }
-    .filter-header {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #f8fafc;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        border-bottom: 2px solid #334155;
-        padding-bottom: 8px;
-    }
-    .stMultiSelect div[data-baseweb="select"] {
-        background-color: #0f172a;
-        border-radius: 8px;
-        border-color: #334155;
-    }
-    .stDateInput input {
-        border-radius: 8px;
-        border-color: #334155;
-        background-color: #0f172a;
-        color: #f8fafc;
-    }
-    .stButton button {
-        width: 100%;
-        border-radius: 8px;
-        font-weight: 600;
-        border: 1px solid #334155;
-        background-color: #1e293b;
-        color: #f8fafc;
-        transition: all 0.2s ease-in-out;
-    }
-    .stButton button:hover {
-        border-color: #38bdf8;
-        color: #38bdf8;
-        background-color: #0f172a;
-        box-shadow: 0 2px 4px rgba(56, 189, 248, 0.15);
-    }
-</style>
-""", unsafe_allow_html=True)
+# Estilos (CSS y formato de gráficos) definidos en styles.py
+apply_theme()
 
 NOTA_VISIBLE = (
     "Datos simulados (no corresponden a la operación real de SaludVital). "
@@ -102,8 +52,7 @@ def main():
     hecho_reservas = data_dict["HechoReservas"]
     hecho_detalle = data_dict["HechoDetalle"]
 
-    st.sidebar.title("SaludVital")
-    st.sidebar.markdown("Centro Médico Ambulatorio")
+    sidebar_brand()
     st.sidebar.markdown("---")
     
     pagina = st.sidebar.radio(
@@ -113,8 +62,7 @@ def main():
     
     st.sidebar.markdown("---")
     
-    st.sidebar.markdown('<div class="filter-card">', unsafe_allow_html=True)
-    st.sidebar.markdown('<div class="filter-header">Filtros Globales</div>', unsafe_allow_html=True)
+    sidebar_section("Filtros globales")
 
     min_res_date = date(2026, 1, 5)
     max_res_date = date(2026, 2, 28)
@@ -137,26 +85,13 @@ def main():
 
     rango_fechas = st.sidebar.date_input(
         "Rango de fechas",
-        value=st.session_state.filtro_fechas,
         min_value=date(2026, 1, 1),
-        max_value=date(2026, 12, 31)
+        max_value=date(2026, 12, 31),
+        key="filtro_fechas"
     )
-    st.session_state.filtro_fechas = rango_fechas
 
-    sel_comuna = st.sidebar.multiselect(
-        "Comuna",
-        options=comunas_disp,
-        default=st.session_state.filtro_comuna
-    )
-    st.session_state.filtro_comuna = sel_comuna
-
-    sel_sexo = st.sidebar.multiselect(
-        "Sexo",
-        options=sexos_disp,
-        default=st.session_state.filtro_sexo
-    )
-    st.session_state.filtro_sexo = sel_sexo
-    st.sidebar.markdown('</div>', unsafe_allow_html=True)
+    sel_comuna = chip_filter("Comuna", comunas_disp, key="filtro_comuna")
+    sel_sexo = chip_filter("Sexo", sexos_disp, key="filtro_sexo")
 
     # Filtrado de hechos
     df_res_filtered = hecho_reservas.copy()
@@ -194,8 +129,7 @@ def main():
     # PÁGINA 1: RESUMEN
     # ----------------------------------------------------
     if pagina == "Resumen":
-        st.title("Resumen")
-        st.markdown("Cuadro de mando ejecutivo y recomendaciones operacionales.")
+        page_header("Resumen", "Cuadro de mando ejecutivo y recomendaciones operacionales.")
 
         c1, c2, c3, c4 = st.columns(4)
         with c1:
@@ -241,8 +175,7 @@ def main():
     # PÁGINA 2: VISIÓN EJECUTIVA
     # ----------------------------------------------------
     elif pagina == "Visión ejecutiva":
-        st.title("Visión ejecutiva")
-        st.markdown("Evolución mensual, distribución por estados, especialidades e ingresos.")
+        page_header("Visión ejecutiva", "Evolución mensual, distribución por estados, especialidades e ingresos.")
 
         c1, c2, c3, c4, c5, c6 = st.columns(6)
         with c1:
@@ -376,8 +309,7 @@ def main():
     # PÁGINA 3: GESTIÓN MÉDICA
     # ----------------------------------------------------
     elif pagina == "Gestión médica":
-        st.title("Gestión médica")
-        st.markdown("Desempeño por profesional, estados de reserva y horas perdidas.")
+        page_header("Gestión médica", "Desempeño por profesional, estados de reserva y horas perdidas.")
 
         col1, col2 = st.columns(2)
         with col1:
@@ -540,8 +472,7 @@ def main():
     # PÁGINA 4: PACIENTES
     # ----------------------------------------------------
     elif pagina == "Pacientes":
-        st.title("Pacientes")
-        st.markdown("Análisis demográfico, comunas, previsión y frecuencia de uso.")
+        page_header("Pacientes", "Análisis demográfico, comunas, previsión y frecuencia de uso.")
 
         c1, c2 = st.columns(2)
         with c1:
@@ -666,8 +597,7 @@ def main():
     # PÁGINA 5: PRUEBAS DE ACEPTACIÓN
     # ----------------------------------------------------
     elif pagina == "Pruebas de aceptación":
-        st.title("Pruebas de Aceptación")
-        st.markdown("Validación automática de los 16 indicadores clave del modelo dimensional y financiero.")
+        page_header("Pruebas de Aceptación", "Validación automática de los 16 indicadores clave del modelo dimensional y financiero.")
 
         pruebas = ejecutar_pruebas_aceptacion(hecho_reservas, hecho_detalle)
         df_pruebas = pd.DataFrame(pruebas)
