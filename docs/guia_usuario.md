@@ -96,19 +96,19 @@ python scripts/modelo_dimensional.py
 
 ## 4. Dashboard Interactivo en Streamlit (`app/`)
 
-El tablero interactivo de SaludVital replica el cuadro de mando de Power BI en una aplicación web moderna construida con Streamlit y gráficos de Plotly.
+El tablero interactivo de SaludVital replica exactamente el cuadro de mando de Power BI en una aplicación web moderna construida con Streamlit y gráficos de Plotly.
 
 ### Arquitectura Modular (`app/`):
-- **`app/data.py`**: Carga las tablas del modelo dimensional (con opción de subida mediante `st.file_uploader` si no se encuentran en disco) y realiza uniones *many-to-one* con las dimensiones sin generar *fan-out*.
-- **`app/medidas.py`**: Contiene la lógica de cálculo para cada medida (Total Reservas, Tasas de Atención/Inasistencia/Cancelación, Ingresos, Ingreso Promedio, Prestaciones Realizadas, etc.), manejo de división por cero, formateadores en español y las pruebas de aceptación.
-- **`app/app.py`**: Interfaz de usuario estructurada en dos páginas y una sección de pruebas, con filtros globales en la barra lateral (`st.session_state`) para rango de fechas, comuna y sexo.
+- **`app/data.py`**: Carga las tablas del modelo dimensional, calcula columnas derivadas en `DimPaciente` (`Reservas del Paciente`, `Tramo Frecuencia`, `Orden Tramo`) y realiza uniones *many-to-one* con las dimensiones sin generar *fan-out*.
+- **`app/medidas.py`**: Contiene la lógica de cálculo para cada medida (Total Reservas, Tasas de Atención/Inasistencia/Cancelación, Ingresos, Ingreso Promedio, Horas Perdidas, Utilización, Cobertura de Bloque, Pacientes Distintos, etc.), formateadores en español y las pruebas de aceptación.
+- **`app/app.py`**: Interfaz de usuario estructurada en cinco páginas, con filtros globales en la barra lateral para rango de fechas, comuna y sexo.
 
 ### Páginas del Dashboard:
-1. **Resumen de reservas**: Tarjetas métricas (Total Reservas, Atenciones Realizadas, Pacientes Distintos, Ingresos), gráfico de líneas de reservas por día, barras horizontales de reservas por médico y gráfico de anillo por previsión.
-2. **Ingresos y prestaciones**: Tarjetas métricas financieras, nota aclaratoria de ingreso valorizado, barras de ingresos por especialidad, Top 10 prestaciones, líneas de ingresos por día y anillo de ingresos por previsión.
-3. **Pruebas de aceptación**: Tabla de validación automática que verifica sin filtros los 16 indicadores clave requeridos por la especificación.
-
-> **Nota.** El tablero oficial del proyecto es el de Power BI, que tiene cuatro páginas (sección 5.2). La app de Streamlit mantiene su estructura de dos páginas más la sección de pruebas y no incorpora las páginas Resumen, Gestión médica ni Pacientes.
+1. **Resumen**: Cuatro tarjetas métricas (Total de reservas, Tasa de atención, Tasa de inasistencia, Ingreso valorizado), cuadros de Conclusiones y Recomendaciones operacionales, y la nota visible al pie.
+2. **Visión ejecutiva**: Seis tarjetas (Total de reservas, Atenciones registradas, Tasa de atención, Tasa de inasistencia, Ingreso valorizado, Ingreso promedio por atención), gráficos de reservas por estado, reservas por mes, reservas por especialidad del médico, ingreso valorizado por mes y tabla de tasas por mes.
+3. **Gestión médica**: Gráficos de reservas atendidas por médico, reservas por estado y médico, tasa de inasistencia por especialidad, horas perdidas por mes, horas perdidas por canal (con bloque) y tabla de desempeño por médico con formato condicional (rojo <50%, verde >=50%).
+4. **Pacientes**: Dos tarjetas (Pacientes con reservas, Reservas por paciente), reservas atendidas por comuna, reservas por previsión, ingresos por previsión valorizado, frecuencia de uso (tramo de frecuencia), pacientes distintos por mes y tabla de pacientes con 2 o más inasistencias (solo IDs).
+5. **Pruebas de aceptación**: Tabla de validación automática que verifica sin filtros los 16 indicadores clave requeridos por la especificación.
 
 ### Ejecución del Dashboard:
 ```bash

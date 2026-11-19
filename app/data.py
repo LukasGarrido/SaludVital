@@ -65,11 +65,11 @@ def prepare_data():
         return None
         
     dim_fecha = data["DimFecha"]
-    dim_paciente = data["DimPaciente"]
+    dim_paciente = data["DimPaciente"].copy()
     dim_medico = data["DimMedico"]
     dim_prestacion = data["DimPrestacion"]
-    hecho_reservas = data["HechoReservas"]
-    hecho_detalle = data["HechoDetalle"]
+    hecho_reservas = data["HechoReservas"].copy()
+    hecho_detalle = data["HechoDetalle"].copy()
     
     # Conversión de fechas
     if "FechaReserva" in hecho_reservas.columns:
@@ -78,18 +78,47 @@ def prepare_data():
         hecho_detalle["FechaAtencion"] = pd.to_datetime(hecho_detalle["FechaAtencion"]).dt.date
     if "Date" in dim_fecha.columns:
         dim_fecha["Date"] = pd.to_datetime(dim_fecha["Date"]).dt.date
+
+    # Columnas calculadas en DimPaciente (sobre HechoReservas SIN filtros)
+    if "PacienteID" in hecho_reservas.columns and "PacienteID" in dim_paciente.columns:
+        conteo_reservas = hecho_reservas.groupby("PacienteID").size().reset_index(name="Reservas del Paciente")
+        dim_paciente = dim_paciente.merge(conteo_reservas, on="PacienteID", how="left")
+        dim_paciente["Reservas del Paciente"] = dim_paciente["Reservas del Paciente"].fillna(0).astype(int)
         
+        def asignar_tramo(n):
+            if n == 0:
+                return "Sin reservas"
+            elif n == 1:
+                return "1 reserva"
+            elif 2 <= n <= 3:
+                return "2 a 3 reservas"
+            else:
+                return "4 o más"
+
+        def asignar_orden_tramo(n):
+            if n == 0:
+                return 0
+            elif n == 1:
+                return 1
+            elif 2 <= n <= 3:
+                return 2
+            else:
+                return 3
+
+        dim_paciente["Tramo Frecuencia"] = dim_paciente["Reservas del Paciente"].apply(asignar_tramo)
+        dim_paciente["Orden Tramo"] = dim_paciente["Reservas del Paciente"].apply(asignar_orden_tramo)
+
     # Enriquecimiento de HechoReservas con dimensiones (many-to-one)
     # DimPaciente
     if "PacienteID" in hecho_reservas.columns and "PacienteID" in dim_paciente.columns:
         n_before = len(hecho_reservas)
-        hecho_reservas = hecho_reservas.merge(dim_paciente, on="PacienteID", how="left", suffixes=("", "_dim"))
+        cols_to_use = [c for c in dim_paciente.columns if c not in hecho_reservas.columns or c == "PacienteID"]
+        hecho_reservas = hecho_reservas.merge(dim_paciente[cols_to_use], on="PacienteID", how="left", suffixes=("", "_dim"))
         assert len(hecho_reservas) == n_before, "Fan-out detectado al unir HechoReservas con DimPaciente"
         
     # DimMedico
     if "MedicoID" in hecho_reservas.columns and "MedicoID" in dim_medico.columns:
         n_before = len(hecho_reservas)
-        # Manejar conflictos de columnas si existen (ej. Especialidad)
         cols_to_use = [c for c in dim_medico.columns if c not in hecho_reservas.columns or c == "MedicoID"]
         hecho_reservas = hecho_reservas.merge(dim_medico[cols_to_use], on="MedicoID", how="left", suffixes=("", "_dim"))
         assert len(hecho_reservas) == n_before, "Fan-out detectado al unir HechoReservas con DimMedico"

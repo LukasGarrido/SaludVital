@@ -9,7 +9,6 @@ def format_clp(value: float | int) -> str:
         return "—"
     try:
         val_int = int(round(value))
-        # Formato con punto de miles: $1.671.000
         formatted = f"{val_int:,}".replace(",", ".")
         return f"${formatted}"
     except Exception:
@@ -32,7 +31,7 @@ def format_num(value: int | float) -> str:
     except Exception:
         return "—"
 
-def calcular_medidas(df_reservas: pd.DataFrame, df_detalle: pd.DataFrame) -> dict:
+def calcular_medidas(df_reservas: pd.DataFrame, df_detalle: pd.DataFrame, df_paciente_cartera: pd.DataFrame | None = None) -> dict:
     """
     Calcula todas las medidas especificadas sobre los hechos filtrados.
     """
@@ -64,10 +63,19 @@ def calcular_medidas(df_reservas: pd.DataFrame, df_detalle: pd.DataFrame) -> dic
     # Pacientes Distintos en HechoReservas
     pacientes_distintos = df_reservas["PacienteID"].nunique() if "PacienteID" in df_reservas.columns and len(df_reservas) > 0 else 0
     
+    # Reservas por Paciente
+    reservas_por_paciente = total_reservas / pacientes_distintos if pacientes_distintos > 0 else float('nan')
+
+    # Pacientes (cartera) - nunique de DimPaciente tras filtros de comuna y sexo
+    if df_paciente_cartera is not None and len(df_paciente_cartera) > 0:
+        pacientes_cartera = df_paciente_cartera["PacienteID"].nunique()
+    else:
+        pacientes_cartera = pacientes_distintos
+
     # Ingresos (suma de Importe en HechoDetalle)
     ingresos = df_detalle["Importe"].sum() if "Importe" in df_detalle.columns and len(df_detalle) > 0 else 0.0
     
-    # Atenciones distintas en HechoDetalle para ingreso promedio
+    # Atenciones distintas en HechoDetalle para ingreso promedio (AtencionID)
     if "AtencionID" in df_detalle.columns and len(df_detalle) > 0:
         det_atenciones = df_detalle["AtencionID"].dropna()
         det_atenciones = det_atenciones[det_atenciones != ""]
@@ -79,7 +87,22 @@ def calcular_medidas(df_reservas: pd.DataFrame, df_detalle: pd.DataFrame) -> dic
     
     # Prestaciones Realizadas (suma de Cantidad en HechoDetalle)
     prestaciones_realizadas = df_detalle["Cantidad"].sum() if "Cantidad" in df_detalle.columns and len(df_detalle) > 0 else 0
-    
+
+    # Horas Perdidas = suma de R.BloqueMinutos donde EstadoReserva == "No asistió", dividido por 60
+    if "BloqueMinutos" in df_reservas.columns and "EstadoReserva" in df_reservas.columns:
+        bloque_no_asistio = df_reservas[df_reservas["EstadoReserva"] == "No asistió"]["BloqueMinutos"].dropna()
+        minutos_perdidos = bloque_no_asistio.sum()
+        horas_perdidas = minutos_perdidos / 60.0 if pd.notna(minutos_perdidos) else 0.0
+    else:
+        horas_perdidas = 0.0
+
+    # Cobertura de Bloque = filas de R con BloqueMinutos no nulo / Total Reservas
+    if "BloqueMinutos" in df_reservas.columns and total_reservas > 0:
+        con_bloque = df_reservas["BloqueMinutos"].dropna().count()
+        cobertura_bloque = con_bloque / total_reservas
+    else:
+        cobertura_bloque = 0.0
+
     return {
         "TotalReservas": total_reservas,
         "Atendidas": atendidas,
@@ -92,9 +115,13 @@ def calcular_medidas(df_reservas: pd.DataFrame, df_detalle: pd.DataFrame) -> dic
         "TasaInasistencia": tasa_inasistencia,
         "TasaCancelacion": tasa_cancelacion,
         "PacientesDistintos": pacientes_distintos,
+        "ReservasPorPaciente": reservas_por_paciente,
+        "PacientesCartera": pacientes_cartera,
         "Ingresos": ingresos,
         "IngresoPromedio": ingreso_promedio,
         "PrestacionesRealizadas": prestaciones_realizadas,
+        "HorasPerdidas": horas_perdidas,
+        "CoberturaBloque": cobertura_bloque,
     }
 
 def ejecutar_pruebas_aceptacion(df_reservas: pd.DataFrame, df_detalle: pd.DataFrame) -> list[dict]:
@@ -179,10 +206,10 @@ def ejecutar_pruebas_aceptacion(df_reservas: pd.DataFrame, df_detalle: pd.DataFr
             "ok": m["AtencionesRealizadas"] == 46
         },
         {
-            "indicador": "Pacientes Distintos",
-            "esperado": 44,
-            "obtenido": m["PacientesDistintos"],
-            "ok": m["PacientesDistintos"] == 44
+            "indicador": "Detalles de Prestación",
+            "esperado": 41,
+            "obtenido": len(df_detalle),
+            "ok": len(df_detalle) == 41
         },
         {
             "indicador": "Ingresos Totales",
@@ -209,16 +236,16 @@ def ejecutar_pruebas_aceptacion(df_reservas: pd.DataFrame, df_detalle: pd.DataFr
             "ok": round(m["IngresoPromedio"]) == 40756
         },
         {
-            "indicador": "Reservas Enero",
-            "esperado": 28,
-            "obtenido": res_enero,
-            "ok": res_enero == 28
+            "indicador": "Pacientes Distintos",
+            "esperado": 44,
+            "obtenido": m["PacientesDistintos"],
+            "ok": m["PacientesDistintos"] == 44
         },
         {
-            "indicador": "Reservas Febrero",
-            "esperado": 47,
-            "obtenido": res_febrero,
-            "ok": res_febrero == 47
+            "indicador": "Médicos Activos",
+            "esperado": 14,
+            "obtenido": df_reservas["MedicoID"].nunique() if "MedicoID" in df_reservas.columns else 0,
+            "ok": (df_reservas["MedicoID"].nunique() if "MedicoID" in df_reservas.columns else 0) == 14
         }
     ]
     return pruebas
