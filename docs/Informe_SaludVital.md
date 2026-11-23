@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="assets/universidad-tecnica-federico-santa-maria-seeklogo.png" alt="Universidad Técnica Federico Santa María" width="260" />
+  <img src="../assets/universidad-tecnica-federico-santa-maria-seeklogo.png" alt="Universidad Técnica Federico Santa María" width="260" />
 
   **Departamento de electronica y informatica**
   **USM sede Concepción**
@@ -27,6 +27,7 @@
   | **Repositorio** | [SaludVital](https://github.com/LukasGarrido/SaludVital) |
 
 </div>
+
 ---
 
 ## Resumen
@@ -1011,19 +1012,19 @@ La tabla de inasistencias repetidas muestra únicamente identificadores, de acue
 
 **Figura 18.** Tablero de Power BI, página Resumen.
 
-![Página Resumen del tablero](/assets/img/fig18_pbi_resumen.png)
+![Página Resumen del tablero](../assets/img/fig18_pbi_resumen.png)
 
 **Figura 19.** Tablero de Power BI, página Visión ejecutiva.
 
-![Página Visión ejecutiva del tablero](img/fig19_pbi_vision_ejecutiva.png)
+![Página Visión ejecutiva del tablero](../assets/img/fig19_pbi_vision_ejecutiva.png)
 
 **Figura 20.** Tablero de Power BI, página Gestión médica.
 
-![Página Gestión médica del tablero](img/fig20_pbi_gestion_medica.png)
+![Página Gestión médica del tablero](../assets/img/fig20_pbi_gestion_medica.png)
 
 **Figura 21.** Tablero de Power BI, página Pacientes.
 
-![Página Pacientes del tablero](img/fig21_pbi_pacientes.png)
+![Página Pacientes del tablero](../assets/img/fig21_pbi_pacientes.png)
 
 ### 9.6. Nota visible de cobertura, simulación y limitaciones
 
@@ -1080,11 +1081,11 @@ El notebook además valida la integridad referencial del modelo, con 7 relacione
 
 **Figura 1.** Reservas por estado final. Fuente: notebook `analisis_saludvital.ipynb`, sección 1.
 
-![Reservas por estado final](img/fig01_reservas_por_estado.png)
+![Reservas por estado final](../assets/img/fig01_reservas_por_estado.png)
 
 **Figura 2.** Destino de cada fila por tabla y rechazos por regla de validación. Fuente: notebook `analisis_saludvital.ipynb`, sección 9.
 
-![Control de carga y rechazos por regla](img/fig02_control_carga_rechazos.png)
+![Control de carga y rechazos por regla](../assets/img/fig02_control_carga_rechazos.png)
 
 La Figura 1 reproduce los 48, 12, 10 y 5 registros por estado del modelo. La Figura 2 reproduce los 34 rechazos por regla (RV-FK 11, RV-BLOQUE 8, RV-VALOR 5, RV-OBLIGATORIO 5, RV-ID-PATRON 2 y una unidad en cada una de RV-TARIFA, RV-ESTADO y RV-CLAVE-REPETIDA), de acuerdo con la Tabla de reglas de validación del capítulo 7.
 
@@ -1162,15 +1163,15 @@ De las 70 reservas resueltas, 48 terminaron en atención. Las 5 reservas pendien
 
 **Figura 3.** Reservas por mes y evolución semanal. Fuente: notebook, sección 2.
 
-![Reservas por mes y por semana](img/fig03_reservas_mensual_semanal.png)
+![Reservas por mes y por semana](../assets/img/fig03_reservas_mensual_semanal.png)
 
 **Figura 4.** Reservas por día entre el período base y el adicional. Fuente: notebook, sección 2.
 
-![Reservas por día, base frente a adicional](img/fig04_base_vs_adicional.png)
+![Reservas por día, base frente a adicional](../assets/img/fig04_base_vs_adicional.png)
 
 **Figura 5.** Reservas por día de la semana y por hora. Fuente: notebook, sección 2.
 
-![Reservas por día de la semana y hora del día](img/fig05_dia_semana_hora.png)
+![Reservas por día de la semana y hora del día](../assets/img/fig05_dia_semana_hora.png)
 
 Se registraron 28 reservas en enero y 47 en febrero. Como los períodos duran distinto, la comparación se normaliza por día: el período base tiene 1,0 reservas por día (30 reservas en 30 días) y el período adicional 1,8 reservas por día (45 reservas en 25 días), lo que representa un aumento aproximado de 80 %. Enero comienza el día 5, por lo que la comparación mensual directa subestima su volumen. Entre semana la demanda es pareja (12 a 13 reservas por día, con lunes, miércoles y viernes empatados en 13) y baja el fin de semana (7 los sábados y 5 los domingos).
 
@@ -1178,7 +1179,7 @@ Se registraron 28 reservas en enero y 47 en febrero. Como los períodos duran di
 
 **Figura 6.** Estados y tasas por mes. Fuente: notebook, sección 3.
 
-![Estados y tasas por mes](img/fig06_estados_tasas_mes.png)
+![Estados y tasas por mes](../assets/img/fig06_estados_tasas_mes.png)
 
 **Tabla 24.** Estados y tasas por mes.
 
@@ -1193,15 +1194,15 @@ La tasa de inasistencia aumentó de 16,7 % en enero a 22,2 % en febrero, mientra
 
 **Figura 7.** Reservas por canal y tasa de inasistencia por canal. Fuente: notebook, sección 4.
 
-![Reservas e inasistencia por canal](img/fig07_canales.png)
+![Reservas e inasistencia por canal](../assets/img/fig07_canales.png)
 
 **Figura 8.** Horas perdidas por inasistencia, por mes y por canal. Fuente: notebook, sección 4.
 
-![Horas perdidas por inasistencia](img/fig08_horas_perdidas.png)
+![Horas perdidas por inasistencia](../assets/img/fig08_horas_perdidas.png)
 
 **Figura 9.** Utilización por médico (solo reservas con bloque). Fuente: notebook, sección 4.
 
-![Utilización por médico](img/fig09_utilizacion_medico.png)
+![Utilización por médico](../assets/img/fig09_utilizacion_medico.png)
 
 De las 75 reservas, 30 tienen un canal resuelto (Recepción 8, Teléfono 8, Sitio web 7 y Aplicación móvil 7), 8 figuran como «Sin resolver» (etiqueta `WEB`) y 37 como «No registrado» (las 30 del período base y 7 que perdieron su canal en cuarentena). Entre los canales resueltos, la tasa de inasistencia es mayor en Teléfono (28,6 %) y Aplicación móvil (25,0 %), y menor en Sitio web (20,0 %) y Recepción (16,7 %). Cada canal tiene menos de 10 reservas, por lo que estas diferencias son indicativas.
 
@@ -1211,11 +1212,11 @@ Solo 38 de las 75 reservas (51 %) tienen bloque en minutos. Sobre ellas se perdi
 
 **Figura 10.** Reservas por especialidad y estado, con tasas de atención e inasistencia. Fuente: notebook, sección 5.
 
-![Reservas por especialidad](img/fig10_especialidades.png)
+![Reservas por especialidad](../assets/img/fig10_especialidades.png)
 
 **Figura 11.** Ingreso valorizado e ingreso promedio por especialidad. Fuente: notebook, sección 5.
 
-![Ingreso por especialidad](img/fig11_ingreso_especialidad.png)
+![Ingreso por especialidad](../assets/img/fig11_ingreso_especialidad.png)
 
 Cardiología y Dermatología concentran la mayor demanda, con 11 reservas cada una. Dermatología genera el mayor ingreso valorizado ($363.000). Traumatología y Nutrición presentan las mayores tasas de inasistencia (67 % cada una), y Medicina General y Kinesiología alcanzan 100 % de tasa de atención. La carga de atenciones por especialidad (según el notebook, con la salvedad de la sección 10.3) es: Dermatología 7, Cardiología 6, Rehabilitación 5, Medicina General 4, Nutrición 4, Endocrinología, Traumatología, Neurología y Oftalmología 3 cada una, Pediatría 2, Ginecología 1 y Kinesiología 0. Cardiología y Dermatología cuentan con 2 médicos cada una y las demás con 1.
 
@@ -1223,11 +1224,11 @@ Cardiología y Dermatología concentran la mayor demanda, con 11 reservas cada u
 
 **Figura 12.** Atenciones, tasa de atención e inasistencias por médico. Fuente: notebook, sección 6.
 
-![Desempeño por médico](img/fig12_medicos.png)
+![Desempeño por médico](../assets/img/fig12_medicos.png)
 
 **Figura 13.** Prestaciones realizadas por médico. Fuente: notebook, sección 6.
 
-![Prestaciones por médico](img/fig13_prestaciones_medico.png)
+![Prestaciones por médico](../assets/img/fig13_prestaciones_medico.png)
 
 **Tabla 25.** Desempeño por médico.
 
@@ -1254,11 +1255,11 @@ La Dra. Carolina Pérez lidera en reservas atendidas (6). El Dr. Rodrigo Soto co
 
 **Figura 14.** Pacientes distintos por mes y comunas. Fuente: notebook, sección 7.
 
-![Pacientes por mes y por comuna](img/fig14_pacientes_comunas.png)
+![Pacientes por mes y por comuna](../assets/img/fig14_pacientes_comunas.png)
 
 **Figura 15.** Reservas por previsión, frecuencia de uso y pacientes con más inasistencias. Fuente: notebook, sección 7.
 
-![Previsión, frecuencia y pacientes con inasistencias](img/fig15_prevision_frecuencia.png)
+![Previsión, frecuencia y pacientes con inasistencias](../assets/img/fig15_prevision_frecuencia.png)
 
 El modelo contiene 44 pacientes y todos registran al menos una reserva. Concepción es la comuna con más atenciones (19 reservas atendidas), seguida de Talcahuano (10), Hualpén (9), Chiguayante (6) y San Pedro (4). Por previsión, FONASA concentra 43 reservas e Isapre 32. En cuanto a frecuencia, 27 pacientes tienen 1 reserva, 16 tienen entre 2 y 3, y solo 1 tiene 4 o más, con un promedio de 1,7 reservas por paciente. Se identificaron pacientes con inasistencias repetidas, que se muestran solo por ID.
 
@@ -1266,11 +1267,11 @@ El modelo contiene 44 pacientes y todos registran al menos una reserva. Concepci
 
 **Figura 16.** Ingreso valorizado por mes y por semana. Fuente: notebook, sección 8.
 
-![Ingreso por mes y semana](img/fig16_ingresos_tiempo.png)
+![Ingreso por mes y semana](../assets/img/fig16_ingresos_tiempo.png)
 
 **Figura 17.** Prestaciones principales por ingreso y cantidad. Fuente: notebook, sección 8.
 
-![Prestaciones principales](img/fig17_prestaciones_top.png)
+![Prestaciones principales](../assets/img/fig17_prestaciones_top.png)
 
 El ingreso valorizado total es de $1.671.000, con $745.000 en enero y $926.000 en febrero (según fecha de atención). La prestación que más ingreso genera es el Procedimiento Dermatológico ($325.000 con 7 unidades), seguida de Evaluación Rehabilitación ($223.000 con 6 unidades), Control Cardiología ($210.000 con 5 unidades) y Consulta Nutricional ($163.000 con 4 unidades). Por tratarse de un ingreso valorizado, no equivale a facturación ni a cobros efectivos.
 
