@@ -1,29 +1,32 @@
 <div align="center">
 
-# UNIVERSIDAD TÉCNICA FEDERICO SANTA MARÍA
+  <img src="assets/universidad-tecnica-federico-santa-maria-seeklogo.png" alt="Universidad Técnica Federico Santa María" width="260" />
 
-**Asignatura:** Inteligencia de Negocio
-**Paralelo:** 701
+  **Departamento de electronica y informatica**
+  **USM sede Concepción**
 
-<br>
+  &nbsp;
 
-# INFORME DE PROYECTO
-# SaludVital: diseño e implementación de una solución de inteligencia de negocio para un centro médico ambulatorio
+  ## SaludVital
+  ### Diseño e implementación de una solución de inteligencia de negocio para un centro médico ambulatorio
 
-<br>
+  &nbsp;
 
-**Integrantes:**
-Octavio Valencia
-Lukas Garrido
+  **Informe Proyecto Integrador**
+  Asignatura: Inteligencia de negocio - BI
 
-**Versión:** 2.1 (integra la base original, la base de datos adicionales y el tablero de Power BI de cuatro páginas)
+  &nbsp;
 
-**Fecha:** 18 de noviembre de 2026
-
-**Repositorio:** https://github.com/LukasGarrido/SaludVital
+  | | |
+  |---|---|
+  | **Integrantes** | Lukas Garrido <br> Octavio Valencia |
+  | **Equipo** | Grupo 07 |
+  | **Profesor** | Alexandra Matus |
+  | **Fecha** | 18 de noviembre de 2026 |
+  | **Versión del documento** | v3.0 |
+  | **Repositorio** | [SaludVital](https://github.com/LukasGarrido/SaludVital) |
 
 </div>
-
 ---
 
 ## Resumen
@@ -1008,7 +1011,7 @@ La tabla de inasistencias repetidas muestra únicamente identificadores, de acue
 
 **Figura 18.** Tablero de Power BI, página Resumen.
 
-![Página Resumen del tablero](img/fig18_pbi_resumen.png)
+![Página Resumen del tablero](/assets/img/fig18_pbi_resumen.png)
 
 **Figura 19.** Tablero de Power BI, página Visión ejecutiva.
 
