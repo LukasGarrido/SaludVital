@@ -2,7 +2,7 @@
 
 # SaludVital BI
 
-Proyecto de **Inteligencia de Negocio**: solución de BI (ETL + modelo dimensional + dashboard interactivo en Streamlit y Power BI) para analizar las atenciones médicas de SaludVital, centro médico ambulatorio privado de la Región del Biobío.
+Solución de BI (ETL + modelo dimensional + dashboard interactivo en Streamlit y Power BI) para analizar las atenciones médicas de SaludVital, centro médico ambulatorio privado de la Región del Biobío.
 
 </div>
 
