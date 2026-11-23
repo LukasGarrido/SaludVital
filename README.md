@@ -1,6 +1,6 @@
 <div align="center">
 
-# SaludVital BI & Streamlit
+# SaludVital BI
 
 Proyecto de **Inteligencia de Negocio**: solución de BI (ETL + modelo dimensional + dashboard interactivo en Streamlit y Power BI) para analizar las atenciones médicas de SaludVital, centro médico ambulatorio privado de la Región del Biobío.
 
@@ -54,11 +54,12 @@ SaludVital/
 │   │       └── verificacion_documentada.csv
 │   ├── SaludVital_BaseDatos.xlsx        # Libro Excel fuente período base
 │   └── SaludVital_DatosAdicionales.xlsx # Libro Excel fuente período adicional
+├── assets/                     # Recursos gráficos e imágenes del proyecto
+│   ├── universidad-tecnica-federico-santa-maria-seeklogo.png # Logo institucional
+│   └── img/                    # Figuras y visualizaciones del análisis (fig01 a fig17)
 ├── docs/                       # Documentación técnica y funcional
 │   ├── guia_usuario.md         # Guía de uso y funcionamiento del repo
-│   └── informe/                # Informe formal del proyecto (v2.1)
-│       ├── Informe_SaludVital.md # Informe integral de proyecto
-│       └── img/                # Figuras y visualizaciones del informe (fig01 a fig17)
+│   └── Informe_SaludVital.md   # Informe integral de proyecto (versión 2.1)
 ├── notebooks/                  # Análisis exploratorio interactivo
 │   └── analisis_saludvital.ipynb # Notebook Jupyter para análisis y respuestas a preguntas de negocio
 ├── reports/                    # Visualización Power BI
@@ -89,4 +90,4 @@ streamlit run app/app.py
 ## Documentación y Guía de Uso
 
 - **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del dashboard de Streamlit y estructura.
-- **[Informe Formal de Proyecto (`docs/informe/Informe_SaludVital.md`)](docs/informe/Informe_SaludVital.md)**: Documento formal completo (v2.1) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.
+- **[Informe Formal de Proyecto (`docs/Informe_SaludVital.md`)](docs/Informe_SaludVital.md)**: Documento formal completo (v2.1) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.
