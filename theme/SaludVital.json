@@ -1,35 +1,56 @@
+
 {
-  "name": "SaludVital Dark",
+  "name": "SaludVital Minimal Red & Graphite",
   "dataColors": [
-    "#E05A6D",
-    "#4FB3A8",
-    "#3B82F6",
-    "#F59E0B",
-    "#10B981",
-    "#8B5CF6",
-    "#EC4899"
+    "#B8323E",
+    "#E05A64",
+    "#D9A0A2",
+    "#85838A",
+    "#C58B72",
+    "#6F737B",
+    "#A94A50"
   ],
-  "background": "#0B1215",
-  "foreground": "#FFFFFF",
-  "tableAccent": "#E05A6D",
+  "background": "#F4F1EF",
+  "foreground": "#29272A",
+  "tableAccent": "#B8323E",
   "textClasses": {
-    "callout": { "color": "#FFFFFF", "fontFace": "Figtree" },
-    "title": { "color": "#FFFFFF", "fontFace": "Figtree" },
-    "header": { "color": "#FFFFFF", "fontFace": "Figtree" },
-    "label": { "color": "#FFFFFF", "fontFace": "Figtree" }
+    "callout": {
+      "color": "#29272A",
+      "fontFace": "Figtree"
+    },
+    "title": {
+      "color": "#29272A",
+      "fontFace": "Figtree"
+    },
+    "header": {
+      "color": "#29272A",
+      "fontFace": "Figtree"
+    },
+    "label": {
+      "color": "#77737A",
+      "fontFace": "Figtree"
+    }
   },
   "visualStyles": {
     "page": {
       "*": {
         "background": [
           {
-            "color": { "solid": { "color": "#0B1215" } },
+            "color": {
+              "solid": {
+                "color": "#F4F1EF"
+              }
+            },
             "transparency": 0
           }
         ],
         "outspace": [
           {
-            "color": { "solid": { "color": "#080E11" } },
+            "color": {
+              "solid": {
+                "color": "#EAE6E4"
+              }
+            },
             "transparency": 0
           }
         ]
@@ -39,22 +60,34 @@
       "*": {
         "background": [
           {
-            "color": { "solid": { "color": "#131C21" } },
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
             "transparency": 0
           }
         ],
         "border": [
           {
             "show": true,
-            "color": { "solid": { "color": "#223038" } },
-            "radius": 12
+            "color": {
+              "solid": {
+                "color": "#E8E2E0"
+              }
+            },
+            "radius": 8
           }
         ],
         "title": [
           {
             "show": true,
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
-            "fontSize": 14,
+            "fontColor": {
+              "solid": {
+                "color": "#29272A"
+              }
+            },
+            "fontSize": 13,
             "fontFamily": "Figtree"
           }
         ]
@@ -64,25 +97,61 @@
       "*": {
         "columnHeaders": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
-            "backColor": { "solid": { "color": "#1B272E" } },
+            "fontColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": "#343036"
+              }
+            },
             "fontFamily": "Figtree"
           }
         ],
         "values": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
-            "fontColorPrimary": { "solid": { "color": "#FFFFFF" } },
-            "fontColorSecondary": { "solid": { "color": "#FFFFFF" } },
-            "backColorPrimary": { "solid": { "color": "#131C21" } },
-            "backColorSecondary": { "solid": { "color": "#182329" } },
+            "fontColor": {
+              "solid": {
+                "color": "#343036"
+              }
+            },
+            "fontColorPrimary": {
+              "solid": {
+                "color": "#343036"
+              }
+            },
+            "fontColorSecondary": {
+              "solid": {
+                "color": "#85838A"
+              }
+            },
+            "backColorPrimary": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "backColorSecondary": {
+              "solid": {
+                "color": "#F8F6F5"
+              }
+            },
             "fontFamily": "Figtree"
           }
         ],
         "total": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
-            "backColor": { "solid": { "color": "#1B272E" } },
+            "fontColor": {
+              "solid": {
+                "color": "#B8323E"
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": "#F1E8E7"
+              }
+            },
             "fontFamily": "Figtree"
           }
         ]
@@ -92,37 +161,85 @@
       "*": {
         "columnHeaders": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
-            "backColor": { "solid": { "color": "#1B272E" } },
+            "fontColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": "#343036"
+              }
+            },
             "fontFamily": "Figtree"
           }
         ],
         "rowHeaders": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
-            "backColor": { "solid": { "color": "#131C21" } },
+            "fontColor": {
+              "solid": {
+                "color": "#343036"
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": "#F4F1EF"
+              }
+            },
             "fontFamily": "Figtree"
           }
         ],
         "values": [
           {
-            "fontColorPrimary": { "solid": { "color": "#FFFFFF" } },
-            "fontColorSecondary": { "solid": { "color": "#FFFFFF" } },
-            "backColorPrimary": { "solid": { "color": "#131C21" } },
-            "backColorSecondary": { "solid": { "color": "#182329" } },
+            "fontColorPrimary": {
+              "solid": {
+                "color": "#343036"
+              }
+            },
+            "fontColorSecondary": {
+              "solid": {
+                "color": "#85838A"
+              }
+            },
+            "backColorPrimary": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "backColorSecondary": {
+              "solid": {
+                "color": "#F8F6F5"
+              }
+            },
             "fontFamily": "Figtree"
           }
         ],
         "subTotals": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
-            "backColor": { "solid": { "color": "#1B272E" } }
+            "fontColor": {
+              "solid": {
+                "color": "#B8323E"
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": "#F1E8E7"
+              }
+            }
           }
         ],
         "total": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
-            "backColor": { "solid": { "color": "#1B272E" } }
+            "fontColor": {
+              "solid": {
+                "color": "#B8323E"
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": "#F1E8E7"
+              }
+            }
           }
         ]
       }
@@ -131,13 +248,21 @@
       "*": {
         "items": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
+            "fontColor": {
+              "solid": {
+                "color": "#343036"
+              }
+            },
             "fontFamily": "Figtree"
           }
         ],
         "header": [
           {
-            "fontColor": { "solid": { "color": "#FFFFFF" } }
+            "fontColor": {
+              "solid": {
+                "color": "#B8323E"
+              }
+            }
           }
         ]
       }
@@ -148,19 +273,31 @@
           {
             "$id": "default",
             "show": true,
-            "fillColor": { "solid": { "color": "#E05A6D" } },
+            "fillColor": {
+              "solid": {
+                "color": "#B8323E"
+              }
+            },
             "transparency": 0
           },
           {
             "$id": "hover",
             "show": true,
-            "fillColor": { "solid": { "color": "#C04A5D" } },
+            "fillColor": {
+              "solid": {
+                "color": "#912832"
+              }
+            },
             "transparency": 0
           },
           {
             "$id": "selected",
             "show": true,
-            "fillColor": { "solid": { "color": "#4FB3A8" } },
+            "fillColor": {
+              "solid": {
+                "color": "#343036"
+              }
+            },
             "transparency": 0
           }
         ],
@@ -168,7 +305,11 @@
           {
             "$id": "default",
             "show": true,
-            "fontColor": { "solid": { "color": "#FFFFFF" } },
+            "fontColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
             "fontSize": 11,
             "fontFamily": "Figtree"
           }
@@ -183,7 +324,11 @@
           {
             "$id": "default",
             "show": true,
-            "lineColor": { "solid": { "color": "#FFFFFF" } },
+            "lineColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
             "weight": 2
           }
         ]
