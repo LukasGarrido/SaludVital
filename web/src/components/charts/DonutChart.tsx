@@ -26,6 +26,7 @@ export default function DonutChart({ data, colors, height = 360, format = format
         values: data.map((d) => d.value),
         textinfo: 'percent',
         textposition: 'inside',
+        insidetextorientation: 'horizontal',
         insidetextfont: { color: '#ffffff', size: 13 },
         marker: {
           colors: data.map((d, i) => {

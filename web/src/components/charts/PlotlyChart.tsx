@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { Data, Layout } from 'plotly.js-basic-dist-min';
 import { baseConfig, baseLayout, type ChartTokens } from '@/lib/chartTheme';
 import { useTokens } from '@/hooks/useTokens';
+import { loadPlotly } from '@/lib/plotly';
 
 /** Tipo de gráfico: define la animación de entrada en CSS (barras verticales, horizontales o circular). */
 export type ChartKind = 'v' | 'h' | 'pie';
@@ -40,9 +41,8 @@ export default function PlotlyChart({ data, layout, height = 340, kind = 'v', hi
     let cancelled = false;
     const el = ref.current;
     if (!el) return;
-    import('plotly.js-basic-dist-min').then((mod) => {
+    loadPlotly().then((Plotly) => {
       if (cancelled) return;
-      const Plotly = mod.default;
       // `transition` anima los cambios de datos al filtrar (Plotly.react los interpola)
       const full = { ...mergeLayout(tokens, layout), height, autosize: true, transition: { duration: 550, easing: 'cubic-in-out' } };
       Promise.resolve(Plotly.react(el, data, full as Partial<Layout>, baseConfig)).then(() => {
@@ -58,7 +58,7 @@ export default function PlotlyChart({ data, layout, height = 340, kind = 'v', hi
   useEffect(() => {
     const el = ref.current;
     return () => {
-      if (el) import('plotly.js-basic-dist-min').then((m) => m.default.purge(el));
+      if (el) loadPlotly().then((Plotly) => Plotly.purge(el));
     };
   }, []);
 

@@ -48,6 +48,8 @@ const { title, subtitle } = Astro.props;
     </script>
   </head>
   <body>
+    <!-- Contenedor persistente: guarda la hoja de estilos de Plotly entre navegaciones (ver lib/plotly.ts) -->
+    <div id="plotly-style-host" hidden transition:persist="plotly-styles"></div>
     <div class="app">
       <aside class="app__sidebar" id="sidebar" transition:persist="sidebar" transition:animate="none">
         <div class="side-head">
