@@ -1,0 +1,8 @@
+---
+import GestionMedicaPage from '@/components/pages/GestionMedicaPage';
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout title="Gestión médica" subtitle="Desempeño por profesional, estados de reserva y horas perdidas.">
+  <GestionMedicaPage client:only="react" />
+</Layout>
