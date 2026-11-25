@@ -12,7 +12,10 @@ interface Props {
   xTitle?: string;
   yTitle?: string;
   height?: number;
+  /** Color único para todas las barras (desactiva el destacado). */
   color?: string;
+  /** Destaca la barra de mayor valor y atenúa las demás (por defecto sí). */
+  highlightMax?: boolean;
 }
 
 /** Barras verticales u horizontales con etiqueta de valor. El orden de `data` es el orden visual. */
@@ -24,9 +27,11 @@ export default function BarChart({
   yTitle,
   height,
   color,
+  highlightMax = true,
 }: Props) {
   const t = useTokens();
-  const barColor = color ?? t.accent;
+  const highlight = highlightMax && !color && data.length > 1;
+  const maxIndex = highlight ? data.reduce((best, d, i, arr) => (d.value > arr[best].value ? i : best), 0) : undefined;
   const traces = useMemo<Data[]>(() => {
     const keys = data.map((d) => d.key);
     const values = data.map((d) => d.value);
@@ -41,11 +46,11 @@ export default function BarChart({
         cliponaxis: false,
         textfont: { color: t.ink, size: 12 },
         // cornerradius existe en plotly.js >= 3 pero aún no figura en los tipos
-        marker: { color: barColor, opacity: 0.92, line: { width: 0 }, ...({ cornerradius: 8 } as object) },
+        marker: { color: highlight ? data.map((_, i) => (i === maxIndex ? t.accent : t.barDim)) : (color ?? t.accent), line: { width: 0 }, ...({ cornerradius: 8 } as object) },
         hovertemplate: orientation === 'v' ? '%{x}: %{text}<extra></extra>' : '%{y}: %{text}<extra></extra>',
       },
     ];
-  }, [data, orientation, format, barColor, t]);
+  }, [data, orientation, format, color, highlight, maxIndex, t]);
 
   const layout = useMemo(
     () => ({
@@ -56,5 +61,5 @@ export default function BarChart({
     [xTitle, yTitle],
   );
 
-  return <PlotlyChart kind={orientation} data={traces} layout={layout} height={height ?? (orientation === 'h' ? Math.max(260, data.length * 34 + 80) : 340)} />;
+  return <PlotlyChart kind={orientation} highlightIndex={maxIndex} data={traces} layout={layout} height={height ?? (orientation === 'h' ? Math.max(260, data.length * 34 + 80) : 340)} />;
 }

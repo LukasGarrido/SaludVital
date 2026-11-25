@@ -11,6 +11,8 @@ interface Props {
   layout?: Partial<Layout>;
   height?: number;
   kind?: ChartKind;
+  /** Índice de la barra destacada (recibe un resplandor). */
+  highlightIndex?: number;
 }
 
 /** Fusión superficial por eje para no perder el tema base al personalizar. */
@@ -30,7 +32,7 @@ function mergeLayout(tokens: ChartTokens, extra: Partial<Layout> = {}): Partial<
  * Wrapper mínimo sobre Plotly. La librería se importa de forma diferida
  * (solo en el cliente) para mantener liviana la carga inicial.
  */
-export default function PlotlyChart({ data, layout, height = 340, kind = 'v' }: Props) {
+export default function PlotlyChart({ data, layout, height = 340, kind = 'v', highlightIndex }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const tokens = useTokens();
 
@@ -43,12 +45,15 @@ export default function PlotlyChart({ data, layout, height = 340, kind = 'v' }: 
       const Plotly = mod.default;
       // `transition` anima los cambios de datos al filtrar (Plotly.react los interpola)
       const full = { ...mergeLayout(tokens, layout), height, autosize: true, transition: { duration: 550, easing: 'cubic-in-out' } };
-      Plotly.react(el, data, full as Partial<Layout>, baseConfig);
+      Promise.resolve(Plotly.react(el, data, full as Partial<Layout>, baseConfig)).then(() => {
+        if (cancelled || highlightIndex === undefined) return;
+        el.querySelectorAll('.barlayer .point').forEach((p, i) => p.classList.toggle('is-hi', i === highlightIndex));
+      });
     });
     return () => {
       cancelled = true;
     };
-  }, [data, layout, height, tokens]);
+  }, [data, layout, height, tokens, highlightIndex]);
 
   useEffect(() => {
     const el = ref.current;
