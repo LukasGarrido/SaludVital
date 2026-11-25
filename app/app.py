@@ -10,11 +10,11 @@ from datetime import date
 try:
     from app.data import prepare_data
     from app.medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
-    from app.styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter
+    from app.styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter, filter_summary, count_card
 except ImportError:
     from data import prepare_data
     from medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
-    from styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter
+    from styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter, filter_summary, count_card
 
 # Configuración de la página
 st.set_page_config(
@@ -77,21 +77,54 @@ def main():
     if "filtro_sexo" not in st.session_state:
         st.session_state.filtro_sexo = sexos_disp
 
-    if st.sidebar.button("Limpiar filtros"):
+    esp_disp = sorted(hecho_reservas["Especialidad"].dropna().unique().tolist())
+    med_disp = sorted(hecho_reservas["Medico"].dropna().unique().tolist())
+    est_disp = [e for e in ["Atendida", "No asistió", "Cancelada", "Pendiente"] if e in set(hecho_reservas["EstadoReserva"])]
+    prev_disp = sorted(hecho_reservas["Prevision"].dropna().unique().tolist())
+    canal_disp = sorted(hecho_reservas["Canal"].dropna().unique().tolist())
+    avanzados = {"filtro_esp": esp_disp, "filtro_medico": med_disp, "filtro_estado": est_disp,
+                 "filtro_prev": prev_disp, "filtro_canal": canal_disp}
+
+    periodos = {
+        "Todo el período": (min_res_date, max_res_date),
+        "Enero 2026": (date(2026, 1, 5), date(2026, 1, 31)),
+        "Febrero 2026": (date(2026, 2, 1), date(2026, 2, 28)),
+        "Últimos 30 días": (date(2026, 1, 30), max_res_date),
+    }
+
+    def _aplicar_periodo():
+        st.session_state.filtro_fechas = periodos[st.session_state.atajo_periodo]
+
+    def _limpiar():
         st.session_state.filtro_fechas = (min_res_date, max_res_date)
         st.session_state.filtro_comuna = comunas_disp
         st.session_state.filtro_sexo = sexos_disp
-        st.rerun()
+        st.session_state.atajo_periodo = "Todo el período"
+        for k in avanzados:
+            st.session_state[k] = []
 
+    st.sidebar.button("Limpiar filtros", on_click=_limpiar, use_container_width=True)
+
+    st.sidebar.selectbox("Atajo de período", list(periodos), key="atajo_periodo", on_change=_aplicar_periodo)
     rango_fechas = st.sidebar.date_input(
         "Rango de fechas",
         min_value=date(2026, 1, 1),
         max_value=date(2026, 12, 31),
+        format="DD/MM/YYYY",
         key="filtro_fechas"
     )
+    if not (isinstance(rango_fechas, tuple) and len(rango_fechas) == 2):
+        st.sidebar.caption("Selecciona fecha de inicio y de término.")
 
     sel_comuna = chip_filter("Comuna", comunas_disp, key="filtro_comuna")
     sel_sexo = chip_filter("Sexo", sexos_disp, key="filtro_sexo")
+
+    with st.sidebar.expander("Filtros avanzados", expanded=False):
+        sel_esp = st.multiselect("Especialidad", esp_disp, key="filtro_esp", placeholder="Todas")
+        sel_medico = st.multiselect("Médico", med_disp, key="filtro_medico", placeholder="Todos")
+        sel_estado = chip_filter("Estado de la reserva", est_disp, key="filtro_estado", container=st)
+        sel_prev = chip_filter("Previsión", prev_disp, key="filtro_prev", container=st)
+        sel_canal = st.multiselect("Canal", canal_disp, key="filtro_canal", placeholder="Todos")
 
     # Filtrado de hechos
     df_res_filtered = hecho_reservas.copy()
@@ -106,15 +139,35 @@ def main():
             df_res_filtered = df_res_filtered[df_res_filtered["FechaReserva"] <= end_date]
             df_det_filtered = df_det_filtered[df_det_filtered["FechaAtencion"] <= end_date]
 
-    if sel_comuna and "Comuna" in df_res_filtered.columns:
-        df_res_filtered = df_res_filtered[df_res_filtered["Comuna"].isin(sel_comuna)]
-    if sel_comuna and "Comuna" in df_det_filtered.columns:
-        df_det_filtered = df_det_filtered[df_det_filtered["Comuna"].isin(sel_comuna)]
+    for col, sel in [("Comuna", sel_comuna), ("Sexo", sel_sexo), ("Especialidad", sel_esp),
+                     ("Medico", sel_medico), ("Prevision", sel_prev)]:
+        if sel:
+            if col in df_res_filtered.columns:
+                df_res_filtered = df_res_filtered[df_res_filtered[col].isin(sel)]
+            if col in df_det_filtered.columns:
+                df_det_filtered = df_det_filtered[df_det_filtered[col].isin(sel)]
 
-    if sel_sexo and "Sexo" in df_res_filtered.columns:
-        df_res_filtered = df_res_filtered[df_res_filtered["Sexo"].isin(sel_sexo)]
-    if sel_sexo and "Sexo" in df_det_filtered.columns:
-        df_det_filtered = df_det_filtered[df_det_filtered["Sexo"].isin(sel_sexo)]
+    # Estado y canal solo existen en reservas: el detalle se acota a esas reservas
+    if sel_estado:
+        df_res_filtered = df_res_filtered[df_res_filtered["EstadoReserva"].isin(sel_estado)]
+    if sel_canal:
+        df_res_filtered = df_res_filtered[df_res_filtered["Canal"].isin(sel_canal)]
+    if sel_estado or sel_canal:
+        df_det_filtered = df_det_filtered[df_det_filtered["ReservaID"].isin(df_res_filtered["ReservaID"])]
+
+    filter_summary([
+        ("Período", f"{rango_fechas[0]:%d/%m} – {rango_fechas[1]:%d/%m}" if isinstance(rango_fechas, tuple) and len(rango_fechas) == 2 else "incompleto", True),
+        ("Comuna", f"{len(sel_comuna)}/{len(comunas_disp)}", 0 < len(sel_comuna) < len(comunas_disp)),
+        ("Sexo", f"{len(sel_sexo)}/{len(sexos_disp)}", 0 < len(sel_sexo) < len(sexos_disp)),
+        ("Especialidad", str(len(sel_esp)), bool(sel_esp)),
+        ("Médico", str(len(sel_medico)), bool(sel_medico)),
+        ("Estado", str(len(sel_estado)), bool(sel_estado)),
+        ("Previsión", str(len(sel_prev)), bool(sel_prev)),
+        ("Canal", str(len(sel_canal)), bool(sel_canal)),
+    ])
+    count_card(len(df_res_filtered), len(hecho_reservas))
+    if df_res_filtered.empty:
+        st.sidebar.warning("Ninguna reserva coincide con los filtros.")
 
     # Pacientes cartera (filtrado por comuna y sexo, sin fecha)
     df_pac_cartera = dim_paciente.copy()

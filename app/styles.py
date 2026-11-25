@@ -163,12 +163,28 @@ def sidebar_section(label: str) -> None:
     st.sidebar.markdown(f'<div class="side-title">{label}</div>', unsafe_allow_html=True)
 
 
-def chip_filter(label: str, options: list, key: str) -> list:
+def chip_filter(label: str, options: list, key: str, container=None) -> list:
     """Selector múltiple tipo chips. Usa st.pills y cae a multiselect en versiones antiguas."""
+    c = container if container is not None else st.sidebar
     if hasattr(st, "pills"):
-        sel = st.sidebar.pills(label, options, selection_mode="multi", key=key)
+        sel = c.pills(label, options, selection_mode="multi", key=key)
         return list(sel) if sel else []
-    return st.sidebar.multiselect(label, options=options, key=key)
+    return c.multiselect(label, options=options, key=key)
+
+
+def filter_summary(items: list[tuple[str, str, bool]]) -> None:
+    """Chips con el estado de cada filtro: (nombre, valor, activo)."""
+    html = "".join(
+        f'<span class="fchip{"" if on else " off"}">{n}: {v}</span>' for n, v, on in items
+    )
+    st.sidebar.markdown(f'<div class="filter-summary">{html}</div>', unsafe_allow_html=True)
+
+
+def count_card(shown: int, total: int, label: str = "reservas visibles") -> None:
+    st.sidebar.markdown(
+        f'<div class="count-card"><b>{shown:,}'.replace(",", ".") + f' <small>/ {total:,}</small></b><span>{label}</span></div>'.replace(",", "."),
+        unsafe_allow_html=True,
+    )
 
 
 # ── Gráficos Plotly ──────────────────────────────────────────────
