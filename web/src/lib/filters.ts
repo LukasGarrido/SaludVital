@@ -121,8 +121,6 @@ export function applyFilters(ds: Dataset, f: FilterState): FilteredData {
   return { reservas, detalle, cartera };
 }
 
-export const filtroActivo = (sel: string[], total: number): boolean => sel.length > 0 && sel.length < total;
-
 /** Cantidad de filtros activos entre los campos que ofrece un gráfico (cada lista con selección cuenta 1). */
 export function countActive(f: FilterState, fields: FilterField[]): number {
   const base = PERIODOS['Todo el período'];

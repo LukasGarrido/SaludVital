@@ -9,7 +9,7 @@
 :root {
   --gutter: 14px;
   --rail: 64px;
-  --panel: 288px;
+  --panel: 250px;
 }
 
 .app {
@@ -127,27 +127,6 @@
   transition: opacity var(--t-med) var(--ease);
 }
 
-/* ── Filtros dentro de la barra ── */
-.side-rail-hint {
-  display: none;
-  place-items: center;
-  height: 40px;
-  color: var(--muted);
-}
-.side-collapsible {
-  margin-top: 0.6rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--line);
-}
-.side-title {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.2rem;
-}
-
 /* ── Pie: tema y fijar ── */
 .side-foot {
   display: flex;
@@ -239,12 +218,6 @@
   /* Estado colapsado (riel): oculta textos y filtros, deja solo iconos */
   [data-sidebar='collapsed'] .app__sidebar:not(:hover):not(:has(:focus-visible)) .side-text {
     opacity: 0;
-  }
-  [data-sidebar='collapsed'] .app__sidebar:not(:hover):not(:has(:focus-visible)) .side-collapsible {
-    display: none;
-  }
-  [data-sidebar='collapsed'] .app__sidebar:not(:hover):not(:has(:focus-visible)) .side-rail-hint {
-    display: grid;
   }
   [data-sidebar='collapsed'] .app__sidebar:not(:hover):not(:has(:focus-visible)) .side-foot {
     flex-direction: column;
