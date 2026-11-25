@@ -188,3 +188,29 @@ select {
   color: var(--accent-strong);
   font-weight: 700;
 }
+
+/* ── Cabecera de la barra lateral y selector de tema ── */
+.side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.theme-toggle {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.theme-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--hover);
+}

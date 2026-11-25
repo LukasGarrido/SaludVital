@@ -21,8 +21,9 @@ export default function DonutChart({ data, colors, height = 360 }: Props) {
         hole: 0.4,
         labels: data.map((d) => d.key),
         values: data.map((d) => d.value),
-        textinfo: 'label+percent',
-        textfont: { color: t.ink, size: 12 },
+        textinfo: 'percent',
+        textposition: 'inside',
+        insidetextfont: { color: '#ffffff', size: 13 },
         marker: {
           colors: data.map((d, i) => {
             const role = colors?.[d.key];

@@ -35,7 +35,9 @@ web/
 │   │   ├── format.ts           #   formato es-CL (CLP, %, miles)
 │   │   ├── chartTheme.ts       #   tema y paleta de Plotly
 │   │   └── content.ts, nav.ts  #   textos editoriales y navegación
-│   ├── stores/filters.ts       # Store compartido (nanostores) persistido en localStorage
+│   ├── stores/                 # Stores compartidos (nanostores) persistidos en localStorage
+│   │   ├── filters.ts          #   filtros globales
+│   │   └── theme.ts            #   modo claro / oscuro
 │   ├── hooks/useFilteredData.ts# Datos filtrados + medidas para cualquier página
 │   ├── layouts/Layout.astro    # Estructura: barra lateral + contenido
 │   ├── components/
@@ -45,7 +47,7 @@ web/
 │   │   ├── filters/            #   FilterPanel y sus controles
 │   │   └── pages/              #   una isla React por página
 │   ├── pages/                  # Rutas Astro (una por página del panel)
-│   └── styles/                 # tokens.css, base.css, components.css
+│   └── styles/                 # tokens.css (claro + oscuro), base.css, components.css
 └── vitest.config.ts
 ```
 
@@ -54,6 +56,13 @@ web/
 `dataset.json` → `applyFilters(filtros)` → `calcularMedidas` → componentes de página.
 Los filtros viven en un store compartido, por lo que se conservan al navegar entre páginas.
 Las islas usan `client:only="react"` porque dependen del estado del navegador.
+
+### Tema claro y oscuro
+
+La paleta es minimalista: superficies planas, un azul de acento y colores de contraste puntuales (ámbar, turquesa, coral, violeta).
+Todos los colores viven como variables CSS en `src/styles/tokens.css`; el modo oscuro se activa con `<html data-theme="dark">`.
+Un script en el `<head>` aplica la preferencia guardada (o la del sistema) antes de pintar, y los gráficos Plotly leen las mismas variables, por lo que cambian de tema sin recargar.
+Para ajustar la identidad visual basta con editar `tokens.css`.
 
 ### Paridad con Streamlit
 

@@ -2,6 +2,7 @@
 import Brand from '@/components/Brand.astro';
 import PageHeader from '@/components/PageHeader.astro';
 import SideNav from '@/components/SideNav.astro';
+import ThemeToggle from '@/components/ThemeToggle';
 import FilterPanel from '@/components/filters/FilterPanel';
 import '@/styles/base.css';
 import '@/styles/components.css';
@@ -20,11 +21,27 @@ const { title, subtitle } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · SaludVital - Centro Médico Ambulatorio</title>
     <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+    <!-- Aplica el tema antes de pintar para evitar el parpadeo: preferencia guardada o del sistema -->
+    <script is:inline>
+      (function () {
+        var t = null;
+        try {
+          t = localStorage.getItem('saludvital:tema');
+        } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
   </head>
   <body>
     <div class="app">
       <aside class="app__sidebar">
-        <Brand />
+        <div class="side-head">
+          <Brand />
+          <ThemeToggle client:only="react" />
+        </div>
         <hr class="side-divider" />
         <SideNav />
         <hr class="side-divider" />
