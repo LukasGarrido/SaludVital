@@ -87,6 +87,16 @@ Python (Streamlit + Pandas + Plotly) · Power BI + DAX (reporte) · Jupyter Note
 streamlit run app/app.py
 ```
 
+## Dashboard alternativo en Astro
+
+El directorio [`web/`](web/README.md) contiene una réplica estática del panel construida con Astro + React, sin servidor Python:
+
+```bash
+cd web
+npm install
+npm run dev      # http://localhost:4321
+```
+
 ## Documentación y Guía de Uso
 
 - **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del dashboard de Streamlit y estructura.
