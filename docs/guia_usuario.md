@@ -71,9 +71,15 @@ SaludVital/
 │   │   ├── layouts/            # Layout.astro (barra lateral + contenido)
 │   │   ├── pages/              # Una ruta por página del panel
 │   │   └── styles/             # tokens.css (claro y oscuro), base.css, components.css
+│   ├── Dockerfile              # Imagen multi-etapa (dev y producción con nginx)
+│   ├── nginx.conf              # Configuración de nginx para el sitio estático
 │   ├── package.json            # Dependencias y scripts (dev, build, test, export-data)
 │   └── README.md               # Documentación técnica del dashboard Astro
 ├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, caché, .venv)
+├── Dockerfile                  # Imagen del dashboard de Streamlit
+├── docker-compose.yml          # Despliegue (producción): Streamlit + Astro (nginx)
+├── docker-compose.dev.yml      # Override de desarrollo: bind mounts y recarga en caliente
+├── .env.example                # Puertos configurables para docker compose
 ├── AGENTS.md                   # Guía de referencia para agentes de IA y desarrollo
 ├── app.py                      # Entrypoint de conveniencia para Streamlit
 ├── LICENSE                     # Licencia MIT
@@ -98,7 +104,8 @@ SaludVital/
    ```bash
    pip install -r requirements.txt
    ```
-4. **Node.js 20+** (solo para el dashboard en Astro de la sección 5):
+4. **Docker y Docker Compose** (opcional, para la sección 7).
+5. **Node.js 20+** (solo para ejecutar el dashboard en Astro sin Docker, sección 5):
    ```bash
    cd web
    npm install
@@ -261,7 +268,60 @@ Para capturar, deja las segmentaciones sin selección y usa **Win + Shift + S**,
 
 ---
 
-## 7. Documentación Adicional
+## 7. Despliegue con Docker
+
+El repositorio incluye imágenes y archivos de Compose para ejecutar ambos dashboards sin instalar Python ni Node.
+
+### Archivos
+
+| Archivo | Función |
+|---|---|
+| `Dockerfile` | Imagen de Streamlit (Python 3.12 slim, usuario sin privilegios, healthcheck) |
+| `web/Dockerfile` | Imagen multi-etapa de Astro: target `dev` (servidor de desarrollo) y `prod` (nginx sin privilegios) |
+| `web/nginx.conf` | Sirve el sitio estático, caché larga para `/_astro/`, cabeceras de seguridad y `/healthz` |
+| `docker-compose.yml` | Despliegue de producción de ambos servicios |
+| `docker-compose.dev.yml` | Override de desarrollo con bind mounts y recarga en caliente |
+| `.env.example` | Puertos configurables (`STREAMLIT_PORT`, `WEB_PORT`, `WEB_DEV_PORT`) |
+
+### Producción
+
+```bash
+docker compose up -d --build
+```
+
+- Streamlit: `http://localhost:8501`
+- Astro (nginx): `http://localhost:8080`
+
+Los contenedores corren sin privilegios, con sistema de archivos de solo lectura y `no-new-privileges`. Ambos tienen `healthcheck`; revisa su estado con `docker compose ps`.
+
+### Desarrollo
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+- Streamlit (`app/` montado, recarga al guardar): `http://localhost:8501`
+- Astro (servidor de desarrollo con recarga en caliente): `http://localhost:4321`
+
+Se usa *polling* para detectar cambios porque los eventos de archivo no cruzan los bind mounts en Windows y macOS.
+
+### Datos
+
+`data/` está en `.gitignore`, por lo que los CSV del modelo **no se incluyen en la imagen**: Streamlit los lee del volumen `./data` (montado en solo lectura). Antes de levantarlo, genera el modelo con el pipeline ETL (sección 3). Si faltan, la app permite subir los archivos desde la interfaz. El dashboard de Astro no necesita volumen porque su `dataset.json` está versionado en `web/src/data/`.
+
+### Comandos útiles
+
+```bash
+docker compose logs -f streamlit      # logs de un servicio
+docker compose down                   # detiene y elimina los contenedores
+docker compose build --no-cache web   # reconstruye una imagen desde cero
+```
+
+> Si cambias el modelo, ejecuta `npm run export-data` en `web/` y reconstruye la imagen de Astro (`docker compose up -d --build web`).
+
+---
+
+## 8. Documentación Adicional
 
 - **`docs/guia_usuario.md`**: Guía de uso y funcionamiento del repositorio y las aplicaciones.
 - **`web/README.md`**: Documentación técnica del dashboard en Astro.
