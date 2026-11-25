@@ -1,43 +1,69 @@
 import type { Config, Layout } from 'plotly.js-basic-dist-min';
 
-export const COLORS = {
-  accent: '#E05A6D',
-  teal: '#4FB3A8',
-  ink: '#E8EEF0',
-  muted: '#8DA2A8',
-  line: '#223038',
-  grid: '#1A262D',
-  surface: '#131C21',
-};
+/** Colores resueltos del tema activo (se leen de las variables CSS, única fuente de verdad). */
+export interface ChartTokens {
+  ink: string;
+  muted: string;
+  line: string;
+  surface: string;
+  accent: string;
+  teal: string;
+  amber: string;
+  coral: string;
+  violet: string;
+  /** Paleta categórica: azul primero, luego colores de contraste. */
+  palette: string[];
+}
 
-/** Paleta categórica (misma que el panel de Streamlit). */
-export const PALETTE = ['#E05A6D', '#4FB3A8', '#3B82F6', '#F59E0B', '#10B981', '#8B5CF6', '#EC4899'];
+const SKY = '#38bdf8';
 
-/** Colores fijos por previsión. */
-export const PREVISION_COLORS: Record<string, string> = { FONASA: COLORS.teal, Isapre: COLORS.accent };
+export function readTokens(): ChartTokens {
+  const css = getComputedStyle(document.documentElement);
+  const v = (name: string) => css.getPropertyValue(name).trim();
+  const accent = v('--accent');
+  const teal = v('--teal');
+  const amber = v('--amber');
+  const coral = v('--coral');
+  const violet = v('--violet');
+  return {
+    ink: v('--ink'),
+    muted: v('--muted'),
+    line: v('--line'),
+    surface: v('--surface'),
+    accent,
+    teal,
+    amber,
+    coral,
+    violet,
+    palette: [accent, amber, teal, coral, violet, SKY],
+  };
+}
 
-export const baseLayout = (): Partial<Layout> => ({
+/** Color fijo por previsión (se resuelve contra el tema activo). */
+export const PREVISION_ROLES: Record<string, keyof ChartTokens> = { FONASA: 'accent', Isapre: 'amber' };
+
+export const baseLayout = (t: ChartTokens): Partial<Layout> => ({
   paper_bgcolor: 'rgba(0,0,0,0)',
   plot_bgcolor: 'rgba(0,0,0,0)',
-  font: { family: 'Figtree, Segoe UI, sans-serif', size: 13, color: COLORS.ink },
+  font: { family: 'Inter, Segoe UI, sans-serif', size: 13, color: t.ink },
   margin: { l: 8, r: 8, t: 24, b: 8 },
-  colorway: PALETTE,
-  hoverlabel: { bgcolor: '#1B2830', bordercolor: COLORS.line, font: { color: '#FFFFFF' } },
-  legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 12, color: COLORS.muted } },
+  colorway: t.palette,
+  hoverlabel: { bgcolor: t.surface, bordercolor: t.line, font: { color: t.ink } },
+  legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 12, color: t.muted } },
   xaxis: {
     showgrid: false,
     zeroline: false,
-    linecolor: COLORS.line,
-    tickfont: { color: COLORS.muted },
-    title: { font: { color: COLORS.muted, size: 12 } },
+    linecolor: t.line,
+    tickfont: { color: t.muted },
+    title: { font: { color: t.muted, size: 12 } },
     automargin: true,
   },
   yaxis: {
-    gridcolor: COLORS.grid,
+    gridcolor: t.line,
     zeroline: false,
     linecolor: 'rgba(0,0,0,0)',
-    tickfont: { color: COLORS.muted },
-    title: { font: { color: COLORS.muted, size: 12 } },
+    tickfont: { color: t.muted },
+    title: { font: { color: t.muted, size: 12 } },
     automargin: true,
   },
 });

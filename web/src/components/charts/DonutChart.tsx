@@ -1,17 +1,19 @@
 import { useMemo } from 'react';
 import type { Data } from 'plotly.js-basic-dist-min';
 import type { Entry } from '@/lib/aggregate';
-import { COLORS, PALETTE } from '@/lib/chartTheme';
+import { type ChartTokens } from '@/lib/chartTheme';
+import { useTokens } from '@/hooks/useTokens';
 import PlotlyChart from './PlotlyChart';
 
 interface Props {
   data: Entry[];
-  /** Color fijo por categoría; las no listadas usan la paleta. */
-  colors?: Record<string, string>;
+  /** Rol de color fijo por categoría (token del tema); las no listadas usan la paleta. */
+  colors?: Record<string, keyof ChartTokens>;
   height?: number;
 }
 
 export default function DonutChart({ data, colors, height = 360 }: Props) {
+  const t = useTokens();
   const traces = useMemo<Data[]>(
     () => [
       {
@@ -20,16 +22,19 @@ export default function DonutChart({ data, colors, height = 360 }: Props) {
         labels: data.map((d) => d.key),
         values: data.map((d) => d.value),
         textinfo: 'label+percent',
-        textfont: { color: COLORS.ink, size: 12 },
+        textfont: { color: t.ink, size: 12 },
         marker: {
-          colors: data.map((d, i) => colors?.[d.key] ?? PALETTE[i % PALETTE.length]),
-          line: { color: COLORS.surface, width: 2 },
+          colors: data.map((d, i) => {
+            const role = colors?.[d.key];
+            return (role ? (t[role] as string) : undefined) ?? t.palette[i % t.palette.length];
+          }),
+          line: { color: t.surface, width: 2 },
         },
         sort: false,
         hovertemplate: '%{label}: %{value} (%{percent})<extra></extra>',
       },
     ],
-    [data, colors],
+    [data, colors, t],
   );
   return <PlotlyChart data={traces} height={height} layout={{ showlegend: true }} />;
 }

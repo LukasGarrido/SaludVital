@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useFilteredData } from '@/hooks/useFilteredData';
 import { countBy, groupBy, sortAsc, sumBy, type Entry } from '@/lib/aggregate';
-import { PREVISION_COLORS } from '@/lib/chartTheme';
+import { PREVISION_ROLES } from '@/lib/chartTheme';
 import { NOTA_VISIBLE } from '@/lib/content';
 import { formatDec, formatNum } from '@/lib/format';
 import { porMes } from '@/lib/series';
@@ -74,13 +74,13 @@ export default function PacientesPage() {
           {atendidasComuna.length > 0 ? <BarChart data={atendidasComuna} orientation="h" /> : <Empty message="Sin datos de comuna." />}
         </Card>
         <Card title="Reservas por previsión">
-          {hay ? <DonutChart data={reservasPrevision} colors={PREVISION_COLORS} /> : <Empty message="Sin datos de previsión." />}
+          {hay ? <DonutChart data={reservasPrevision} colors={PREVISION_ROLES} /> : <Empty message="Sin datos de previsión." />}
         </Card>
       </Grid>
 
       <Grid>
         <Card title="Ingresos por previsión (valorizado)">
-          {detalle.length > 0 ? <DonutChart data={ingresosPrevision} colors={PREVISION_COLORS} /> : <Empty message="Sin datos de ingresos por previsión." />}
+          {detalle.length > 0 ? <DonutChart data={ingresosPrevision} colors={PREVISION_ROLES} /> : <Empty message="Sin datos de ingresos por previsión." />}
         </Card>
         <Card title="Frecuencia de uso (reservas por paciente)">
           {frecuencia.length > 0 ? <BarChart data={frecuencia} /> : <Empty message="Sin datos de frecuencia." />}

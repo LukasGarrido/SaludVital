@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import './tokens.css';
 
 *,
@@ -16,8 +16,8 @@ body {
 body {
   font-family: var(--font);
   color: var(--ink);
-  background: radial-gradient(1100px 500px at 85% -10%, rgba(224, 90, 109, 0.1), transparent 60%), var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
+  transition: background 0.2s, color 0.2s;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -44,7 +44,7 @@ select {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a3a43;
+  background: var(--line-strong);
   border-radius: 8px;
 }
 ::-webkit-scrollbar-track {
@@ -105,17 +105,14 @@ select {
   width: 72px;
   height: 3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--teal));
+  background: var(--accent);
 }
 .page-header h1 {
   font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   line-height: 1.15;
-  background: linear-gradient(90deg, #fff, #c9d6da);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--ink);
 }
 .page-header p {
   margin-top: 0.35rem;
@@ -140,8 +137,8 @@ select {
 }
 .brand__name {
   font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
+  font-weight: 700;
+  color: var(--ink);
   line-height: 1.1;
 }
 .brand__sub {
@@ -183,12 +180,11 @@ select {
   transition: background 0.15s, color 0.15s;
 }
 .nav__link:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: var(--hover);
+  color: var(--ink);
 }
 .nav__link[aria-current='page'] {
   background: var(--accent-soft);
-  box-shadow: inset 3px 0 0 var(--accent);
-  color: #fff;
+  color: var(--accent-strong);
   font-weight: 700;
 }

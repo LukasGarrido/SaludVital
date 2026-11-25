@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { Data } from 'plotly.js-basic-dist-min';
 import type { Entry } from '@/lib/aggregate';
-import { COLORS } from '@/lib/chartTheme';
+import { useTokens } from '@/hooks/useTokens';
 import PlotlyChart from './PlotlyChart';
 
 interface Props {
@@ -23,8 +23,10 @@ export default function BarChart({
   xTitle,
   yTitle,
   height,
-  color = COLORS.accent,
+  color,
 }: Props) {
+  const t = useTokens();
+  const barColor = color ?? t.accent;
   const traces = useMemo<Data[]>(() => {
     const keys = data.map((d) => d.key);
     const values = data.map((d) => d.value);
@@ -37,12 +39,12 @@ export default function BarChart({
         text: values.map(format),
         textposition: 'outside',
         cliponaxis: false,
-        textfont: { color: COLORS.ink, size: 12 },
-        marker: { color, line: { color: COLORS.surface, width: 2 } },
+        textfont: { color: t.ink, size: 12 },
+        marker: { color: barColor, line: { color: t.surface, width: 2 } },
         hovertemplate: orientation === 'v' ? '%{x}: %{text}<extra></extra>' : '%{y}: %{text}<extra></extra>',
       },
     ];
-  }, [data, orientation, format, color]);
+  }, [data, orientation, format, barColor, t]);
 
   const layout = useMemo(
     () => ({

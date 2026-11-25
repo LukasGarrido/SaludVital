@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Data } from 'plotly.js-basic-dist-min';
-import { COLORS, PALETTE } from '@/lib/chartTheme';
+import { useTokens } from '@/hooks/useTokens';
 import PlotlyChart from './PlotlyChart';
 
 export interface Series {
@@ -16,6 +16,7 @@ interface Props {
 
 /** Barras horizontales apiladas (una serie por estado, una categoría por fila). */
 export default function StackedBarChart({ categories, series, height }: Props) {
+  const t = useTokens();
   const traces = useMemo<Data[]>(
     () =>
       series.map((s, i) => ({
@@ -24,10 +25,10 @@ export default function StackedBarChart({ categories, series, height }: Props) {
         name: s.name,
         y: categories,
         x: s.values,
-        marker: { color: PALETTE[i % PALETTE.length], line: { color: COLORS.surface, width: 1 } },
+        marker: { color: t.palette[i % t.palette.length], line: { color: t.surface, width: 1 } },
         hovertemplate: '%{y} · ' + s.name + ': %{x}<extra></extra>',
       })),
-    [categories, series],
+    [categories, series, t],
   );
   return (
     <PlotlyChart
