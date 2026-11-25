@@ -8,8 +8,6 @@
 .kpi,
 .note,
 .table-wrap,
-.adv,
-.count-card,
 .app__sidebar {
   position: relative;
   background:
@@ -38,8 +36,6 @@
   .kpi,
   .note,
   .table-wrap,
-  .adv,
-  .count-card,
   .app__sidebar {
     background: var(--glass-strong);
   }

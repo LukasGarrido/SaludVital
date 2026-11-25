@@ -41,12 +41,34 @@ export interface FilterState extends Periodo {
   canales: string[];
 }
 
-/** Comuna y sexo parten con todo seleccionado (igual que Streamlit); el resto, vacío = todos. */
+/** Campos de filtro que un gráfico puede ofrecer. `periodo` agrupa desde/hasta/atajo. */
+export type FilterField =
+  | 'periodo'
+  | 'comunas'
+  | 'sexos'
+  | 'especialidades'
+  | 'medicos'
+  | 'estados'
+  | 'previsiones'
+  | 'canales';
+
+export const ALL_FIELDS: FilterField[] = [
+  'periodo',
+  'comunas',
+  'sexos',
+  'especialidades',
+  'medicos',
+  'estados',
+  'previsiones',
+  'canales',
+];
+
+/** Cada gráfico parte sin filtros: período completo y listas vacías (vacío = todos). */
 export const defaultFilters = (): FilterState => ({
   ...PERIODOS['Todo el período'],
   atajo: 'Todo el período',
-  comunas: [...FILTER_OPTIONS.comunas],
-  sexos: [...FILTER_OPTIONS.sexos],
+  comunas: [],
+  sexos: [],
   especialidades: [],
   medicos: [],
   estados: [],
@@ -99,4 +121,10 @@ export function applyFilters(ds: Dataset, f: FilterState): FilteredData {
   return { reservas, detalle, cartera };
 }
 
-export const filtroActivo = (sel: string[], total: number): boolean => sel.length > 0 && sel.length < total;
+/** Cantidad de filtros activos entre los campos que ofrece un gráfico (cada lista con selección cuenta 1). */
+export function countActive(f: FilterState, fields: FilterField[]): number {
+  const base = PERIODOS['Todo el período'];
+  return fields.filter((field) =>
+    field === 'periodo' ? f.desde !== base.desde || f.hasta !== base.hasta : f[field].length > 0,
+  ).length;
+}

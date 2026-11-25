@@ -74,8 +74,8 @@ SaludVital/
 │   ├── src/
 │   │   ├── data/dataset.json   # Modelo exportado (reservas, detalle, pacientes)
 │   │   ├── lib/                # Lógica pura en TypeScript: medidas, filtros, pruebas, formato
-│   │   ├── stores/             # Estado compartido: filtros y tema claro/oscuro
-│   │   ├── hooks/              # useFilteredData, useTokens
+│   │   ├── stores/             # Estado compartido: filtros por gráfico y tema claro/oscuro
+│   │   ├── hooks/              # useChartFilters, useTokens
 │   │   ├── components/         # ui/, charts/, filters/, pages/ y piezas .astro
 │   │   ├── layouts/            # Layout.astro (barra lateral + contenido)
 │   │   ├── pages/              # Una ruta por página del panel
@@ -110,7 +110,7 @@ streamlit run app/app.py
 
 ## Dashboard alternativo en Astro
 
-El directorio [`web/`](web/README.md) contiene una réplica estática del panel construida con Astro + React, sin servidor Python. Incluye las mismas cinco páginas, los filtros globales (con atajos de período y filtros avanzados) y un modo claro/oscuro.
+El directorio [`web/`](web/README.md) contiene una réplica estática del panel construida con Astro + React, sin servidor Python. Incluye las mismas cinco páginas, filtros propios en cada gráfico (botón «Filtros» en la cabecera de cada tarjeta) y un modo claro/oscuro.
 
 ```bash
 cd web

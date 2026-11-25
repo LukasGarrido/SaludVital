@@ -65,8 +65,8 @@ SaludVital/
 │   ├── src/
 │   │   ├── data/dataset.json   # Modelo exportado (reservas, detalle, pacientes)
 │   │   ├── lib/                # Lógica pura en TypeScript: medidas, filtros, pruebas, formato
-│   │   ├── stores/             # Estado compartido: filtros y tema claro/oscuro
-│   │   ├── hooks/              # useFilteredData, useTokens
+│   │   ├── stores/             # Estado compartido: filtros por gráfico y tema claro/oscuro
+│   │   ├── hooks/              # useChartFilters, useTokens
 │   │   ├── components/         # ui/, charts/, filters/, pages/ y piezas .astro
 │   │   ├── layouts/            # Layout.astro (barra lateral + contenido)
 │   │   ├── pages/              # Una ruta por página del panel
@@ -174,26 +174,26 @@ Para publicarlo en una subruta (por ejemplo GitHub Pages): `SITE_BASE=/SaludVita
 ### Arquitectura
 
 - **`scripts/export_data.py`**: reutiliza `app/data.py` para exportar reservas, detalle y pacientes ya enriquecidos con sus dimensiones.
-- **`src/lib/`**: lógica pura sin React. `measures.ts` y `acceptance.ts` son el port de `calcular_medidas` y `ejecutar_pruebas_aceptacion`; `filters.ts` aplica los filtros globales con la misma semántica que Streamlit; `format.ts` entrega el formato es-CL (CLP, porcentajes, miles).
-- **`src/stores/`**: estado compartido entre páginas (filtros y tema), persistido en el navegador.
+- **`src/lib/`**: lógica pura sin React. `measures.ts` y `acceptance.ts` son el port de `calcular_medidas` y `ejecutar_pruebas_aceptacion`; `filters.ts` aplica los filtros con la misma semántica de datos que Streamlit; `format.ts` entrega el formato es-CL (CLP, porcentajes, miles).
+- **`src/stores/`**: estado compartido (filtros de cada gráfico y tema), persistido en el navegador.
 - **`src/components/`**: componentes reutilizables (`ui/`, `charts/`, `filters/`), una isla React por página (`pages/`) y piezas estáticas `.astro`.
 - **`src/styles/`**: `tokens.css` define toda la paleta en variables CSS para el tema claro y el oscuro.
 
 ### Páginas y filtros
 
-Las cinco páginas (Resumen, Visión ejecutiva, Gestión médica, Pacientes y Pruebas de aceptación) muestran los mismos indicadores que el dashboard de Streamlit. Los filtros globales de la barra lateral se conservan al navegar entre páginas:
+Las cinco páginas (Resumen, Visión ejecutiva, Gestión médica, Pacientes y Pruebas de aceptación) muestran los mismos indicadores que el dashboard de Streamlit. A diferencia de Streamlit, aquí **no hay filtros globales**: cada gráfico, tabla y grupo de KPI tiene su propio botón **Filtros** en la cabecera, con un contador de filtros activos. Cambiar el filtro de un gráfico no afecta a los demás, y la elección se recuerda al volver:
 
 - Atajo de período (todo el período, enero, febrero, últimos 30 días) y rango de fechas.
-- Comuna y sexo (parten con todo seleccionado).
-- Filtros avanzados: especialidad, médico, estado de la reserva, previsión y canal (sin selección equivale a todos).
-- La frecuencia de uso de pacientes responde a comuna y sexo, pero no a la fecha.
+- Comuna, sexo, especialidad, médico, estado de la reserva, previsión y canal (sin selección equivale a todos).
+- Cada gráfico ofrece solo los campos que tienen sentido para él (por ejemplo, «Reservas por estado» no filtra por estado).
+- La frecuencia de uso de pacientes responde únicamente a comuna y sexo, no a la fecha.
 - Las pruebas de aceptación siempre se ejecutan sobre el modelo completo, sin filtros.
 
 ### Diseño glass, menú expandible y transiciones
 
 - **Estilo:** vidrio translúcido en azules con el coral de SaludVital como acento cálido.
 - **Menú lateral:** riel de iconos que se expande al pasar el cursor; el botón inferior lo fija abierto (se recuerda la elección).
-- **Navegación:** transiciones animadas entre páginas sin recargar; el menú y los filtros se conservan.
+- **Navegación:** transiciones animadas entre páginas sin recargar; el menú se conserva y los filtros de cada gráfico se recuerdan.
 - **Gráficos:** barras que crecen al aparecer, barra máxima destacada y transición suave al filtrar.
 
 ### Modo claro y oscuro
