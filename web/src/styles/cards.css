@@ -170,3 +170,8 @@
   border: 1px solid var(--warn-line);
   color: var(--warn-text);
 }
+
+/* Tarjetas de ancho completo (tablas y gráficos solos en su fila) */
+.card--wide {
+  margin-bottom: 1.1rem;
+}
