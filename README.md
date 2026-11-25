@@ -80,9 +80,15 @@ SaludVital/
 │   │   ├── layouts/            # Layout.astro (barra lateral + contenido)
 │   │   ├── pages/              # Una ruta por página del panel
 │   │   └── styles/             # tokens.css (claro y oscuro), base.css, components.css
+│   ├── Dockerfile              # Imagen multi-etapa (dev y producción con nginx)
+│   ├── nginx.conf              # Configuración de nginx para el sitio estático
 │   ├── package.json            # Dependencias y scripts (dev, build, test, export-data)
 │   └── README.md               # Documentación técnica del dashboard Astro
 ├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, caché, .venv)
+├── Dockerfile                  # Imagen del dashboard de Streamlit
+├── docker-compose.yml          # Despliegue (producción): Streamlit + Astro (nginx)
+├── docker-compose.dev.yml      # Override de desarrollo: bind mounts y recarga en caliente
+├── .env.example                # Puertos configurables para docker compose
 ├── AGENTS.md                   # Guía de referencia para agentes de IA y desarrollo
 ├── app.py                      # Entrypoint de conveniencia para Streamlit
 ├── LICENSE                     # Licencia MIT
@@ -119,6 +125,33 @@ npm run export-data   # regenera el JSON desde data/modelo (requiere Python)
 npm test              # pruebas de paridad con Streamlit y de filtros
 npm run build         # chequeo de tipos + build estático en dist/
 ```
+
+## Despliegue con Docker
+
+Ambos dashboards se pueden levantar con Docker Compose, tanto en desarrollo como en producción.
+
+| Servicio | Producción | Desarrollo |
+| --- | --- | --- |
+| Streamlit | http://localhost:8501 | http://localhost:8501 |
+| Astro | http://localhost:8080 (nginx) | http://localhost:4321 (dev server) |
+
+**Producción** (imágenes inmutables, usuario sin privilegios, sistema de archivos de solo lectura):
+
+```bash
+docker compose up -d --build
+```
+
+**Desarrollo** (código montado desde el host con recarga en caliente):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+Notas:
+
+- Los CSV del modelo (`data/modelo`) no están versionados ni van dentro de la imagen: Streamlit los lee del volumen `./data`. Si faltan, la app permite subirlos desde la interfaz. El dashboard de Astro no necesita volumen porque su JSON va en el repositorio.
+- Los puertos se pueden cambiar copiando `.env.example` a `.env`.
+- Para detener todo: `docker compose down`.
 
 ## Documentación y Guía de Uso
 
