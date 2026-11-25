@@ -230,7 +230,8 @@ def main():
     elif pagina == "Visión ejecutiva":
         page_header("Visión ejecutiva", "Evolución mensual, distribución por estados, especialidades e ingresos.")
 
-        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        c1, c2, c3 = st.columns(3)
+        c4, c5, c6 = st.columns(3)
         with c1:
             st.metric("Total de reservas", format_num(medidas["TotalReservas"]))
         with c2:
