@@ -3,7 +3,7 @@ import { useFilteredData } from '@/hooks/useFilteredData';
 import { countBy, groupBy, sortAsc, sumBy, type Entry } from '@/lib/aggregate';
 import { PREVISION_ROLES } from '@/lib/chartTheme';
 import { NOTA_VISIBLE } from '@/lib/content';
-import { formatDec, formatNum } from '@/lib/format';
+import { formatClp, formatDec, formatNum } from '@/lib/format';
 import { porMes } from '@/lib/series';
 import BarChart from '../charts/BarChart';
 import DonutChart from '../charts/DonutChart';
@@ -80,7 +80,7 @@ export default function PacientesPage() {
 
       <Grid>
         <Card title="Ingresos por previsión (valorizado)">
-          {detalle.length > 0 ? <DonutChart data={ingresosPrevision} colors={PREVISION_ROLES} /> : <Empty message="Sin datos de ingresos por previsión." />}
+          {detalle.length > 0 ? <DonutChart data={ingresosPrevision} colors={PREVISION_ROLES} format={formatClp} /> : <Empty message="Sin datos de ingresos por previsión." />}
         </Card>
         <Card title="Frecuencia de uso (reservas por paciente)">
           {frecuencia.length > 0 ? <BarChart data={frecuencia} /> : <Empty message="Sin datos de frecuencia." />}

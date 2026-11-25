@@ -1,7 +1,118 @@
-/* Contenedor de gráficos */
+/* Contenedor de gráficos: carga, animación de entrada y foco al pasar el cursor */
 
-/* ── Gráficos ── */
 .chart {
   width: 100%;
   min-height: 200px;
+  border-radius: var(--radius);
+}
+
+/* Esqueleto brillante mientras se carga Plotly (se quita al dibujar el gráfico) */
+.chart:not(.js-plotly-plot) {
+  background: linear-gradient(100deg, transparent 30%, var(--hover) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Barras: crecen desde el eje al aparecer (verticales desde abajo, horizontales desde la izquierda) */
+@keyframes bar-grow-y {
+  from { transform: scaleY(0); opacity: 0; }
+}
+@keyframes bar-grow-x {
+  from { transform: scaleX(0); opacity: 0; }
+}
+.chart[data-kind='v'] .barlayer .point path,
+.chart[data-kind='h'] .barlayer .point path {
+  transform-box: fill-box;
+  animation: bar-grow-y 0.75s var(--ease) backwards;
+}
+.chart[data-kind='v'] .barlayer .point path { transform-origin: bottom; }
+.chart[data-kind='h'] .barlayer .point path {
+  transform-origin: left;
+  animation-name: bar-grow-x;
+}
+.chart[data-kind='v'] .barlayer .point:nth-child(1) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(1) path { animation-delay: 45ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(2) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(2) path { animation-delay: 90ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(3) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(3) path { animation-delay: 135ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(4) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(4) path { animation-delay: 180ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(5) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(5) path { animation-delay: 225ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(6) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(6) path { animation-delay: 270ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(7) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(7) path { animation-delay: 315ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(8) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(8) path { animation-delay: 360ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(9) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(9) path { animation-delay: 405ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(10) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(10) path { animation-delay: 450ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(11) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(11) path { animation-delay: 495ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(12) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(12) path { animation-delay: 540ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(13) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(13) path { animation-delay: 585ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(14) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(14) path { animation-delay: 630ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(15) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(15) path { animation-delay: 675ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(16) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(16) path { animation-delay: 720ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(17) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(17) path { animation-delay: 765ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(18) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(18) path { animation-delay: 810ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(19) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(19) path { animation-delay: 855ms; }
+.chart[data-kind='v'] .barlayer .point:nth-child(20) path,
+.chart[data-kind='h'] .barlayer .point:nth-child(20) path { animation-delay: 900ms; }
+
+/* Donut: el anillo gira y aparece suavemente */
+@keyframes donut-in {
+  from { transform: rotate(-35deg) scale(0.92); opacity: 0; }
+}
+.chart[data-kind='pie'] .pielayer {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: donut-in 0.9s var(--ease) backwards;
+}
+
+/* Etiquetas y leyenda aparecen después de las formas */
+@keyframes chart-fade {
+  from { opacity: 0; }
+}
+.chart .barlayer text,
+.chart .pielayer text,
+.chart .legend {
+  animation: chart-fade 0.6s 0.35s ease backwards;
+}
+
+/* Foco: al pasar sobre una barra, las demás se atenúan */
+.chart .barlayer .point path {
+  transition: opacity var(--t-fast) ease, filter var(--t-fast) ease;
+  cursor: default;
+}
+.chart .barlayer:hover .point path {
+  opacity: 0.55;
+}
+.chart .barlayer .point:hover path {
+  opacity: 1;
+  filter: brightness(1.08) drop-shadow(0 4px 10px var(--accent-soft));
+}
+.chart .slice path {
+  transition: opacity var(--t-fast) ease;
+}
+.chart .pielayer:hover .slice path {
+  opacity: 0.6;
+}
+.chart .pielayer .slice:hover path {
+  opacity: 1;
 }

@@ -32,6 +32,7 @@ export default function StackedBarChart({ categories, series, height }: Props) {
   );
   return (
     <PlotlyChart
+      kind="h"
       data={traces}
       layout={{ barmode: 'stack', bargap: 0.25 }}
       height={height ?? Math.max(300, categories.length * 34 + 110)}

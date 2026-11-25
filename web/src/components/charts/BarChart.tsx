@@ -40,7 +40,8 @@ export default function BarChart({
         textposition: 'outside',
         cliponaxis: false,
         textfont: { color: t.ink, size: 12 },
-        marker: { color: barColor, line: { width: 0 } },
+        // cornerradius existe en plotly.js >= 3 pero aún no figura en los tipos
+        marker: { color: barColor, opacity: 0.92, line: { width: 0 }, ...({ cornerradius: 8 } as object) },
         hovertemplate: orientation === 'v' ? '%{x}: %{text}<extra></extra>' : '%{y}: %{text}<extra></extra>',
       },
     ];
@@ -55,5 +56,5 @@ export default function BarChart({
     [xTitle, yTitle],
   );
 
-  return <PlotlyChart data={traces} layout={layout} height={height ?? (orientation === 'h' ? Math.max(260, data.length * 34 + 80) : 340)} />;
+  return <PlotlyChart kind={orientation} data={traces} layout={layout} height={height ?? (orientation === 'h' ? Math.max(260, data.length * 34 + 80) : 340)} />;
 }
