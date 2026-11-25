@@ -1,7 +1,7 @@
 # SaludVital · Dashboard en Astro
 
 Réplica del panel de Streamlit (`app/`) como sitio estático con Astro + islas React.
-Muestra las mismas 5 páginas, filtros globales y medidas, y no necesita servidor Python.
+Muestra las mismas 5 páginas y medidas, con filtros propios en cada gráfico, y no necesita servidor Python.
 
 ## Comandos
 
@@ -29,22 +29,23 @@ web/
 │   │   ├── types.ts            #   tipos del modelo
 │   │   ├── measures.ts         #   port de calcular_medidas
 │   │   ├── acceptance.ts       #   port de ejecutar_pruebas_aceptacion
-│   │   ├── filters.ts          #   estado de filtros y applyFilters
+│   │   ├── filters.ts          #   estado de filtros, applyFilters y campos disponibles
+│   │   ├── chartFilterFields.ts#   conjuntos de campos de filtro por tipo de gráfico
 │   │   ├── aggregate.ts        #   groupBy / countBy / sumBy
 │   │   ├── series.ts, dates.ts #   agrupación mensual
 │   │   ├── format.ts           #   formato es-CL (CLP, %, miles)
 │   │   ├── chartTheme.ts       #   tema y paleta de Plotly
 │   │   └── content.ts, nav.ts  #   textos editoriales y navegación
 │   ├── stores/                 # Stores compartidos (nanostores) persistidos en localStorage
-│   │   ├── filters.ts          #   filtros globales
+│   │   ├── chartFilters.ts     #   filtros de cada gráfico (por id)
 │   │   └── theme.ts            #   modo claro / oscuro
-│   ├── hooks/useFilteredData.ts# Datos filtrados + medidas para cualquier página
+│   ├── hooks/useChartFilters.ts# Filtros y datos filtrados de un gráfico concreto
 │   ├── layouts/Layout.astro    # Estructura: barra lateral + contenido
 │   ├── components/
 │   │   ├── *.astro             #   partes estáticas (marca, navegación, encabezado)
 │   │   ├── ui/                 #   Card, KpiGrid, DataTable, Note, Grid, Section…
 │   │   ├── charts/             #   PlotlyChart, BarChart, DonutChart, StackedBarChart
-│   │   ├── filters/            #   FilterPanel y sus controles
+│   │   ├── filters/            #   FilterPopover y sus controles (chips, casillas, fechas)
 │   │   └── pages/              #   una isla React por página
 │   ├── pages/                  # Rutas Astro (una por página del panel)
 │   ├── scripts/sidebar.ts      # Barra lateral: fijar/colapsar y enlace activo
@@ -54,8 +55,9 @@ web/
 
 ### Flujo de datos
 
-`dataset.json` → `applyFilters(filtros)` → `calcularMedidas` → componentes de página.
-Los filtros viven en un store compartido, por lo que se conservan al navegar entre páginas.
+`dataset.json` → `applyFilters(filtros del gráfico)` → agregaciones del gráfico → componente.
+Cada gráfico, grupo de KPI y tabla tiene **sus propios filtros** (`useChartFilters(id, campos)`), guardados por `id` en un store
+y recordados en el navegador. Cambiar el filtro de un gráfico no afecta a los demás.
 Las islas usan `client:only="react"` porque dependen del estado del navegador.
 
 ### Estilos (glass)
@@ -98,10 +100,25 @@ Todos los colores viven como variables CSS en `src/styles/tokens.css`; el modo o
 Un script en el `<head>` aplica la preferencia guardada (o la del sistema) antes de pintar, y los gráficos Plotly leen las mismas variables, por lo que cambian de tema sin recargar.
 Para ajustar la identidad visual basta con editar `tokens.css`.
 
+### Filtros por gráfico
+
+Cada tarjeta (`FilterableCard`) y cada grupo de KPI (`FilterableKpis`) muestra un botón **Filtros** con un contador de filtros activos.
+Al abrirlo aparece un popover con solo los controles que tienen sentido para ese gráfico: por ejemplo, «Reservas por estado» no
+ofrece filtrar por estado, y la frecuencia de uso de pacientes solo responde a comuna y sexo.
+
+| Campos | Dónde |
+| --- | --- |
+| Período, comuna, sexo, especialidad, médico, estado, previsión, canal | Gráficos y KPI de reservas (menos la dimensión que el propio gráfico ya muestra) |
+| Período, comuna, sexo, especialidad, médico, previsión | Gráficos de ingresos (detalle) |
+| Comuna, sexo | Frecuencia de uso (cartera de pacientes) |
+
+Para agregar un gráfico con filtros: usa `FilterableCard` con un `id` único, el `scope` de los datos (`reservas`, `detalle` o `cartera`),
+la lista de `fields` (ver `lib/chartFilterFields.ts`) y una función `render(data)` que dibuja el gráfico con los datos ya filtrados.
+
 ### Paridad con Streamlit
 
 - Las 16 pruebas de aceptación se ejecutan en `npm test` y en la página *Pruebas de aceptación*.
-- Los filtros siguen la misma semántica: comuna y sexo parten con todo seleccionado, el resto vacío = todos,
-  la cartera de pacientes ignora la fecha y estado/canal acotan también el detalle.
+- Los filtros siguen la misma semántica de datos: vacío = todos, la cartera de pacientes ignora la fecha y estado/canal acotan también el detalle.
+  A diferencia de Streamlit (filtros globales en la barra lateral), aquí cada gráfico se filtra de forma independiente.
 
 > Si cambia el ETL o el modelo en `data/modelo`, ejecuta `npm run export-data` y commitea el JSON.
