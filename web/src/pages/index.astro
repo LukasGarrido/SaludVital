@@ -1,0 +1,8 @@
+---
+import ResumenPage from '@/components/pages/ResumenPage';
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout title="Resumen" subtitle="Cuadro de mando ejecutivo y recomendaciones operacionales.">
+  <ResumenPage client:only="react" />
+</Layout>

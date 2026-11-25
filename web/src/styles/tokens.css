@@ -1,0 +1,82 @@
+/*
+ * Tokens de diseño. Tema claro por defecto; el oscuro se activa con
+ * <html data-theme="dark">. Estética minimalista: superficies planas,
+ * bordes finos y un único azul de acento con colores de contraste puntuales.
+ */
+:root {
+  color-scheme: light;
+  --scheme: light;
+
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --surface-2: #f0f4fa;
+  --sidebar: #ffffff;
+  --line: #e4e9f2;
+  --line-strong: #cfd8e6;
+  --hover: rgba(37, 99, 235, 0.06);
+
+  --ink: #0f172a;
+  --muted: #64748b;
+
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.1);
+  --on-accent: #ffffff;
+
+  /* Colores de contraste */
+  --teal: #0ea5a4;
+  --amber: #f59e0b;
+  --coral: #f43f5e;
+  --violet: #7c3aed;
+
+  --ok: #059669;
+  --bad: #dc2626;
+  --ok-bg: rgba(5, 150, 105, 0.1);
+  --ok-line: rgba(5, 150, 105, 0.35);
+  --warn-bg: rgba(245, 158, 11, 0.12);
+  --warn-line: rgba(245, 158, 11, 0.4);
+  --warn-text: #b45309;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.05);
+  --font: 'Inter', 'Figtree', 'Segoe UI', system-ui, sans-serif;
+  --sidebar-w: 300px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --scheme: dark;
+
+  --bg: #0a1020;
+  --surface: #111a2e;
+  --surface-2: #16213a;
+  --sidebar: #0d1527;
+  --line: #1f2c47;
+  --line-strong: #2e4066;
+  --hover: rgba(96, 165, 250, 0.08);
+
+  --ink: #e6edf7;
+  --muted: #8fa1bd;
+
+  --accent: #4f8dff;
+  --accent-strong: #8ab4ff;
+  --accent-soft: rgba(79, 141, 255, 0.16);
+  --on-accent: #0a1020;
+
+  --teal: #2dd4bf;
+  --amber: #fbbf24;
+  --coral: #fb7185;
+  --violet: #a78bfa;
+
+  --ok: #34d399;
+  --bad: #f87171;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-line: rgba(52, 211, 153, 0.4);
+  --warn-bg: rgba(251, 191, 36, 0.12);
+  --warn-line: rgba(251, 191, 36, 0.4);
+  --warn-text: #fcd34d;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.25);
+}

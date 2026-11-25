@@ -1,0 +1,8 @@
+---
+import PacientesPage from '@/components/pages/PacientesPage';
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout title="Pacientes" subtitle="Análisis demográfico, comunas, previsión y frecuencia de uso.">
+  <PacientesPage client:only="react" />
+</Layout>

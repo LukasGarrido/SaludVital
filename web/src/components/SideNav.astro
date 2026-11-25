@@ -1,0 +1,23 @@
+---
+import { NAV_ITEMS } from '@/lib/nav';
+
+const trim = (p: string) => p.replace(/\/+$/, '');
+const base = trim(import.meta.env.BASE_URL);
+const current = trim(Astro.url.pathname);
+
+const items = NAV_ITEMS.map((i) => {
+  const href = `${base}/${i.href}`;
+  return { label: i.label, href, active: trim(href) === current };
+});
+---
+
+<nav class="nav" aria-label="Navegación">
+  <div class="nav__label">Navegación</div>
+  {
+    items.map((i) => (
+      <a class="nav__link" href={i.href} aria-current={i.active ? 'page' : undefined}>
+        {i.label}
+      </a>
+    ))
+  }
+</nav>

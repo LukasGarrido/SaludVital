@@ -1,0 +1,31 @@
+{
+  "name": "saludvital-web",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "export-data": "python scripts/export_data.py",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@astrojs/react": "^7.1.9",
+    "@nanostores/react": "^2.0.1",
+    "astro": "^7.4.13",
+    "nanostores": "^1.5.5",
+    "plotly.js-basic-dist-min": "^4.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/node": "^26.6.7",
+    "@types/plotly.js-basic-dist-min": "^2.12.4",
+    "@types/react": "^19.3.1",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.1"
+  }
+}
