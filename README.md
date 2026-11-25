@@ -2,7 +2,7 @@
 
 # SaludVital BI
 
-Solución de BI (ETL + modelo dimensional + dashboard interactivo en Streamlit y Power BI) para analizar las atenciones médicas de SaludVital, centro médico ambulatorio privado de la Región del Biobío.
+Solución de BI (ETL + modelo dimensional + dashboard interactivo en Streamlit y Astro, y reporte en Power BI) para analizar las atenciones médicas de SaludVital, centro médico ambulatorio privado de la Región del Biobío.
 
 </div>
 
@@ -68,9 +68,30 @@ SaludVital/
 │   └── modelo_dimensional.py   # Script ETL en Python (Pandas)
 ├── theme/                      # Recursos visuales corporativos
 │   └── SaludVital.json         # Tema de diseño corporativo para Power BI
+├── web/                        # Dashboard alternativo en Astro + React (sitio estático)
+│   ├── scripts/
+│   │   └── export_data.py      # Exporta el modelo enriquecido a JSON (reutiliza app/data.py)
+│   ├── src/
+│   │   ├── data/dataset.json   # Modelo exportado (reservas, detalle, pacientes)
+│   │   ├── lib/                # Lógica pura en TypeScript: medidas, filtros, pruebas, formato
+│   │   ├── stores/             # Estado compartido: filtros y tema claro/oscuro
+│   │   ├── hooks/              # useFilteredData, useTokens
+│   │   ├── components/         # ui/, charts/, filters/, pages/ y piezas .astro
+│   │   ├── layouts/            # Layout.astro (barra lateral + contenido)
+│   │   ├── pages/              # Una ruta por página del panel
+│   │   └── styles/             # tokens.css (claro y oscuro), base.css, components.css
+│   ├── Dockerfile              # Imagen multi-etapa (dev y producción con nginx)
+│   ├── nginx.conf              # Configuración de nginx para el sitio estático
+│   ├── package.json            # Dependencias y scripts (dev, build, test, export-data)
+│   └── README.md               # Documentación técnica del dashboard Astro
 ├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, caché, .venv)
+├── Dockerfile                  # Imagen del dashboard de Streamlit
+├── docker-compose.yml          # Despliegue (producción): Streamlit + Astro (nginx)
+├── docker-compose.dev.yml      # Override de desarrollo: bind mounts y recarga en caliente
+├── .env.example                # Puertos configurables para docker compose
 ├── AGENTS.md                   # Guía de referencia para agentes de IA y desarrollo
 ├── app.py                      # Entrypoint de conveniencia para Streamlit
+├── LICENSE                     # Licencia MIT
 ├── README.md                   # Resumen ejecutivo del proyecto
 └── requirements.txt            # Dependencias de Python
 ```
@@ -79,7 +100,7 @@ SaludVital/
 
 ## Stack
 
-Python (Streamlit + Pandas + Plotly) · Power BI + DAX (reporte) · Jupyter Notebooks · Excel (fuente)
+Python (Streamlit + Pandas + Plotly) · Astro + React + TypeScript (dashboard estático) · Power BI + DAX (reporte) · Jupyter Notebooks · Excel (fuente)
 
 ## Ejecución del Dashboard en Streamlit
 
@@ -89,7 +110,7 @@ streamlit run app/app.py
 
 ## Dashboard alternativo en Astro
 
-El directorio [`web/`](web/README.md) contiene una réplica estática del panel construida con Astro + React, sin servidor Python:
+El directorio [`web/`](web/README.md) contiene una réplica estática del panel construida con Astro + React, sin servidor Python. Incluye las mismas cinco páginas, los filtros globales (con atajos de período y filtros avanzados) y un modo claro/oscuro.
 
 ```bash
 cd web
@@ -97,9 +118,44 @@ npm install
 npm run dev      # http://localhost:4321
 ```
 
+Otros comandos útiles (desde `web/`):
+
+```bash
+npm run export-data   # regenera el JSON desde data/modelo (requiere Python)
+npm test              # pruebas de paridad con Streamlit y de filtros
+npm run build         # chequeo de tipos + build estático en dist/
+```
+
+## Despliegue con Docker
+
+Ambos dashboards se pueden levantar con Docker Compose, tanto en desarrollo como en producción.
+
+| Servicio | Producción | Desarrollo |
+| --- | --- | --- |
+| Streamlit | http://localhost:8501 | http://localhost:8501 |
+| Astro | http://localhost:8080 (nginx) | http://localhost:4321 (dev server) |
+
+**Producción** (imágenes inmutables, usuario sin privilegios, sistema de archivos de solo lectura):
+
+```bash
+docker compose up -d --build
+```
+
+**Desarrollo** (código montado desde el host con recarga en caliente):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+Notas:
+
+- Los CSV del modelo (`data/modelo`) no están versionados ni van dentro de la imagen: Streamlit los lee del volumen `./data`. Si faltan, la app permite subirlos desde la interfaz. El dashboard de Astro no necesita volumen porque su JSON va en el repositorio.
+- Los puertos se pueden cambiar copiando `.env.example` a `.env`.
+- Para detener todo: `docker compose down`.
+
 ## Documentación y Guía de Uso
 
-- **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del dashboard de Streamlit y estructura.
+- **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso de los dashboards de Streamlit y Astro, y estructura.
 - **[Informe Formal de Proyecto (`docs/Informe_SaludVital.md`)](docs/Informe_SaludVital.md)**: Documento formal completo (v2.1) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.
 
 ## Licencia

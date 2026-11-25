@@ -1,0 +1,27 @@
+# Contexto de build de la imagen de Streamlit (raíz del repo): solo entra el código necesario.
+.git
+.gitignore
+.claude
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.ipynb_checkpoints
+
+# Datos y reportes: los datos se montan como volumen, nunca se hornean en la imagen
+data
+reports
+notebooks
+docs
+assets
+scripts
+theme
+
+# El dashboard de Astro tiene su propio Dockerfile y contexto (web/)
+web
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.env

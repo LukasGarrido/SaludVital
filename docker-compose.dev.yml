@@ -1,0 +1,39 @@
+# Override de desarrollo: código montado desde el host y recarga en caliente.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# Streamlit -> http://localhost:8501     Astro (dev server) -> http://localhost:4321
+
+services:
+  streamlit:
+    command:
+      - streamlit
+      - run
+      - app/app.py
+      - --server.port=8501
+      - --server.address=0.0.0.0
+      - --server.headless=true
+      - --server.runOnSave=true
+      - --server.fileWatcherType=poll   # los eventos de archivo no cruzan el bind mount en Windows/macOS
+    volumes:
+      - ./app:/app/app
+      - ./app.py:/app/app.py
+      - ./data:/app/data:ro
+    read_only: false
+
+  web:
+    build:
+      context: ./web
+      target: dev
+    image: saludvital/web:dev
+    ports: !override
+      - "${WEB_DEV_PORT:-4321}:4321"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"       # recarga en caliente sobre bind mounts
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules   # conserva las dependencias instaladas en la imagen
+    read_only: false
+
+volumes:
+  web_node_modules:

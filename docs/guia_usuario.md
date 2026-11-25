@@ -1,8 +1,8 @@
 <div align="center">
 
-# Guía de Usuario y del Repositorio — SaludVital BI & Streamlit
+# Guía de Usuario y del Repositorio — SaludVital BI, Streamlit & Astro
 
-Esta guía describe la arquitectura, la estructura del proyecto, el funcionamiento del pipeline ETL, el dashboard interactivo en Streamlit y las instrucciones para ejecutar y mantener la solución de Business Intelligence (BI) de **SaludVital**.
+Esta guía describe la arquitectura, la estructura del proyecto, el funcionamiento del pipeline ETL, los dashboards interactivos en Streamlit y Astro y las instrucciones para ejecutar y mantener la solución de Business Intelligence (BI) de **SaludVital**.
 
 </div>
 
@@ -45,11 +45,12 @@ SaludVital/
 │   │       └── verificacion_documentada.csv
 │   ├── SaludVital_BaseDatos.xlsx        # Libro Excel fuente período base
 │   └── SaludVital_DatosAdicionales.xlsx # Libro Excel fuente período adicional
+├── assets/                     # Recursos gráficos e imágenes del proyecto
+│   ├── universidad-tecnica-federico-santa-maria-seeklogo.png # Logo institucional
+│   └── img/                    # Figuras y visualizaciones del análisis (fig01 a fig17)
 ├── docs/                       # Documentación técnica y funcional
 │   ├── guia_usuario.md         # Guía de uso y funcionamiento del repo
-│   └── informe/                # Informe formal del proyecto (v2.1)
-│       ├── Informe_SaludVital.md # Informe integral de proyecto
-│       └── img/                # Figuras y visualizaciones del informe (fig01 a fig17)
+│   └── Informe_SaludVital.md   # Informe integral de proyecto (versión 2.1)
 ├── notebooks/                  # Análisis exploratorio interactivo
 │   └── analisis_saludvital.ipynb # Notebook Jupyter para análisis y respuestas a preguntas de negocio
 ├── reports/                    # Visualización Power BI
@@ -58,9 +59,30 @@ SaludVital/
 │   └── modelo_dimensional.py   # Script ETL en Python (Pandas)
 ├── theme/                      # Recursos visuales corporativos
 │   └── SaludVital.json         # Tema de diseño corporativo para Power BI
+├── web/                        # Dashboard alternativo en Astro + React (sitio estático)
+│   ├── scripts/
+│   │   └── export_data.py      # Exporta el modelo enriquecido a JSON (reutiliza app/data.py)
+│   ├── src/
+│   │   ├── data/dataset.json   # Modelo exportado (reservas, detalle, pacientes)
+│   │   ├── lib/                # Lógica pura en TypeScript: medidas, filtros, pruebas, formato
+│   │   ├── stores/             # Estado compartido: filtros y tema claro/oscuro
+│   │   ├── hooks/              # useFilteredData, useTokens
+│   │   ├── components/         # ui/, charts/, filters/, pages/ y piezas .astro
+│   │   ├── layouts/            # Layout.astro (barra lateral + contenido)
+│   │   ├── pages/              # Una ruta por página del panel
+│   │   └── styles/             # tokens.css (claro y oscuro), base.css, components.css
+│   ├── Dockerfile              # Imagen multi-etapa (dev y producción con nginx)
+│   ├── nginx.conf              # Configuración de nginx para el sitio estático
+│   ├── package.json            # Dependencias y scripts (dev, build, test, export-data)
+│   └── README.md               # Documentación técnica del dashboard Astro
 ├── .gitignore                  # Archivos ignorados (CSV, XLSX, PBIX, caché, .venv)
+├── Dockerfile                  # Imagen del dashboard de Streamlit
+├── docker-compose.yml          # Despliegue (producción): Streamlit + Astro (nginx)
+├── docker-compose.dev.yml      # Override de desarrollo: bind mounts y recarga en caliente
+├── .env.example                # Puertos configurables para docker compose
 ├── AGENTS.md                   # Guía de referencia para agentes de IA y desarrollo
 ├── app.py                      # Entrypoint de conveniencia para Streamlit
+├── LICENSE                     # Licencia MIT
 ├── README.md                   # Resumen ejecutivo del proyecto
 └── requirements.txt            # Dependencias de Python
 ```
@@ -81,6 +103,12 @@ SaludVital/
 3. **Instalación de Dependencias**:
    ```bash
    pip install -r requirements.txt
+   ```
+4. **Docker y Docker Compose** (opcional, para la sección 7).
+5. **Node.js 20+** (solo para ejecutar el dashboard en Astro sin Docker, sección 5):
+   ```bash
+   cd web
+   npm install
    ```
 
 ---
@@ -103,7 +131,8 @@ El tablero interactivo de SaludVital replica exactamente el cuadro de mando de P
 ### Arquitectura Modular (`app/`):
 - **`app/data.py`**: Carga las tablas del modelo dimensional, calcula columnas derivadas en `DimPaciente` (`Reservas del Paciente`, `Tramo Frecuencia`, `Orden Tramo`) y realiza uniones *many-to-one* con las dimensiones sin generar *fan-out*.
 - **`app/medidas.py`**: Contiene la lógica de cálculo para cada medida (Total Reservas, Tasas de Atención/Inasistencia/Cancelación, Ingresos, Ingreso Promedio, Horas Perdidas, Utilización, Cobertura de Bloque, Pacientes Distintos, etc.), formateadores en español y las pruebas de aceptación.
-- **`app/app.py`**: Interfaz de usuario estructurada en cinco páginas, con filtros globales en la barra lateral para rango de fechas, comuna y sexo.
+- **`app/styles.py`**: Capa visual del panel (CSS, tema de los gráficos Plotly y controles de filtros).
+- **`app/app.py`**: Interfaz de usuario estructurada en cinco páginas, con filtros globales en la barra lateral: atajo de período, rango de fechas, comuna y sexo, más un panel de filtros avanzados (especialidad, médico, estado de la reserva, previsión y canal), un resumen de filtros activos y un contador de reservas visibles.
 
 ### Páginas del Dashboard:
 1. **Resumen**: Cuatro tarjetas métricas (Total de reservas, Tasa de atención, Tasa de inasistencia, Ingreso valorizado), cuadros de Conclusiones y Recomendaciones operacionales, y la nota visible al pie.
@@ -123,13 +152,61 @@ streamlit run app.py
 
 ---
 
-## 5. Análisis Exploratorio y Power BI
+## 5. Dashboard en Astro (`web/`)
 
-### 5.1. Jupyter
+Réplica estática del panel de Streamlit construida con **Astro + React + TypeScript** y gráficos Plotly. No necesita servidor Python: el modelo dimensional se exporta una vez a JSON y todo el cálculo (filtros, medidas y pruebas de aceptación) ocurre en el navegador.
+
+### Ejecución
+
+Desde `web/`:
+
+| Comando | Acción |
+|---|---|
+| `npm install` | Instala las dependencias |
+| `npm run export-data` | Regenera `src/data/dataset.json` desde `data/modelo` (requiere Python) |
+| `npm run dev` | Servidor de desarrollo en `http://localhost:4321` |
+| `npm run build` | Chequeo de tipos y build estático en `dist/` |
+| `npm run preview` | Sirve `dist/` localmente |
+| `npm test` | Pruebas de paridad con Streamlit y de filtros |
+
+Para publicarlo en una subruta (por ejemplo GitHub Pages): `SITE_BASE=/SaludVital/ npm run build`.
+
+### Arquitectura
+
+- **`scripts/export_data.py`**: reutiliza `app/data.py` para exportar reservas, detalle y pacientes ya enriquecidos con sus dimensiones.
+- **`src/lib/`**: lógica pura sin React. `measures.ts` y `acceptance.ts` son el port de `calcular_medidas` y `ejecutar_pruebas_aceptacion`; `filters.ts` aplica los filtros globales con la misma semántica que Streamlit; `format.ts` entrega el formato es-CL (CLP, porcentajes, miles).
+- **`src/stores/`**: estado compartido entre páginas (filtros y tema), persistido en el navegador.
+- **`src/components/`**: componentes reutilizables (`ui/`, `charts/`, `filters/`), una isla React por página (`pages/`) y piezas estáticas `.astro`.
+- **`src/styles/`**: `tokens.css` define toda la paleta en variables CSS para el tema claro y el oscuro.
+
+### Páginas y filtros
+
+Las cinco páginas (Resumen, Visión ejecutiva, Gestión médica, Pacientes y Pruebas de aceptación) muestran los mismos indicadores que el dashboard de Streamlit. Los filtros globales de la barra lateral se conservan al navegar entre páginas:
+
+- Atajo de período (todo el período, enero, febrero, últimos 30 días) y rango de fechas.
+- Comuna y sexo (parten con todo seleccionado).
+- Filtros avanzados: especialidad, médico, estado de la reserva, previsión y canal (sin selección equivale a todos).
+- La frecuencia de uso de pacientes responde a comuna y sexo, pero no a la fecha.
+- Las pruebas de aceptación siempre se ejecutan sobre el modelo completo, sin filtros.
+
+### Modo claro y oscuro
+
+El botón de sol y luna junto a la marca alterna el tema. La primera vez se usa la preferencia del sistema y después se recuerda la elección. Para cambiar la identidad visual basta con editar `src/styles/tokens.css`.
+
+### Mantenimiento
+
+- Si cambia el modelo en `data/modelo` (por ejemplo, tras ejecutar el ETL), corre `npm run export-data` y commitea el JSON resultante.
+- La lógica de medidas existe en Python y en TypeScript: `npm test` verifica que las 16 pruebas de aceptación den las mismas cifras en ambas.
+
+---
+
+## 6. Análisis Exploratorio y Power BI
+
+### 6.1. Jupyter
 
 `notebooks/analisis_saludvital.ipynb` contiene el análisis exploratorio interactivo que valida las preguntas de negocio y recalcula los indicadores con las mismas definiciones DAX.
 
-### 5.2. Tablero de Power BI (`reports/SaludVital.pbix`)
+### 6.2. Tablero de Power BI (`reports/SaludVital.pbix`)
 
 El tablero oficial se apoya en el modelo en estrella (dos hechos y cuatro dimensiones) y en las medidas DAX del capítulo 9 del informe. Tiene cuatro páginas:
 
@@ -176,7 +253,7 @@ Las columnas calculadas de `DimPaciente` (`Reservas del Paciente`, `Tramo Frecue
 - Las horas perdidas y la utilización solo cubren las reservas con bloque horario.
 - Reservas por especialidad usa la especialidad del médico e ingresos por especialidad usa la de la prestación, por lo que no deben compararse directamente.
 
-### 5.3. Capturas del tablero
+### 6.3. Capturas del tablero
 
 Guarda una captura por página en `reports/capturas/` con estos nombres, que son los que usa el informe:
 
@@ -191,7 +268,61 @@ Para capturar, deja las segmentaciones sin selección y usa **Win + Shift + S**,
 
 ---
 
-## 6. Documentación Adicional
+## 7. Despliegue con Docker
 
-- **`docs/guia_usuario.md`**: Guía de uso y funcionamiento del repositorio y la aplicación.
-- **`docs/informe/Informe_SaludVital.md`**: Informe integral de proyecto (versión 2.1), con análisis estratégico, especificación ETL, modelo dimensional, medidas DAX, tablero Power BI (capítulo 9), valores de control (sección 10.4) y recomendaciones operacionales (sección 13.1).
+El repositorio incluye imágenes y archivos de Compose para ejecutar ambos dashboards sin instalar Python ni Node.
+
+### Archivos
+
+| Archivo | Función |
+|---|---|
+| `Dockerfile` | Imagen de Streamlit (Python 3.12 slim, usuario sin privilegios, healthcheck) |
+| `web/Dockerfile` | Imagen multi-etapa de Astro: target `dev` (servidor de desarrollo) y `prod` (nginx sin privilegios) |
+| `web/nginx.conf` | Sirve el sitio estático, caché larga para `/_astro/`, cabeceras de seguridad y `/healthz` |
+| `docker-compose.yml` | Despliegue de producción de ambos servicios |
+| `docker-compose.dev.yml` | Override de desarrollo con bind mounts y recarga en caliente |
+| `.env.example` | Puertos configurables (`STREAMLIT_PORT`, `WEB_PORT`, `WEB_DEV_PORT`) |
+
+### Producción
+
+```bash
+docker compose up -d --build
+```
+
+- Streamlit: `http://localhost:8501`
+- Astro (nginx): `http://localhost:8080`
+
+Los contenedores corren sin privilegios, con sistema de archivos de solo lectura y `no-new-privileges`. Ambos tienen `healthcheck`; revisa su estado con `docker compose ps`.
+
+### Desarrollo
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+- Streamlit (`app/` montado, recarga al guardar): `http://localhost:8501`
+- Astro (servidor de desarrollo con recarga en caliente): `http://localhost:4321`
+
+Se usa *polling* para detectar cambios porque los eventos de archivo no cruzan los bind mounts en Windows y macOS.
+
+### Datos
+
+`data/` está en `.gitignore`, por lo que los CSV del modelo **no se incluyen en la imagen**: Streamlit los lee del volumen `./data` (montado en solo lectura). Antes de levantarlo, genera el modelo con el pipeline ETL (sección 3). Si faltan, la app permite subir los archivos desde la interfaz. El dashboard de Astro no necesita volumen porque su `dataset.json` está versionado en `web/src/data/`.
+
+### Comandos útiles
+
+```bash
+docker compose logs -f streamlit      # logs de un servicio
+docker compose down                   # detiene y elimina los contenedores
+docker compose build --no-cache web   # reconstruye una imagen desde cero
+```
+
+> Si cambias el modelo, ejecuta `npm run export-data` en `web/` y reconstruye la imagen de Astro (`docker compose up -d --build web`).
+
+---
+
+## 8. Documentación Adicional
+
+- **`docs/guia_usuario.md`**: Guía de uso y funcionamiento del repositorio y las aplicaciones.
+- **`web/README.md`**: Documentación técnica del dashboard en Astro.
+- **`docs/Informe_SaludVital.md`**: Informe integral de proyecto (versión 2.1), con análisis estratégico, especificación ETL, modelo dimensional, medidas DAX, tablero Power BI (capítulo 9), valores de control (sección 10.4) y recomendaciones operacionales (sección 13.1).

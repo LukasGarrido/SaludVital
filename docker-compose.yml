@@ -1,0 +1,43 @@
+# Despliegue (producción): imágenes inmutables.
+#
+#   docker compose up -d --build
+#
+# Para desarrollo con recarga en caliente, superpón docker-compose.dev.yml:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+name: saludvital
+
+services:
+  # Dashboard de Streamlit. Necesita los CSV del modelo en ./data/modelo (no versionados):
+  # se montan en solo lectura. Si faltan, la app permite subirlos desde la interfaz.
+  streamlit:
+    build: .
+    image: saludvital/streamlit:latest
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    volumes:
+      - ./data:/app/data:ro
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  # Dashboard de Astro: sitio estático servido por nginx (no necesita datos externos).
+  web:
+    build:
+      context: ./web
+      target: prod
+      args:
+        SITE_BASE: ${SITE_BASE:-/}
+    image: saludvital/web:latest
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
