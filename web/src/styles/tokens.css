@@ -1,0 +1,23 @@
+/* Tokens de diseño: tema oscuro "Red & Graphite" de SaludVital */
+:root {
+  --bg: #0b1215;
+  --surface: #131c21;
+  --surface-2: #16222a;
+  --sidebar: #080e11;
+  --line: #223038;
+  --line-strong: #34464f;
+  --ink: #e8eef0;
+  --muted: #8da2a8;
+  --accent: #e05a6d;
+  --accent-soft: rgba(224, 90, 109, 0.16);
+  --teal: #4fb3a8;
+  --ok: #10b981;
+  --bad: #ef4444;
+
+  --radius-sm: 9px;
+  --radius: 12px;
+  --radius-lg: 14px;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  --font: 'Figtree', 'Segoe UI', system-ui, sans-serif;
+  --sidebar-w: 300px;
+}
