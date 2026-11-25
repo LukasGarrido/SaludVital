@@ -29,7 +29,21 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Sincroniza el estado de los botones al cargar y tras cada navegación
-const sync = () => apply(root.dataset.sidebar === 'pinned' ? 'pinned' : 'collapsed');
+const trim = (p: string) => p.replace(/\/+$/, '') || '/';
+
+/** La barra persiste entre páginas (transition:persist), así que el enlace activo se actualiza aquí. */
+function markActive(): void {
+  const current = trim(location.pathname);
+  document.querySelectorAll<HTMLAnchorElement>('.nav__link').forEach((a) => {
+    if (trim(new URL(a.href).pathname) === current) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  });
+}
+
+// Sincroniza botones y enlace activo al cargar y tras cada navegación
+const sync = () => {
+  apply(root.dataset.sidebar === 'pinned' ? 'pinned' : 'collapsed');
+  markActive();
+};
 sync();
 document.addEventListener('astro:page-load', sync);
