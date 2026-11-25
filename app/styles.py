@@ -121,6 +121,11 @@ hr {{ border:none !important; border-top:1px solid var(--line) !important; margi
 [data-testid="stMetric"]:hover {{ transform:translateY(-2px); border-color:#34464F; border-left-color:var(--accent); }}
 [data-testid="stMetricLabel"] p {{ text-transform:uppercase; letter-spacing:.04em; font-size:.74rem !important; }}
 
+[data-testid="stMetricLabel"] {{ min-height:2.1em; align-items:flex-start; }}
+[data-testid="stMetricLabel"] * {{ white-space:normal !important; overflow:visible !important; text-overflow:clip !important; }}
+[data-testid="stMetricValue"], [data-testid="stMetricValue"] * {{ white-space:nowrap !important; overflow:visible !important; text-overflow:clip !important; }}
+[data-testid="stMetricValue"] {{ font-size:clamp(1rem,1.45vw,1.8rem) !important; }}
+
 /* Tablas y alertas */
 [data-testid="stDataFrame"] {{ box-shadow:0 6px 18px rgba(0,0,0,.2); }}
 [data-testid="stAlert"] {{ border-left:3px solid var(--teal); }}
