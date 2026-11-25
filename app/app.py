@@ -103,7 +103,7 @@ def main():
         for k in avanzados:
             st.session_state[k] = []
 
-    st.sidebar.button("Limpiar filtros", on_click=_limpiar, use_container_width=True)
+    st.sidebar.button("Limpiar filtros", on_click=_limpiar, width="stretch")
 
     st.sidebar.selectbox("Atajo de período", list(periodos), key="atajo_periodo", on_change=_aplicar_periodo)
     rango_fechas = st.sidebar.date_input(
@@ -259,7 +259,7 @@ def main():
                     color_discrete_sequence=PALETTE
                 )
                 fig_est.update_traces(textinfo="percent+label")
-                st.plotly_chart(fig_est, use_container_width=True)
+                st.plotly_chart(fig_est, width="stretch")
             else:
                 st.info("Sin datos de estado.")
 
@@ -283,7 +283,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_mes.update_traces(textposition="outside")
-                st.plotly_chart(fig_mes, use_container_width=True)
+                st.plotly_chart(fig_mes, width="stretch")
             else:
                 st.info("Sin datos de fecha de reserva.")
 
@@ -302,7 +302,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_esp.update_traces(textposition="outside")
-                st.plotly_chart(fig_esp, use_container_width=True)
+                st.plotly_chart(fig_esp, width="stretch")
             else:
                 st.info("Sin datos de especialidad.")
 
@@ -327,7 +327,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_ing.update_traces(textposition="outside")
-                st.plotly_chart(fig_ing, use_container_width=True)
+                st.plotly_chart(fig_ing, width="stretch")
             else:
                 st.info("Sin datos de ingresos mensuales.")
 
@@ -351,7 +351,7 @@ def main():
                     "Tasa de Cancelación": format_pct(m_sub["TasaCancelacion"])
                 })
             df_tasas_mes = pd.DataFrame(tasas_mes_rows)
-            st.dataframe(df_tasas_mes, use_container_width=True)
+            st.dataframe(df_tasas_mes, width="stretch")
         else:
             st.info("Sin datos para calcular tasas por mes.")
 
@@ -379,7 +379,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_med_at.update_traces(textposition="outside")
-                st.plotly_chart(fig_med_at, use_container_width=True)
+                st.plotly_chart(fig_med_at, width="stretch")
             else:
                 st.info("Sin datos.")
 
@@ -395,7 +395,7 @@ def main():
                     orientation="h",
                     color_discrete_sequence=PALETTE
                 )
-                st.plotly_chart(fig_med_est, use_container_width=True)
+                st.plotly_chart(fig_med_est, width="stretch")
             else:
                 st.info("Sin datos.")
 
@@ -419,7 +419,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_esp_in.update_traces(textposition="outside")
-                st.plotly_chart(fig_esp_in, use_container_width=True)
+                st.plotly_chart(fig_esp_in, width="stretch")
             else:
                 st.info("Sin datos.")
 
@@ -449,7 +449,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_hp.update_traces(textposition="outside")
-                st.plotly_chart(fig_hp, use_container_width=True)
+                st.plotly_chart(fig_hp, width="stretch")
             else:
                 st.info("Sin datos.")
 
@@ -470,7 +470,7 @@ def main():
                 color_discrete_sequence=[COLOR_BARS]
             )
             fig_can.update_traces(textposition="outside")
-            st.plotly_chart(fig_can, use_container_width=True)
+            st.plotly_chart(fig_can, width="stretch")
         else:
             st.info("Sin datos de canal.")
 
@@ -514,7 +514,7 @@ def main():
                 styled_df = df_desempeno.style.applymap(color_tasa, subset=["Tasa de Atención"])
             else:
                 styled_df = df_desempeno.style.apply(color_tasa, subset=["Tasa de Atención"])
-            st.dataframe(styled_df.format(format_dict), use_container_width=True)
+            st.dataframe(styled_df.format(format_dict), width="stretch")
         else:
             st.info("Sin datos de médico.")
 
@@ -550,7 +550,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_com.update_traces(textposition="outside")
-                st.plotly_chart(fig_com, use_container_width=True)
+                st.plotly_chart(fig_com, width="stretch")
             else:
                 st.info("Sin datos de comuna.")
 
@@ -566,7 +566,7 @@ def main():
                     color_discrete_map={"FONASA": COLOR_FONASA, "Isapre": COLOR_ISAPRE_PRIMARY}
                 )
                 fig_pr.update_traces(textinfo="percent+label")
-                st.plotly_chart(fig_pr, use_container_width=True)
+                st.plotly_chart(fig_pr, width="stretch")
             else:
                 st.info("Sin datos de previsión.")
 
@@ -583,7 +583,7 @@ def main():
                     color_discrete_map={"FONASA": COLOR_FONASA, "Isapre": COLOR_ISAPRE_PRIMARY}
                 )
                 fig_pi.update_traces(textinfo="percent+label")
-                st.plotly_chart(fig_pi, use_container_width=True)
+                st.plotly_chart(fig_pi, width="stretch")
             else:
                 st.info("Sin datos de ingresos por previsión.")
 
@@ -604,7 +604,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_freq.update_traces(textposition="outside")
-                st.plotly_chart(fig_freq, use_container_width=True)
+                st.plotly_chart(fig_freq, width="stretch")
             else:
                 st.info("Sin datos de frecuencia.")
 
@@ -628,7 +628,7 @@ def main():
                 color_discrete_sequence=[COLOR_BARS]
             )
             fig_p_mes.update_traces(textposition="outside")
-            st.plotly_chart(fig_p_mes, use_container_width=True)
+            st.plotly_chart(fig_p_mes, width="stretch")
         else:
             st.info("Sin datos.")
 
@@ -637,7 +637,7 @@ def main():
             df_inas = df_res_filtered[df_res_filtered["EstadoReserva"] == "No asistió"].groupby("PacienteID").size().reset_index(name="Reservas No Asistió")
             df_inas = df_inas[df_inas["Reservas No Asistió"] >= 2]
             if not df_inas.empty:
-                st.dataframe(df_inas, use_container_width=True)
+                st.dataframe(df_inas, width="stretch")
             else:
                 st.info("Sin pacientes con 2 o más inasistencias.")
         else:
@@ -654,6 +654,9 @@ def main():
 
         pruebas = ejecutar_pruebas_aceptacion(hecho_reservas, hecho_detalle)
         df_pruebas = pd.DataFrame(pruebas)
+        for _c in df_pruebas.columns:
+            if _c != "ok":
+                df_pruebas[_c] = df_pruebas[_c].astype(str)
 
         def style_ok(val):
             return 'color: #10B981; font-weight: bold;' if val else 'color: #EF4444; font-weight: bold;'
@@ -664,7 +667,7 @@ def main():
             styled_pruebas = df_pruebas.style.applymap(style_ok, subset=["ok"])
         else:
             styled_pruebas = df_pruebas.style.apply(style_ok, subset=["ok"])
-        st.dataframe(styled_pruebas, use_container_width=True)
+        st.dataframe(styled_pruebas, width="stretch")
         
         ok_count = sum(1 for p in pruebas if p["ok"])
         total_count = len(pruebas)
