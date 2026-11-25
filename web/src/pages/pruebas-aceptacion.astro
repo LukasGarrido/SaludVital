@@ -1,0 +1,11 @@
+---
+import PruebasPage from '@/components/pages/PruebasPage';
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout
+  title="Pruebas de aceptación"
+  subtitle="Validación automática de los 16 indicadores clave del modelo dimensional y financiero."
+>
+  <PruebasPage client:only="react" />
+</Layout>
