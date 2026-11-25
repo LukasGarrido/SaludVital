@@ -2,7 +2,9 @@
 import Brand from '@/components/Brand.astro';
 import PageHeader from '@/components/PageHeader.astro';
 import SideNav from '@/components/SideNav.astro';
+import FilterPanel from '@/components/filters/FilterPanel';
 import '@/styles/base.css';
+import '@/styles/components.css';
 
 interface Props {
   title: string;
@@ -26,6 +28,7 @@ const { title, subtitle } = Astro.props;
         <hr class="side-divider" />
         <SideNav />
         <hr class="side-divider" />
+        <FilterPanel client:only="react" />
       </aside>
       <main class="app__main">
         <PageHeader title={title} subtitle={subtitle} />
