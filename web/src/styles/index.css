@@ -1,5 +1,6 @@
 /* Punto de entrada de los estilos (orden = cascada) */
 @import './base.css';
+@import './glass.css';
 @import './layout.css';
 @import './cards.css';
 @import './charts.css';

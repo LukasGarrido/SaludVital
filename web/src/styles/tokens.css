@@ -1,82 +1,115 @@
 /*
- * Tokens de diseño. Tema claro por defecto; el oscuro se activa con
- * <html data-theme="dark">. Estética minimalista: superficies planas,
- * bordes finos y un único azul de acento con colores de contraste puntuales.
+ * Tokens de diseño — estilo "glass" minimalista en azules.
+ * Tema claro por defecto; el oscuro se activa con <html data-theme="dark">.
+ * Las superficies son translúcidas (--glass-*) y se apoyan en el fondo con halos azules (base.css).
  */
 :root {
   color-scheme: light;
   --scheme: light;
 
-  --bg: #f5f7fb;
-  --surface: #ffffff;
-  --surface-2: #f0f4fa;
-  --sidebar: #ffffff;
-  --line: #e4e9f2;
-  --line-strong: #cfd8e6;
-  --hover: rgba(37, 99, 235, 0.06);
+  /* Fondo */
+  --bg: #eaf1fc;
+  --bg-orb-1: rgba(59, 130, 246, 0.35);
+  --bg-orb-2: rgba(56, 189, 248, 0.28);
+  --bg-orb-3: rgba(99, 102, 241, 0.2);
 
-  --ink: #0f172a;
-  --muted: #64748b;
+  /* Vidrio */
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-strong: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-edge: rgba(15, 40, 100, 0.08);
+  --glass-shine: rgba(255, 255, 255, 0.9);
+  --tooltip: #ffffff;
+  --blur: 18px;
+  --blur-strong: 26px;
 
+  /* Compatibilidad con componentes existentes */
+  --surface: var(--glass);
+  --surface-2: rgba(255, 255, 255, 0.4);
+  --sidebar: var(--glass-strong);
+  --line: rgba(30, 64, 140, 0.12);
+  --line-strong: rgba(30, 64, 140, 0.24);
+  --hover: rgba(37, 99, 235, 0.08);
+
+  --ink: #0b1b3a;
+  --muted: #5b6b88;
+
+  /* Azules */
   --accent: #2563eb;
   --accent-strong: #1d4ed8;
-  --accent-soft: rgba(37, 99, 235, 0.1);
+  --accent-soft: rgba(37, 99, 235, 0.12);
   --on-accent: #ffffff;
+  --sky: #0ea5e9;
+  --indigo: #4f46e5;
+  --teal: #0d9488;
 
-  /* Colores de contraste */
-  --teal: #0ea5a4;
-  --amber: #f59e0b;
-  --coral: #f43f5e;
-  --violet: #7c3aed;
-
+  /* Estados */
   --ok: #059669;
   --bad: #dc2626;
   --ok-bg: rgba(5, 150, 105, 0.1);
-  --ok-line: rgba(5, 150, 105, 0.35);
+  --ok-line: rgba(5, 150, 105, 0.3);
   --warn-bg: rgba(245, 158, 11, 0.12);
   --warn-line: rgba(245, 158, 11, 0.4);
   --warn-text: #b45309;
 
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 14px;
-  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.05);
-  --font: 'Inter', 'Figtree', 'Segoe UI', system-ui, sans-serif;
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 18px;
+  --shadow: 0 1px 1px rgba(15, 40, 100, 0.04), 0 8px 28px rgba(30, 64, 140, 0.1);
+  --shadow-lift: 0 1px 1px rgba(15, 40, 100, 0.05), 0 14px 36px rgba(30, 64, 140, 0.16);
+
+  --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  /* Barra lateral: riel colapsado y expandido */
+  --rail-w: 76px;
   --sidebar-w: 300px;
+
+  /* Movimiento */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 0.18s;
+  --t-med: 0.35s;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
   --scheme: dark;
 
-  --bg: #0a1020;
-  --surface: #111a2e;
-  --surface-2: #16213a;
-  --sidebar: #0d1527;
-  --line: #1f2c47;
-  --line-strong: #2e4066;
-  --hover: rgba(96, 165, 250, 0.08);
+  --bg: #060d1f;
+  --bg-orb-1: rgba(37, 99, 235, 0.42);
+  --bg-orb-2: rgba(14, 165, 233, 0.22);
+  --bg-orb-3: rgba(99, 102, 241, 0.26);
 
-  --ink: #e6edf7;
-  --muted: #8fa1bd;
+  --glass: rgba(18, 30, 60, 0.5);
+  --glass-strong: rgba(14, 24, 50, 0.72);
+  --glass-border: rgba(140, 180, 255, 0.14);
+  --glass-edge: rgba(0, 0, 0, 0.35);
+  --glass-shine: rgba(160, 200, 255, 0.12);
+  --tooltip: #0f1b38;
 
-  --accent: #4f8dff;
-  --accent-strong: #8ab4ff;
-  --accent-soft: rgba(79, 141, 255, 0.16);
-  --on-accent: #0a1020;
+  --surface-2: rgba(30, 48, 92, 0.4);
+  --line: rgba(140, 180, 255, 0.14);
+  --line-strong: rgba(140, 180, 255, 0.3);
+  --hover: rgba(96, 165, 250, 0.1);
 
+  --ink: #e8f0ff;
+  --muted: #94a8cc;
+
+  --accent: #5b9bff;
+  --accent-strong: #9cc2ff;
+  --accent-soft: rgba(91, 155, 255, 0.18);
+  --on-accent: #06122b;
+  --sky: #38bdf8;
+  --indigo: #818cf8;
   --teal: #2dd4bf;
-  --amber: #fbbf24;
-  --coral: #fb7185;
-  --violet: #a78bfa;
 
   --ok: #34d399;
   --bad: #f87171;
   --ok-bg: rgba(52, 211, 153, 0.12);
-  --ok-line: rgba(52, 211, 153, 0.4);
+  --ok-line: rgba(52, 211, 153, 0.35);
   --warn-bg: rgba(251, 191, 36, 0.12);
   --warn-line: rgba(251, 191, 36, 0.4);
   --warn-text: #fcd34d;
 
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.25);
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.32);
+  --shadow-lift: 0 1px 1px rgba(0, 0, 0, 0.35), 0 16px 40px rgba(0, 0, 0, 0.45);
 }

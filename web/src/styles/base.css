@@ -17,8 +17,22 @@ body {
   font-family: var(--font);
   color: var(--ink);
   background: var(--bg);
-  transition: background 0.2s, color 0.2s;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Halos azules desenfocados detrás de todo: dan profundidad al vidrio */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40vmax 40vmax at 12% 8%, var(--bg-orb-1), transparent 70%),
+    radial-gradient(36vmax 36vmax at 88% 18%, var(--bg-orb-2), transparent 70%),
+    radial-gradient(44vmax 44vmax at 70% 95%, var(--bg-orb-3), transparent 70%);
+  transition: opacity var(--t-med) var(--ease);
 }
 
 h1,
@@ -36,7 +50,11 @@ select {
 
 :focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent-soft);
 }
 
 ::-webkit-scrollbar {
@@ -46,6 +64,8 @@ select {
 ::-webkit-scrollbar-thumb {
   background: var(--line-strong);
   border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-track {
   background: transparent;

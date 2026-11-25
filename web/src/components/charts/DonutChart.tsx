@@ -29,7 +29,7 @@ export default function DonutChart({ data, colors, height = 360 }: Props) {
             const role = colors?.[d.key];
             return (role ? (t[role] as string) : undefined) ?? t.palette[i % t.palette.length];
           }),
-          line: { color: t.surface, width: 2 },
+          line: { color: t.edge, width: 2 },
         },
         sort: false,
         hovertemplate: '%{label}: %{value} (%{percent})<extra></extra>',

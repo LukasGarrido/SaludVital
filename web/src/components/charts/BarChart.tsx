@@ -40,7 +40,7 @@ export default function BarChart({
         textposition: 'outside',
         cliponaxis: false,
         textfont: { color: t.ink, size: 12 },
-        marker: { color: barColor, line: { color: t.surface, width: 2 } },
+        marker: { color: barColor, line: { width: 0 } },
         hovertemplate: orientation === 'v' ? '%{x}: %{text}<extra></extra>' : '%{y}: %{text}<extra></extra>',
       },
     ];
