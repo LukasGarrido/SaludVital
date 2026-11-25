@@ -1,0 +1,55 @@
+/* Tablas (contenedor de vidrio en glass.css) */
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.table th,
+.table td {
+  padding: 0.65rem 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table th {
+  background: var(--surface-2);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.table tbody tr {
+  transition: background var(--t-fast);
+}
+.table tbody tr:hover {
+  background: var(--hover);
+}
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+.table .is-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.table__sort {
+  all: unset;
+  cursor: pointer;
+  transition: color var(--t-fast);
+}
+.table__sort:hover {
+  color: var(--accent);
+}
+.cell-ok {
+  color: var(--ok);
+  font-weight: 700;
+}
+.cell-bad {
+  color: var(--bad);
+  font-weight: 700;
+}

@@ -1,0 +1,259 @@
+/*
+ * Estructura de la app: barra lateral (riel que se expande), navegación y cabecera.
+ *
+ * Móvil / pantallas angostas: la barra va arriba, siempre expandida.
+ * Escritorio (>= 901px): la barra es un panel flotante de vidrio que vive como riel de iconos
+ * y se expande al pasar el cursor o al enfocarla con teclado. El botón "fijar" la deja abierta
+ * (<html data-sidebar="pinned">) y desplaza el contenido; colapsada, la expansión es un overlay.
+ */
+:root {
+  --gutter: 14px;
+  --rail: 64px;
+  --panel: 288px;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.app__sidebar {
+  margin: var(--gutter);
+  padding: 1rem 0.9rem 1.2rem;
+  border-radius: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.app__main {
+  padding: 1.6rem 1.1rem 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── Encabezado de página ── */
+.page-header {
+  position: relative;
+  margin-bottom: 1.6rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+.page-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 72px;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--hot), var(--accent) 60%, var(--sky));
+}
+.page-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+.page-header p {
+  margin-top: 0.4rem;
+  color: var(--muted);
+}
+
+/* ── Marca ── */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.15rem 0 0.15rem 3px;
+}
+.brand__mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--sky));
+  box-shadow: 0 6px 16px var(--accent-soft);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.brand__name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.brand__sub {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── Navegación ── */
+.side-head {
+  margin-bottom: 0.7rem;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.nav__link {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 0.75rem 0.7rem 13px;
+  border-radius: 16px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.nav__link .icon {
+  flex: none;
+}
+.nav__link:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+.nav__link[aria-current='page'] {
+  background: linear-gradient(135deg, var(--accent), var(--sky));
+  color: var(--on-accent);
+  font-weight: 650;
+  box-shadow: 0 8px 22px var(--accent-glow);
+}
+.side-text {
+  white-space: nowrap;
+  transition: opacity var(--t-med) var(--ease);
+}
+
+/* ── Filtros dentro de la barra ── */
+.side-rail-hint {
+  display: none;
+  place-items: center;
+  height: 40px;
+  color: var(--muted);
+}
+.side-collapsible {
+  margin-top: 0.6rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+.side-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+/* ── Pie: tema y fijar ── */
+.side-foot {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+.theme-toggle,
+.side-btn {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--glass-strong);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast), transform var(--t-fast);
+}
+.theme-toggle:hover,
+.side-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.theme-toggle:active,
+.side-btn:active {
+  transform: scale(0.94);
+}
+.side-pin[aria-pressed='true'] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: transparent;
+}
+/* El botón de fijar solo tiene sentido con la barra flotante */
+.side-pin {
+  display: none;
+}
+
+/* ═══ Escritorio: barra flotante tipo riel ═══ */
+@media (min-width: 901px) {
+  .app__sidebar {
+    position: fixed;
+    z-index: 30;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--rail);
+    padding: 1rem 0.55rem 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    transition:
+      width var(--t-med) var(--ease),
+      box-shadow var(--t-med) var(--ease),
+      background var(--t-med) var(--ease);
+  }
+  .app__sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .app__main {
+    margin-left: calc(var(--gutter) * 2 + var(--rail) + 0.6rem);
+    margin-right: 0;
+    padding: 2.2rem 2.2rem 3rem 1.2rem;
+    transition: margin-left var(--t-med) var(--ease);
+  }
+
+  /* Estado expandido: cursor encima, foco de teclado o fijada */
+  .app__sidebar:is(:hover, :has(:focus-visible)),
+  [data-sidebar='pinned'] .app__sidebar {
+    width: var(--panel);
+  }
+  .app__sidebar:is(:hover, :has(:focus-visible)) {
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(170%);
+    backdrop-filter: blur(var(--blur-strong)) saturate(170%);
+    box-shadow: var(--shadow-lift), inset 0 1px 0 var(--glass-shine);
+  }
+  [data-sidebar='pinned'] .app__main {
+    margin-left: calc(var(--gutter) * 2 + var(--panel) + 0.6rem);
+  }
+
+  .side-pin {
+    display: grid;
+  }
+
+  /* Estado colapsado (riel): oculta textos y filtros, deja solo iconos */
+  [data-sidebar='collapsed'] .app__sidebar:not(:hover):not(:has(:focus-visible)) .side-text {
+    opacity: 0;
+  }
+  [data-sidebar='collapsed'] .app__sidebar:not(:hover):not(:has(:focus-visible)) .side-collapsible {
+    display: none;
+  }
+  [data-sidebar='collapsed'] .app__sidebar:not(:hover):not(:has(:focus-visible)) .side-rail-hint {
+    display: grid;
+  }
+  [data-sidebar='collapsed'] .app__sidebar:not(:hover):not(:has(:focus-visible)) .side-foot {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Anclaje de los controles del pie al fondo */
+  .side-foot {
+    margin-top: auto;
+    padding-top: 0.8rem;
+  }
+}

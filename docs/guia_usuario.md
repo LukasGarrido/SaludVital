@@ -70,7 +70,7 @@ SaludVital/
 │   │   ├── components/         # ui/, charts/, filters/, pages/ y piezas .astro
 │   │   ├── layouts/            # Layout.astro (barra lateral + contenido)
 │   │   ├── pages/              # Una ruta por página del panel
-│   │   └── styles/             # tokens.css (claro y oscuro), base.css, components.css
+│   │   └── styles/             # tokens, base, glass, layout, cards, charts, table, filters, motion
 │   ├── Dockerfile              # Imagen multi-etapa (dev y producción con nginx)
 │   ├── nginx.conf              # Configuración de nginx para el sitio estático
 │   ├── package.json            # Dependencias y scripts (dev, build, test, export-data)
@@ -189,9 +189,16 @@ Las cinco páginas (Resumen, Visión ejecutiva, Gestión médica, Pacientes y Pr
 - La frecuencia de uso de pacientes responde a comuna y sexo, pero no a la fecha.
 - Las pruebas de aceptación siempre se ejecutan sobre el modelo completo, sin filtros.
 
+### Diseño glass, menú expandible y transiciones
+
+- **Estilo:** vidrio translúcido en azules con el coral de SaludVital como acento cálido.
+- **Menú lateral:** riel de iconos que se expande al pasar el cursor; el botón inferior lo fija abierto (se recuerda la elección).
+- **Navegación:** transiciones animadas entre páginas sin recargar; el menú y los filtros se conservan.
+- **Gráficos:** barras que crecen al aparecer, barra máxima destacada y transición suave al filtrar.
+
 ### Modo claro y oscuro
 
-El botón de sol y luna junto a la marca alterna el tema. La primera vez se usa la preferencia del sistema y después se recuerda la elección. Para cambiar la identidad visual basta con editar `src/styles/tokens.css`.
+El botón de sol y luna en la parte inferior del menú lateral alterna el tema. La primera vez se usa la preferencia del sistema y después se recuerda la elección. Para cambiar la identidad visual basta con editar `src/styles/tokens.css`.
 
 ### Mantenimiento
 

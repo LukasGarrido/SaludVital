@@ -25,13 +25,14 @@ export default function StackedBarChart({ categories, series, height }: Props) {
         name: s.name,
         y: categories,
         x: s.values,
-        marker: { color: t.palette[i % t.palette.length], line: { color: t.surface, width: 1 } },
+        marker: { color: t.palette[i % t.palette.length], line: { width: 0 } },
         hovertemplate: '%{y} · ' + s.name + ': %{x}<extra></extra>',
       })),
     [categories, series, t],
   );
   return (
     <PlotlyChart
+      kind="h"
       data={traces}
       layout={{ barmode: 'stack', bargap: 0.25 }}
       height={height ?? Math.max(300, categories.length * 34 + 110)}

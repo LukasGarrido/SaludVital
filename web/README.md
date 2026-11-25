@@ -47,7 +47,8 @@ web/
 │   │   ├── filters/            #   FilterPanel y sus controles
 │   │   └── pages/              #   una isla React por página
 │   ├── pages/                  # Rutas Astro (una por página del panel)
-│   └── styles/                 # tokens.css (claro + oscuro), base.css, components.css
+│   ├── scripts/sidebar.ts      # Barra lateral: fijar/colapsar y enlace activo
+│   └── styles/                 # Módulos CSS (ver más abajo)
 └── vitest.config.ts
 ```
 
@@ -57,9 +58,42 @@ web/
 Los filtros viven en un store compartido, por lo que se conservan al navegar entre páginas.
 Las islas usan `client:only="react"` porque dependen del estado del navegador.
 
+### Estilos (glass)
+
+Los estilos se dividen en módulos que `styles/index.css` importa en orden de cascada:
+
+| Archivo | Contenido |
+| --- | --- |
+| `tokens.css` | Variables de diseño del tema claro y oscuro (colores, vidrio, radios, sombras, movimiento) |
+| `base.css` | Reset, tipografía y fondo con halos de luz |
+| `glass.css` | Superficie de vidrio compartida: degradado, resplandor azul, borde luminoso y desenfoque |
+| `layout.css` | Estructura, cabecera, marca y barra lateral |
+| `cards.css`, `table.css`, `filters.css`, `charts.css` | Componentes |
+| `motion.css` | Transiciones entre vistas, entrada escalonada y `prefers-reduced-motion` |
+
+### Barra lateral expandible
+
+En escritorio la barra es un panel flotante de vidrio que vive como **riel de iconos** y se expande al pasar el cursor
+(o al enfocarla con el teclado) como un overlay. El botón de la parte inferior la **fija** abierta y desplaza el contenido;
+el estado se recuerda en `localStorage` y se aplica desde el `<head>` para evitar saltos. En pantallas angostas la barra
+pasa arriba y queda siempre expandida.
+
+### Transiciones entre vistas
+
+El `Layout` usa `ClientRouter` de Astro (View Transitions): la navegación no recarga el documento, la barra lateral
+**persiste** entre páginas (conserva filtros y estado) y el contenido entra con una animación definida en
+`lib/transitions.ts` y `styles/motion.css`. Las páginas se precargan al pasar el cursor por los enlaces.
+Con `prefers-reduced-motion` todas las animaciones se desactivan.
+
+### Gráficos
+
+Las barras son azules translúcidas con la de mayor valor destacada (azul vivo con resplandor); crecen desde el eje al
+aparecer y se interpolan al cambiar los filtros. El donut muestra el total al centro y los tooltips son burbujas blancas.
+Los colores se leen de las variables CSS (`lib/chartTheme.ts`), por lo que siguen al tema activo.
+
 ### Tema claro y oscuro
 
-La paleta es minimalista: superficies planas, un azul de acento y colores de contraste puntuales (ámbar, turquesa, coral, violeta).
+La paleta es azul sobre vidrio, con el **coral de SaludVital** (`--hot`) como único acento cálido de contraste (segmentos de alerta, previsión Isapre, línea del encabezado).
 Todos los colores viven como variables CSS en `src/styles/tokens.css`; el modo oscuro se activa con `<html data-theme="dark">`.
 Un script en el `<head>` aplica la preferencia guardada (o la del sistema) antes de pintar, y los gráficos Plotly leen las mismas variables, por lo que cambian de tema sin recargar.
 Para ajustar la identidad visual basta con editar `tokens.css`.

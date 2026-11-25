@@ -11,7 +11,11 @@ export const $theme = atom<Theme>(initial());
 
 /** Aplica el tema al documento, lo recuerda y avisa a los gráficos. */
 export function setTheme(theme: Theme): void {
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  // Clase temporal que suaviza el cambio de color en toda la interfaz (ver styles/motion.css)
+  root.classList.add('theme-fade');
+  root.dataset.theme = theme;
+  window.setTimeout(() => root.classList.remove('theme-fade'), 450);
   try {
     localStorage.setItem(THEME_KEY, theme);
   } catch {
