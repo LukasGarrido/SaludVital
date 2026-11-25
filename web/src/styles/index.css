@@ -1,0 +1,7 @@
+/* Punto de entrada de los estilos (orden = cascada) */
+@import './base.css';
+@import './layout.css';
+@import './cards.css';
+@import './charts.css';
+@import './table.css';
+@import './filters.css';

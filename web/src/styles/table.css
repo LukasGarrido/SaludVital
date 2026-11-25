@@ -1,0 +1,52 @@
+/* Tablas */
+
+/* ── Tablas ── */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.table th,
+.table td {
+  padding: 0.55rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table th {
+  background: var(--surface-2);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+.table tbody tr:hover {
+  background: var(--hover);
+}
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+.table .is-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.table__sort {
+  all: unset;
+  cursor: pointer;
+}
+.table__sort:hover {
+  color: var(--ink);
+}
+.cell-ok {
+  color: var(--ok);
+  font-weight: 700;
+}
+.cell-bad {
+  color: var(--bad);
+  font-weight: 700;
+}
