@@ -91,3 +91,7 @@ streamlit run app/app.py
 
 - **[Guía de Usuario (`docs/guia_usuario.md`)](docs/guia_usuario.md)**: Instrucciones detalladas de configuración, ejecución del pipeline ETL, uso del dashboard de Streamlit y estructura.
 - **[Informe Formal de Proyecto (`docs/Informe_SaludVital.md`)](docs/Informe_SaludVital.md)**: Documento formal completo (v2.1) con análisis, reglas, ETL, modelo dimensional, medidas DAX y validación con Jupyter.
+
+## Licencia
+
+El código se distribuye bajo licencia [MIT](LICENSE). Los datos incluidos son simulados y no corresponden a la operación real de SaludVital.
