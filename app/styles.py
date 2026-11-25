@@ -99,6 +99,44 @@ hr {{ border:none !important; border-top:1px solid var(--line) !important; margi
     border-radius:9px; font-weight:600; transition:all .15s;
 }}
 [data-testid="stSidebar"] .stButton button:hover {{ border-color:var(--accent); color:#fff; }}
+/* ── Mejoras visuales ── */
+.stApp {{ background:radial-gradient(1100px 500px at 85% -10%, rgba(224,90,109,.10), transparent 60%), var(--bg); }}
+::-webkit-scrollbar {{ width:10px; height:10px; }}
+::-webkit-scrollbar-thumb {{ background:#2A3A43; border-radius:8px; }}
+::-webkit-scrollbar-track {{ background:transparent; }}
+.page-header {{ padding-bottom:1rem; border-bottom:1px solid var(--line); position:relative; }}
+.page-header::after {{ content:""; position:absolute; left:0; bottom:-1px; width:72px; height:3px; border-radius:3px; background:linear-gradient(90deg,var(--accent),var(--teal)); }}
+.page-header h1 {{ background:linear-gradient(90deg,#fff,#C9D6DA); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }}
+.section-title {{ font-size:.78rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin:1.4rem 0 .6rem 0; }}
+
+/* Tarjetas con elevación */
+[data-testid="stColumn"]:has(h3), [data-testid="column"]:has(h3) {{
+    box-shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 8px 24px rgba(0,0,0,.25); transition:border-color .2s, transform .2s;
+}}
+[data-testid="stColumn"]:has(h3):hover, [data-testid="column"]:has(h3):hover {{ border-color:#34464F; }}
+[data-testid="stMetric"] {{
+    background:linear-gradient(160deg,#16222A 0%,var(--surface) 70%);
+    box-shadow:0 6px 18px rgba(0,0,0,.25); transition:transform .18s, border-color .18s;
+}}
+[data-testid="stMetric"]:hover {{ transform:translateY(-2px); border-color:#34464F; border-left-color:var(--accent); }}
+[data-testid="stMetricLabel"] p {{ text-transform:uppercase; letter-spacing:.04em; font-size:.74rem !important; }}
+
+/* Tablas y alertas */
+[data-testid="stDataFrame"] {{ box-shadow:0 6px 18px rgba(0,0,0,.2); }}
+[data-testid="stAlert"] {{ border-left:3px solid var(--teal); }}
+
+/* Filtros: resumen activo */
+.filter-summary {{ display:flex; flex-wrap:wrap; gap:.35rem; margin:.2rem 0 .8rem 0; }}
+.fchip {{ font-size:.72rem; font-weight:600; color:#fff; background:rgba(224,90,109,.18); border:1px solid rgba(224,90,109,.45);
+    border-radius:999px; padding:.12rem .6rem; }}
+.fchip.off {{ color:var(--muted); background:transparent; border-color:var(--line); }}
+.count-card {{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:.55rem .8rem; margin:.4rem 0 .8rem 0;
+    display:flex; justify-content:space-between; align-items:baseline; }}
+.count-card b {{ font-size:1.25rem; color:#fff; }}
+.count-card span {{ font-size:.74rem; color:var(--muted); }}
+[data-testid="stSidebar"] [data-testid="stExpander"] {{ border:1px solid var(--line); border-radius:10px; background:var(--surface); }}
+[data-testid="stSidebar"] [data-testid="stExpander"] summary p {{ font-size:.85rem; font-weight:700; color:var(--ink); }}
+[data-testid="stSidebar"] .stButton button:focus-visible, button:focus-visible {{ outline:2px solid var(--accent) !important; outline-offset:1px; }}
 </style>
 """
 
@@ -137,14 +175,16 @@ def chip_filter(label: str, options: list, key: str) -> list:
 def _style_figure(fig):
     fig.update_layout(
         template="plotly_dark",
+        colorway=["#E05A6D", "#4FB3A8", "#3B82F6", "#F59E0B", "#8B5CF6", "#10B981", "#EC4899"],
+        hovermode="closest",
         font=dict(family="Figtree, Segoe UI, sans-serif", size=13, color=INK),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=8, r=8, t=24, b=8),
         hoverlabel=dict(bgcolor="#1B2830", font=dict(color="#FFFFFF"), bordercolor=LINE),
         legend=dict(title_text="", orientation="h", yanchor="bottom", y=-0.28, x=0, font=dict(size=12, color=MUTED)),
     )
-    fig.update_xaxes(showgrid=False, zeroline=False, linecolor=LINE, tickfont=dict(color=MUTED), title_font=dict(color=MUTED, size=12))
-    fig.update_yaxes(gridcolor="#1A262D", zeroline=False, linecolor="rgba(0,0,0,0)", tickfont=dict(color=MUTED), title_font=dict(color=MUTED, size=12))
+    fig.update_xaxes(showgrid=False, automargin=True, zeroline=False, linecolor=LINE, tickfont=dict(color=MUTED), title_font=dict(color=MUTED, size=12))
+    fig.update_yaxes(automargin=True, title_text=None, gridcolor="#1A262D", zeroline=False, linecolor="rgba(0,0,0,0)", tickfont=dict(color=MUTED), title_font=dict(color=MUTED, size=12))
     fig.update_traces(textfont=dict(color=INK, size=12), cliponaxis=False, selector=dict(type="bar"))
     fig.update_traces(marker=dict(line=dict(color=SURFACE, width=2)), selector=dict(type="pie"))
     try:
