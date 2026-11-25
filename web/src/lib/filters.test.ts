@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { dataset } from './dataset';
-import { applyFilters, defaultFilters, FILTER_OPTIONS, PERIODOS } from './filters';
+import { ALL_FIELDS, applyFilters, countActive, defaultFilters, FILTER_OPTIONS, PERIODOS } from './filters';
+import { CARTERA_FIELDS, DETALLE_FIELDS, except } from './chartFilterFields';
 
 describe('applyFilters', () => {
   it('sin filtros devuelve todo el modelo', () => {
@@ -32,5 +33,30 @@ describe('applyFilters', () => {
     const todo = applyFilters(dataset, defaultFilters()).cartera.length;
     const feb = applyFilters(dataset, { ...defaultFilters(), ...PERIODOS['Febrero 2026'] }).cartera.length;
     expect(feb).toBe(todo);
+  });
+});
+
+describe('filtros por gráfico', () => {
+  it('cada gráfico parte sin filtros activos', () => {
+    expect(countActive(defaultFilters(), ALL_FIELDS)).toBe(0);
+  });
+
+  it('cuenta período y listas con selección', () => {
+    const f = { ...defaultFilters(), ...PERIODOS['Febrero 2026'], comunas: [FILTER_OPTIONS.comunas[0]], medicos: [] };
+    expect(countActive(f, ALL_FIELDS)).toBe(2);
+  });
+
+  it('ignora filtros de campos que el gráfico no ofrece', () => {
+    const f = { ...defaultFilters(), estados: ['Atendida'] };
+    expect(countActive(f, except('estados'))).toBe(0);
+    expect(countActive(f, DETALLE_FIELDS)).toBe(0);
+    expect(countActive(f, CARTERA_FIELDS)).toBe(0);
+  });
+
+  it('dos gráficos con filtros distintos devuelven datos independientes', () => {
+    const a = applyFilters(dataset, { ...defaultFilters(), ...PERIODOS['Enero 2026'] });
+    const b = applyFilters(dataset, { ...defaultFilters(), ...PERIODOS['Febrero 2026'] });
+    expect(a.reservas.length + b.reservas.length).toBeLessThanOrEqual(75);
+    expect(a.reservas.length).not.toBe(b.reservas.length);
   });
 });
