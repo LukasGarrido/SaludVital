@@ -38,11 +38,11 @@
 /* ── Tarjeta ── */
 .card {
   border-radius: var(--radius-lg);
-  padding: 1.2rem 1.4rem 1.3rem;
+  padding: 1.4rem 1.6rem 1.5rem;
   min-width: 0;
 }
 .card__title {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 650;
   letter-spacing: -0.01em;
   margin-bottom: 0.7rem;
@@ -94,7 +94,7 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius);
-  padding: 1.05rem 1.2rem 1.1rem;
+  padding: 1.2rem 1.4rem 1.25rem;
 }
 /* Reflejo suave en la esquina: refuerza la sensación de cristal */
 .kpi::after {
@@ -117,11 +117,11 @@
 }
 .kpi__value {
   position: relative;
-  font-size: clamp(1.25rem, 1.9vw, 1.9rem);
+  font-size: clamp(1.4rem, 2.1vw, 2.15rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
   white-space: nowrap;
-  background: linear-gradient(135deg, var(--accent-strong), var(--sky));
+  background: linear-gradient(135deg, var(--ink) 25%, var(--accent-strong) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

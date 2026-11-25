@@ -46,9 +46,9 @@
 .btn {
   width: 100%;
   background: var(--glass-strong);
-  color: var(--muted);
+  color: var(--ink);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
   padding: 0.55rem 0.75rem;
   font-weight: 600;
   font-size: 0.86rem;
@@ -89,7 +89,7 @@
   background: linear-gradient(135deg, var(--accent), var(--sky));
   border-color: transparent;
   color: var(--on-accent);
-  box-shadow: 0 4px 12px var(--accent-soft);
+  box-shadow: 0 6px 18px var(--accent-glow);
 }
 .adv {
   border-radius: var(--radius-sm);

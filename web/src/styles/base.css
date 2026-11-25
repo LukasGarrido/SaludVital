@@ -17,6 +17,7 @@ body {
   font-family: var(--font);
   color: var(--ink);
   background: var(--bg);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -29,9 +30,11 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(40vmax 40vmax at 12% 8%, var(--bg-orb-1), transparent 70%),
-    radial-gradient(36vmax 36vmax at 88% 18%, var(--bg-orb-2), transparent 70%),
-    radial-gradient(44vmax 44vmax at 70% 95%, var(--bg-orb-3), transparent 70%);
+    radial-gradient(46vmax 46vmax at 8% 6%, var(--bg-orb-1), transparent 68%),
+    radial-gradient(38vmax 38vmax at 92% 14%, var(--bg-orb-2), transparent 68%),
+    radial-gradient(50vmax 50vmax at 72% 100%, var(--bg-orb-3), transparent 68%),
+    radial-gradient(28vmax 28vmax at 4% 96%, var(--bg-orb-hot), transparent 70%),
+    linear-gradient(160deg, var(--bg), var(--bg-2));
   transition: opacity var(--t-med) var(--ease);
 }
 

@@ -1,70 +1,78 @@
 /*
- * Tokens de diseño — estilo "glass" minimalista en azules.
+ * Tokens de diseño — glass profundo en azules con el coral de SaludVital como acento cálido.
  * Tema claro por defecto; el oscuro se activa con <html data-theme="dark">.
- * Las superficies son translúcidas (--glass-*) y se apoyan en el fondo con halos azules (base.css).
+ * Las superficies son translúcidas y se apoyan en el fondo con grandes halos de luz (base.css).
  */
 :root {
   color-scheme: light;
   --scheme: light;
 
   /* Fondo */
-  --bg: #eaf1fc;
-  --bg-orb-1: rgba(59, 130, 246, 0.35);
-  --bg-orb-2: rgba(56, 189, 248, 0.28);
-  --bg-orb-3: rgba(99, 102, 241, 0.2);
+  --bg: #d9e6ff;
+  --bg-2: #c4d6fb;
+  --bg-orb-1: rgba(37, 99, 235, 0.5);
+  --bg-orb-2: rgba(56, 189, 248, 0.42);
+  --bg-orb-3: rgba(99, 102, 241, 0.34);
+  --bg-orb-hot: rgba(224, 90, 109, 0.16);
 
   /* Vidrio */
-  --glass: rgba(255, 255, 255, 0.55);
-  --glass-strong: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.7);
-  --glass-edge: rgba(15, 40, 100, 0.08);
-  --glass-shine: rgba(255, 255, 255, 0.9);
+  --glass: rgba(255, 255, 255, 0.42);
+  --glass-strong: rgba(255, 255, 255, 0.7);
+  --glass-grad-a: rgba(255, 255, 255, 0.6);
+  --glass-grad-b: rgba(255, 255, 255, 0.18);
+  --glass-glow: rgba(37, 99, 235, 0.16);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-shine: rgba(255, 255, 255, 0.95);
   --tooltip: #ffffff;
-  --blur: 18px;
-  --blur-strong: 26px;
+  --tooltip-ink: #0b1b3a;
+  --blur: 28px;
+  --blur-strong: 38px;
 
-  /* Compatibilidad con componentes existentes */
   --surface: var(--glass);
-  --surface-2: rgba(255, 255, 255, 0.4);
+  --surface-2: rgba(255, 255, 255, 0.35);
   --sidebar: var(--glass-strong);
-  --line: rgba(30, 64, 140, 0.12);
-  --line-strong: rgba(30, 64, 140, 0.24);
-  --hover: rgba(37, 99, 235, 0.08);
+  --line: rgba(20, 50, 120, 0.12);
+  --line-strong: rgba(20, 50, 120, 0.26);
+  --hover: rgba(37, 99, 235, 0.09);
 
-  --ink: #0b1b3a;
-  --muted: #5b6b88;
+  --ink: #0a1a3a;
+  --muted: #546487;
 
   /* Azules */
   --accent: #2563eb;
   --accent-strong: #1d4ed8;
-  --accent-soft: rgba(37, 99, 235, 0.12);
+  --accent-soft: rgba(37, 99, 235, 0.14);
+  --accent-glow: rgba(37, 99, 235, 0.45);
   --on-accent: #ffffff;
   --sky: #0ea5e9;
   --indigo: #4f46e5;
   --teal: #0d9488;
+  --bar-dim: rgba(37, 99, 235, 0.3);
+
+  /* Acento de marca SaludVital (coral/burdeo): contraste cálido, alertas y destacados */
+  --hot: #c93a4b;
+  --hot-soft: rgba(201, 58, 75, 0.14);
 
   /* Estados */
   --ok: #059669;
-  --bad: #dc2626;
+  --bad: #c93a4b;
   --ok-bg: rgba(5, 150, 105, 0.1);
   --ok-line: rgba(5, 150, 105, 0.3);
   --warn-bg: rgba(245, 158, 11, 0.12);
   --warn-line: rgba(245, 158, 11, 0.4);
   --warn-text: #b45309;
 
-  --radius-sm: 10px;
-  --radius: 14px;
-  --radius-lg: 18px;
-  --shadow: 0 1px 1px rgba(15, 40, 100, 0.04), 0 8px 28px rgba(30, 64, 140, 0.1);
-  --shadow-lift: 0 1px 1px rgba(15, 40, 100, 0.05), 0 14px 36px rgba(30, 64, 140, 0.16);
+  --radius-sm: 12px;
+  --radius: 20px;
+  --radius-lg: 26px;
+  --shadow: 0 1px 1px rgba(15, 40, 100, 0.05), 0 18px 48px rgba(30, 64, 140, 0.16);
+  --shadow-lift: 0 1px 1px rgba(15, 40, 100, 0.06), 0 26px 60px rgba(30, 64, 140, 0.26);
 
   --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
 
-  /* Barra lateral: riel colapsado y expandido */
   --rail-w: 76px;
   --sidebar-w: 300px;
 
-  /* Movimiento */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --t-fast: 0.18s;
   --t-med: 0.35s;
@@ -74,42 +82,52 @@
   color-scheme: dark;
   --scheme: dark;
 
-  --bg: #060d1f;
-  --bg-orb-1: rgba(37, 99, 235, 0.42);
-  --bg-orb-2: rgba(14, 165, 233, 0.22);
-  --bg-orb-3: rgba(99, 102, 241, 0.26);
+  --bg: #040915;
+  --bg-2: #07122b;
+  --bg-orb-1: rgba(37, 99, 235, 0.55);
+  --bg-orb-2: rgba(14, 165, 233, 0.3);
+  --bg-orb-3: rgba(99, 102, 241, 0.38);
+  --bg-orb-hot: rgba(224, 90, 109, 0.14);
 
-  --glass: rgba(18, 30, 60, 0.5);
-  --glass-strong: rgba(14, 24, 50, 0.72);
-  --glass-border: rgba(140, 180, 255, 0.14);
-  --glass-edge: rgba(0, 0, 0, 0.35);
-  --glass-shine: rgba(160, 200, 255, 0.12);
-  --tooltip: #0f1b38;
+  --glass: rgba(20, 36, 78, 0.38);
+  --glass-strong: rgba(10, 20, 48, 0.72);
+  --glass-grad-a: rgba(150, 190, 255, 0.14);
+  --glass-grad-b: rgba(150, 190, 255, 0.03);
+  --glass-glow: rgba(59, 130, 246, 0.26);
+  --glass-border: rgba(150, 190, 255, 0.2);
+  --glass-shine: rgba(190, 215, 255, 0.22);
+  --tooltip: #ffffff;
+  --tooltip-ink: #0a1a3a;
 
-  --surface-2: rgba(30, 48, 92, 0.4);
-  --line: rgba(140, 180, 255, 0.14);
-  --line-strong: rgba(140, 180, 255, 0.3);
-  --hover: rgba(96, 165, 250, 0.1);
+  --surface-2: rgba(40, 64, 124, 0.35);
+  --line: rgba(150, 190, 255, 0.14);
+  --line-strong: rgba(150, 190, 255, 0.32);
+  --hover: rgba(96, 165, 250, 0.12);
 
-  --ink: #e8f0ff;
-  --muted: #94a8cc;
+  --ink: #eaf1ff;
+  --muted: #94a8d0;
 
   --accent: #5b9bff;
-  --accent-strong: #9cc2ff;
-  --accent-soft: rgba(91, 155, 255, 0.18);
-  --on-accent: #06122b;
+  --accent-strong: #a5c8ff;
+  --accent-soft: rgba(91, 155, 255, 0.2);
+  --accent-glow: rgba(91, 155, 255, 0.55);
+  --on-accent: #05112b;
   --sky: #38bdf8;
   --indigo: #818cf8;
   --teal: #2dd4bf;
+  --bar-dim: rgba(91, 155, 255, 0.28);
+
+  --hot: #e05a6d;
+  --hot-soft: rgba(224, 90, 109, 0.18);
 
   --ok: #34d399;
-  --bad: #f87171;
+  --bad: #f0707f;
   --ok-bg: rgba(52, 211, 153, 0.12);
   --ok-line: rgba(52, 211, 153, 0.35);
   --warn-bg: rgba(251, 191, 36, 0.12);
   --warn-line: rgba(251, 191, 36, 0.4);
   --warn-text: #fcd34d;
 
-  --shadow: 0 1px 1px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.32);
-  --shadow-lift: 0 1px 1px rgba(0, 0, 0, 0.35), 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.35), 0 20px 50px rgba(0, 0, 0, 0.45);
+  --shadow-lift: 0 1px 1px rgba(0, 0, 0, 0.4), 0 30px 70px rgba(0, 0, 0, 0.6);
 }
