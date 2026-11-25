@@ -25,6 +25,7 @@
   --glass-shine: rgba(255, 255, 255, 0.95);
   --tooltip: #ffffff;
   --tooltip-ink: #0b1b3a;
+  --panel: rgba(255, 255, 255, 0.97);
   --blur: 28px;
   --blur-strong: 38px;
 
@@ -98,6 +99,7 @@
   --glass-shine: rgba(190, 215, 255, 0.22);
   --tooltip: #ffffff;
   --tooltip-ink: #0a1a3a;
+  --panel: rgba(11, 21, 48, 0.97);
 
   --surface-2: rgba(40, 64, 124, 0.35);
   --line: rgba(150, 190, 255, 0.14);
