@@ -10,11 +10,11 @@ from datetime import date
 try:
     from app.data import prepare_data
     from app.medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
-    from app.styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter
+    from app.styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter, filter_summary, count_card
 except ImportError:
     from data import prepare_data
     from medidas import calcular_medidas, ejecutar_pruebas_aceptacion, format_clp, format_pct, format_num
-    from styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter
+    from styles import apply_theme, page_header, sidebar_brand, sidebar_section, chip_filter, filter_summary, count_card
 
 # Configuración de la página
 st.set_page_config(
@@ -77,21 +77,54 @@ def main():
     if "filtro_sexo" not in st.session_state:
         st.session_state.filtro_sexo = sexos_disp
 
-    if st.sidebar.button("Limpiar filtros"):
+    esp_disp = sorted(hecho_reservas["Especialidad"].dropna().unique().tolist())
+    med_disp = sorted(hecho_reservas["Medico"].dropna().unique().tolist())
+    est_disp = [e for e in ["Atendida", "No asistió", "Cancelada", "Pendiente"] if e in set(hecho_reservas["EstadoReserva"])]
+    prev_disp = sorted(hecho_reservas["Prevision"].dropna().unique().tolist())
+    canal_disp = sorted(hecho_reservas["Canal"].dropna().unique().tolist())
+    avanzados = {"filtro_esp": esp_disp, "filtro_medico": med_disp, "filtro_estado": est_disp,
+                 "filtro_prev": prev_disp, "filtro_canal": canal_disp}
+
+    periodos = {
+        "Todo el período": (min_res_date, max_res_date),
+        "Enero 2026": (date(2026, 1, 5), date(2026, 1, 31)),
+        "Febrero 2026": (date(2026, 2, 1), date(2026, 2, 28)),
+        "Últimos 30 días": (date(2026, 1, 30), max_res_date),
+    }
+
+    def _aplicar_periodo():
+        st.session_state.filtro_fechas = periodos[st.session_state.atajo_periodo]
+
+    def _limpiar():
         st.session_state.filtro_fechas = (min_res_date, max_res_date)
         st.session_state.filtro_comuna = comunas_disp
         st.session_state.filtro_sexo = sexos_disp
-        st.rerun()
+        st.session_state.atajo_periodo = "Todo el período"
+        for k in avanzados:
+            st.session_state[k] = []
 
+    st.sidebar.button("Limpiar filtros", on_click=_limpiar, width="stretch")
+
+    st.sidebar.selectbox("Atajo de período", list(periodos), key="atajo_periodo", on_change=_aplicar_periodo)
     rango_fechas = st.sidebar.date_input(
         "Rango de fechas",
         min_value=date(2026, 1, 1),
         max_value=date(2026, 12, 31),
+        format="DD/MM/YYYY",
         key="filtro_fechas"
     )
+    if not (isinstance(rango_fechas, tuple) and len(rango_fechas) == 2):
+        st.sidebar.caption("Selecciona fecha de inicio y de término.")
 
     sel_comuna = chip_filter("Comuna", comunas_disp, key="filtro_comuna")
     sel_sexo = chip_filter("Sexo", sexos_disp, key="filtro_sexo")
+
+    with st.sidebar.expander("Filtros avanzados", expanded=False):
+        sel_esp = st.multiselect("Especialidad", esp_disp, key="filtro_esp", placeholder="Todas")
+        sel_medico = st.multiselect("Médico", med_disp, key="filtro_medico", placeholder="Todos")
+        sel_estado = chip_filter("Estado de la reserva", est_disp, key="filtro_estado", container=st)
+        sel_prev = chip_filter("Previsión", prev_disp, key="filtro_prev", container=st)
+        sel_canal = st.multiselect("Canal", canal_disp, key="filtro_canal", placeholder="Todos")
 
     # Filtrado de hechos
     df_res_filtered = hecho_reservas.copy()
@@ -106,15 +139,35 @@ def main():
             df_res_filtered = df_res_filtered[df_res_filtered["FechaReserva"] <= end_date]
             df_det_filtered = df_det_filtered[df_det_filtered["FechaAtencion"] <= end_date]
 
-    if sel_comuna and "Comuna" in df_res_filtered.columns:
-        df_res_filtered = df_res_filtered[df_res_filtered["Comuna"].isin(sel_comuna)]
-    if sel_comuna and "Comuna" in df_det_filtered.columns:
-        df_det_filtered = df_det_filtered[df_det_filtered["Comuna"].isin(sel_comuna)]
+    for col, sel in [("Comuna", sel_comuna), ("Sexo", sel_sexo), ("Especialidad", sel_esp),
+                     ("Medico", sel_medico), ("Prevision", sel_prev)]:
+        if sel:
+            if col in df_res_filtered.columns:
+                df_res_filtered = df_res_filtered[df_res_filtered[col].isin(sel)]
+            if col in df_det_filtered.columns:
+                df_det_filtered = df_det_filtered[df_det_filtered[col].isin(sel)]
 
-    if sel_sexo and "Sexo" in df_res_filtered.columns:
-        df_res_filtered = df_res_filtered[df_res_filtered["Sexo"].isin(sel_sexo)]
-    if sel_sexo and "Sexo" in df_det_filtered.columns:
-        df_det_filtered = df_det_filtered[df_det_filtered["Sexo"].isin(sel_sexo)]
+    # Estado y canal solo existen en reservas: el detalle se acota a esas reservas
+    if sel_estado:
+        df_res_filtered = df_res_filtered[df_res_filtered["EstadoReserva"].isin(sel_estado)]
+    if sel_canal:
+        df_res_filtered = df_res_filtered[df_res_filtered["Canal"].isin(sel_canal)]
+    if sel_estado or sel_canal:
+        df_det_filtered = df_det_filtered[df_det_filtered["ReservaID"].isin(df_res_filtered["ReservaID"])]
+
+    filter_summary([
+        ("Período", f"{rango_fechas[0]:%d/%m} – {rango_fechas[1]:%d/%m}" if isinstance(rango_fechas, tuple) and len(rango_fechas) == 2 else "incompleto", True),
+        ("Comuna", f"{len(sel_comuna)}/{len(comunas_disp)}", 0 < len(sel_comuna) < len(comunas_disp)),
+        ("Sexo", f"{len(sel_sexo)}/{len(sexos_disp)}", 0 < len(sel_sexo) < len(sexos_disp)),
+        ("Especialidad", str(len(sel_esp)), bool(sel_esp)),
+        ("Médico", str(len(sel_medico)), bool(sel_medico)),
+        ("Estado", str(len(sel_estado)), bool(sel_estado)),
+        ("Previsión", str(len(sel_prev)), bool(sel_prev)),
+        ("Canal", str(len(sel_canal)), bool(sel_canal)),
+    ])
+    count_card(len(df_res_filtered), len(hecho_reservas))
+    if df_res_filtered.empty:
+        st.sidebar.warning("Ninguna reserva coincide con los filtros.")
 
     # Pacientes cartera (filtrado por comuna y sexo, sin fecha)
     df_pac_cartera = dim_paciente.copy()
@@ -177,7 +230,8 @@ def main():
     elif pagina == "Visión ejecutiva":
         page_header("Visión ejecutiva", "Evolución mensual, distribución por estados, especialidades e ingresos.")
 
-        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        c1, c2, c3 = st.columns(3)
+        c4, c5, c6 = st.columns(3)
         with c1:
             st.metric("Total de reservas", format_num(medidas["TotalReservas"]))
         with c2:
@@ -206,7 +260,7 @@ def main():
                     color_discrete_sequence=PALETTE
                 )
                 fig_est.update_traces(textinfo="percent+label")
-                st.plotly_chart(fig_est, use_container_width=True)
+                st.plotly_chart(fig_est, width="stretch")
             else:
                 st.info("Sin datos de estado.")
 
@@ -230,7 +284,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_mes.update_traces(textposition="outside")
-                st.plotly_chart(fig_mes, use_container_width=True)
+                st.plotly_chart(fig_mes, width="stretch")
             else:
                 st.info("Sin datos de fecha de reserva.")
 
@@ -249,7 +303,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_esp.update_traces(textposition="outside")
-                st.plotly_chart(fig_esp, use_container_width=True)
+                st.plotly_chart(fig_esp, width="stretch")
             else:
                 st.info("Sin datos de especialidad.")
 
@@ -274,7 +328,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_ing.update_traces(textposition="outside")
-                st.plotly_chart(fig_ing, use_container_width=True)
+                st.plotly_chart(fig_ing, width="stretch")
             else:
                 st.info("Sin datos de ingresos mensuales.")
 
@@ -298,7 +352,7 @@ def main():
                     "Tasa de Cancelación": format_pct(m_sub["TasaCancelacion"])
                 })
             df_tasas_mes = pd.DataFrame(tasas_mes_rows)
-            st.dataframe(df_tasas_mes, use_container_width=True)
+            st.dataframe(df_tasas_mes, width="stretch")
         else:
             st.info("Sin datos para calcular tasas por mes.")
 
@@ -326,7 +380,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_med_at.update_traces(textposition="outside")
-                st.plotly_chart(fig_med_at, use_container_width=True)
+                st.plotly_chart(fig_med_at, width="stretch")
             else:
                 st.info("Sin datos.")
 
@@ -342,7 +396,7 @@ def main():
                     orientation="h",
                     color_discrete_sequence=PALETTE
                 )
-                st.plotly_chart(fig_med_est, use_container_width=True)
+                st.plotly_chart(fig_med_est, width="stretch")
             else:
                 st.info("Sin datos.")
 
@@ -366,7 +420,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_esp_in.update_traces(textposition="outside")
-                st.plotly_chart(fig_esp_in, use_container_width=True)
+                st.plotly_chart(fig_esp_in, width="stretch")
             else:
                 st.info("Sin datos.")
 
@@ -396,7 +450,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_hp.update_traces(textposition="outside")
-                st.plotly_chart(fig_hp, use_container_width=True)
+                st.plotly_chart(fig_hp, width="stretch")
             else:
                 st.info("Sin datos.")
 
@@ -417,7 +471,7 @@ def main():
                 color_discrete_sequence=[COLOR_BARS]
             )
             fig_can.update_traces(textposition="outside")
-            st.plotly_chart(fig_can, use_container_width=True)
+            st.plotly_chart(fig_can, width="stretch")
         else:
             st.info("Sin datos de canal.")
 
@@ -461,7 +515,7 @@ def main():
                 styled_df = df_desempeno.style.applymap(color_tasa, subset=["Tasa de Atención"])
             else:
                 styled_df = df_desempeno.style.apply(color_tasa, subset=["Tasa de Atención"])
-            st.dataframe(styled_df.format(format_dict), use_container_width=True)
+            st.dataframe(styled_df.format(format_dict), width="stretch")
         else:
             st.info("Sin datos de médico.")
 
@@ -497,7 +551,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_com.update_traces(textposition="outside")
-                st.plotly_chart(fig_com, use_container_width=True)
+                st.plotly_chart(fig_com, width="stretch")
             else:
                 st.info("Sin datos de comuna.")
 
@@ -513,7 +567,7 @@ def main():
                     color_discrete_map={"FONASA": COLOR_FONASA, "Isapre": COLOR_ISAPRE_PRIMARY}
                 )
                 fig_pr.update_traces(textinfo="percent+label")
-                st.plotly_chart(fig_pr, use_container_width=True)
+                st.plotly_chart(fig_pr, width="stretch")
             else:
                 st.info("Sin datos de previsión.")
 
@@ -530,7 +584,7 @@ def main():
                     color_discrete_map={"FONASA": COLOR_FONASA, "Isapre": COLOR_ISAPRE_PRIMARY}
                 )
                 fig_pi.update_traces(textinfo="percent+label")
-                st.plotly_chart(fig_pi, use_container_width=True)
+                st.plotly_chart(fig_pi, width="stretch")
             else:
                 st.info("Sin datos de ingresos por previsión.")
 
@@ -551,7 +605,7 @@ def main():
                     color_discrete_sequence=[COLOR_BARS]
                 )
                 fig_freq.update_traces(textposition="outside")
-                st.plotly_chart(fig_freq, use_container_width=True)
+                st.plotly_chart(fig_freq, width="stretch")
             else:
                 st.info("Sin datos de frecuencia.")
 
@@ -575,7 +629,7 @@ def main():
                 color_discrete_sequence=[COLOR_BARS]
             )
             fig_p_mes.update_traces(textposition="outside")
-            st.plotly_chart(fig_p_mes, use_container_width=True)
+            st.plotly_chart(fig_p_mes, width="stretch")
         else:
             st.info("Sin datos.")
 
@@ -584,7 +638,7 @@ def main():
             df_inas = df_res_filtered[df_res_filtered["EstadoReserva"] == "No asistió"].groupby("PacienteID").size().reset_index(name="Reservas No Asistió")
             df_inas = df_inas[df_inas["Reservas No Asistió"] >= 2]
             if not df_inas.empty:
-                st.dataframe(df_inas, use_container_width=True)
+                st.dataframe(df_inas, width="stretch")
             else:
                 st.info("Sin pacientes con 2 o más inasistencias.")
         else:
@@ -601,6 +655,9 @@ def main():
 
         pruebas = ejecutar_pruebas_aceptacion(hecho_reservas, hecho_detalle)
         df_pruebas = pd.DataFrame(pruebas)
+        for _c in df_pruebas.columns:
+            if _c != "ok":
+                df_pruebas[_c] = df_pruebas[_c].astype(str)
 
         def style_ok(val):
             return 'color: #10B981; font-weight: bold;' if val else 'color: #EF4444; font-weight: bold;'
@@ -611,7 +668,7 @@ def main():
             styled_pruebas = df_pruebas.style.applymap(style_ok, subset=["ok"])
         else:
             styled_pruebas = df_pruebas.style.apply(style_ok, subset=["ok"])
-        st.dataframe(styled_pruebas, use_container_width=True)
+        st.dataframe(styled_pruebas, width="stretch")
         
         ok_count = sum(1 for p in pruebas if p["ok"])
         total_count = len(pruebas)
